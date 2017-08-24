@@ -1,17 +1,27 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es2017",
-        "outDir": "out",
         "lib": [
             "es7"
         ],
-        "sourceMap": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "outDir": "out",
+        "plugins": [
+            {
+                "ignoreDefinitionFiles": true,
+                "name": "tslint-language-service"
+            }
+        ],
         "rootDir": ".",
-        "strict": true
+        "sourceMap": true,
+        "strict": true,
+        "target": "es2017"
     },
+    "include": [
+        "src"
+    ],
     "exclude": [
-        "node_modules",
-        ".vscode-test"
+        ".vscode-test",
+        "node_modules"
     ]
 }

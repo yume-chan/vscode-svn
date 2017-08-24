@@ -1,0 +1,26 @@
+{
+    "extends": [
+        "tslint:recommended"
+    ],
+    "rulesDirectory": [
+        "linter"
+    ],
+    "rules": {
+        "comment-format": [
+            true,
+            "check-space",
+            "check-uppercase"
+        ],
+        "curly": false,
+        "max-line-length": false,
+        "interface-name": [
+            true,
+            "never-prefix"
+        ],
+        "no-console": false,
+        "space-before-function-paren": false,
+        "array-type": false,
+        "forin": false,
+        "eslint-curly": true
+    }
+}

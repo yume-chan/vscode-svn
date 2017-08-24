@@ -75,12 +75,36 @@ function parseItemStates(lines: string[]): SvnItemState[] {
     return lines.map(parseItemState);
 }
 
-export class SvnClient {
-    constructor(public base: string, public filePath: string) { }
+interface SvnCommitTextMessage {
+    isFile: false;
+    message: string;
+}
 
-    private exec(command: string, ...args: string[]): Promise<string> {
+interface SvnCommitFileMessage {
+    isFile: true;
+    file: string;
+}
+
+type SvnCommitMessage = SvnCommitTextMessage | SvnCommitFileMessage;
+
+interface SvnCommitListTargets {
+    isFile: false;
+    files: string[];
+}
+
+interface SvnCommitFileTargets {
+    isFile: true;
+    file: string;
+}
+
+type SvnCommitTargets = SvnCommitListTargets | SvnCommitFileTargets;
+
+export class SvnClient {
+    constructor(public svnPath: string = "svn") { }
+
+    private execSvn(command: string, ...args: string[]): Promise<string> {
         return new Promise<string>((resolve, reject) => {
-            execFile("svn", [command, ...args], { cwd: this.base }, (err, stdout, stderr) => {
+            execFile(this.svnPath, [command, ...args], (err, stdout, stderr) => {
                 if (stderr !== undefined && stderr !== "") {
                     const lines = splitLines(stderr);
 
@@ -100,8 +124,11 @@ export class SvnClient {
                                 level = error;
                             }
 
-                            const id = parseInt(line.substring(0, 6), 10);
                             const message = line.substring(8);
+                            if (message == "Commit failed (details follow):")
+                                continue;
+
+                            const id = parseInt(line.substring(0, 6), 10);
                             level.push({ id, message });
                         }
                     }
@@ -116,23 +143,25 @@ export class SvnClient {
         });
     }
 
-    public add(...files: string[]): Promise<SvnItemState[]> {
-        return this.exec("add", ...files).then(splitLines).then(parseItemStates);
+    public add(...target: string[]): Promise<SvnItemState[]> {
+        return this.execSvn("add", ...target).then(splitLines).then(parseItemStates);
     }
 
-    public cat(filePath: string): Promise<string> {
-        return this.exec("cat", filePath).catch(() => "");
+    public cat(target: string): Promise<string> {
+        return this.execSvn("cat", target);
     }
 
-    public status(): Promise<SvnItemState[]> {
-        return this.exec("status").then(splitLines).then(parseItemStates);
+    public status(target: string): Promise<SvnItemState[]> {
+        return this.execSvn("status", target).then(splitLines).then(parseItemStates);
     }
 
-    public commit(message: string, ...files: string[]): Promise<string> {
-        return this.exec("commit", "--message", message, ...files);
+    public commit(message: SvnCommitMessage, targets: SvnCommitTargets): Promise<string> {
+        const messageArgs = message.isFile ? ["--encoding", "UTF-8", "--file", message.file] : ["--message", message.message];
+        const targetsArgs = targets.isFile ? ["--targets", targets.file] : targets.files;
+        return this.execSvn("commit", ...messageArgs, ...targetsArgs);
     }
 
     public revert(...files: string[]): Promise<SvnItemState[]> {
-        return this.exec("revert", "--recursive", ...files).then(splitLines).then(parseItemStates);
+        return this.execSvn("revert", "--recursive", ...files).then(splitLines).then(parseItemStates);
     }
 }
