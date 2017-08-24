@@ -3,16 +3,16 @@
         {
             "target_name": "svn",
             "include_dirs": [
-                "C:/Users/Simon/Desktop/git/svn/ext/apr/include",
-                "C:/Users/Simon/Desktop/git/svn/ext/Subversion/subversion/include"
+                "src/svn/apr/include",
+                "src/svn/svn/include"
             ],
             "libraries": [
-                "C:/Users/Simon/Desktop/git/svn/ext/apr/release_x64/libapr_tsvn.lib",
-                "C:/Users/Simon/Desktop/git/svn/ext/Subversion/release_x64/libsvn_tsvn.lib"
+                "<(module_root_dir)/src/svn/apr/release_x64/libapr_tsvn.lib",
+                "<(module_root_dir)/src/svn/svn/release_x64/libsvn_tsvn.lib"
             ],
             "sources": [
-                "src/svn-client/export.cc",
-                "src/svn-client/client.cc"
+                "src/svn/export.cc",
+                "src/svn/client.cc"
             ]
         }
     ]

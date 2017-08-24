@@ -48,8 +48,8 @@
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.15063.0/winrt",
                 "${workspaceRoot}",
                 "C:/Users/Simon/.node-gyp/8.4.0/include/node",
-                "C:/Users/Simon/Desktop/git/svn/ext/apr/include",
-                "C:/Users/Simon/Desktop/git/svn/ext/Subversion/subversion/include"
+                "${workspaceRoot}/src/svn/apr/include",
+                "${workspaceRoot}/src/svn/svn/include"
             ],
             "defines": [
                 "_DEBUG",
