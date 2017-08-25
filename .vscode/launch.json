@@ -8,10 +8,10 @@
             "request": "launch",
             "program": "node",
             "args": [
-                "${workspaceRoot}/index.js"
+                "${workspaceRoot}/svn/test/index.spec.js"
             ],
             "stopAtEntry": false,
-            "cwd": "${workspaceRoot}",
+            "cwd": "${workspaceRoot}/svn",
             "environment": [],
             "externalConsole": true
         },
