@@ -1,0 +1,13 @@
+{
+  "name": "svn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/Release/svn.node",
+  "typings": "index.d.ts",
+  "scripts": {
+    "postinstall": "node-gyp rebuild && node scripts/postinstall.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

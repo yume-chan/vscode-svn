@@ -3,30 +3,30 @@ import * as fs from "fs-extra";
 
 import * as vscode from "vscode";
 
-import { SvnClient, SvnError, SvnErrorCode, SvnFileChange, SvnItemState, SvnLockOwner, SvnPropertyChange } from "./svn-client";
+import { Client, SvnStatus, SvnStatusResult } from "../svn";
 import { SvnTextDocumentContentProvider } from "./svn-text-document-content-provider";
 
-type SvnResourceState = SvnItemState & vscode.SourceControlResourceState;
+type SvnResourceState = SvnStatus & vscode.SourceControlResourceState;
 
 export function activate(context: vscode.ExtensionContext) {
     const base = vscode.workspace.rootPath;
     if (base === undefined)
         return;
 
-    const client = new SvnClient("C:/Users/Simon/Documents/visual studio 2017/Projects/Svn/Svn/bin/Debug/svn.exe");
+    const client = new Client();
 
     const iconsRootPath = path.join(path.dirname(__dirname), "..", 'resources', 'icons');
     const statusIcons = {
-        [SvnFileChange.Modified]: "modified",
-        [SvnFileChange.Untracked]: "untracked",
-        [SvnFileChange.Added]: "added",
-        [SvnFileChange.TypeChanged]: "conflict",
+        [Client.StatusKind.modified]: "modified",
+        [Client.StatusKind.unversioned]: "untracked",
+        [Client.StatusKind.added]: "added",
+        [Client.StatusKind.obstructed]: "conflict",
     };
-    function getResourceState(state: SvnItemState): SvnResourceState {
-        const resourceUri = vscode.Uri.file(path.resolve(base, state.relativePath));
-        const filename: string = path.basename(state.relativePath);
-        const icon = statusIcons[state.fileChange];
-        const command: vscode.Command = state.fileChange == SvnFileChange.Modified ?
+    function getResourceState(state: SvnStatus): SvnResourceState {
+        const resourceUri = vscode.Uri.file(state.path);
+        const filename: string = path.basename(state.path);
+        const icon = statusIcons[state.textStatus];
+        const command: vscode.Command = state.textStatus == Client.StatusKind.modified ?
             { command: "vscode.diff", title: "Diff", arguments: [resourceUri.with({ scheme: "svn" }), resourceUri, filename] } :
             { command: "vscode.open", title: "Open", arguments: [resourceUri] };
         return {
@@ -56,15 +56,12 @@ export function activate(context: vscode.ExtensionContext) {
     let ignoredFiles: string[];
 
     async function onWorkspaceChange() {
-        let status: SvnItemState[];
+        let status: SvnStatusResult;
         try {
             status = await client.status(base!);
         }
         catch (err) {
-            if (err instanceof SvnError) {
-                if (err.warning.find(item => item.id === SvnErrorCode.NotWorkingCopy) !== undefined)
-                    vscode.commands.executeCommand("setContext", "svnState", "idle");
-            }
+            vscode.commands.executeCommand("setContext", "svnState", "idle");
             return;
         }
 
@@ -85,14 +82,14 @@ export function activate(context: vscode.ExtensionContext) {
 
                 vscode.window.withProgress({ location: vscode.ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
                     try {
-                        await client.commit({ isFile: false, message }, { isFile: false, files: stagedFiles });
+                        // await client.commit({ isFile: false, message }, { isFile: false, files: stagedFiles });
                         ignoredFiles = [];
                         contentProvider.onCommit(stagedStates);
                     } catch (err) {
-                        if (err instanceof SvnError) {
-                            const first = err.error[0];
-                            vscode.window.showErrorMessage(`Commit failed: E${first.id}: ${first.message}`);
-                        }
+                        // if (err instanceof SvnError) {
+                        //     const first = err.error[0];
+                        //     vscode.window.showErrorMessage(`Commit failed: E${first.id}: ${first.message}`);
+                        // }
                     }
                     finally {
                         vscode.scm.inputBox.value = "";
@@ -105,18 +102,18 @@ export function activate(context: vscode.ExtensionContext) {
 
             context.subscriptions.push(vscode.commands.registerCommand("svn.stage", async function(...resourceStates: SvnResourceState[]) {
                 for (const value of resourceStates) {
-                    const filePath = value.relativePath;
-                    switch (value.fileChange) {
-                        case SvnFileChange.Modified:
-                        case SvnFileChange.TypeChanged:
+                    const filePath = value.path;
+                    switch (value.textStatus) {
+                        case Client.StatusKind.modified:
+                        case Client.StatusKind.obstructed:
                             const index = ignoredFiles.indexOf(filePath);
                             if (index !== -1) {
                                 ignoredFiles.splice(index, 1);
                                 stagedFiles.push(filePath);
                             }
                             break;
-                        case SvnFileChange.Untracked:
-                            await client.add(filePath);
+                        case Client.StatusKind.unversioned:
+                            // await client.add(filePath);
                             break;
                     }
                 }
@@ -125,15 +122,15 @@ export function activate(context: vscode.ExtensionContext) {
             }));
             context.subscriptions.push(vscode.commands.registerCommand("svn.unstage", async function(...resourceStates: SvnResourceState[]) {
                 for (const value of resourceStates) {
-                    const filePath = value.relativePath;
-                    switch (value.fileChange) {
-                        case SvnFileChange.Modified:
-                        case SvnFileChange.TypeChanged:
+                    const filePath = value.path;
+                    switch (value.textStatus) {
+                        case Client.StatusKind.modified:
+                        case Client.StatusKind.obstructed:
                             if (!ignoredFiles.includes(filePath))
                                 ignoredFiles.push(filePath);
                             break;
-                        case SvnFileChange.Added:
-                            await client.revert(filePath);
+                        case Client.StatusKind.unversioned:
+                            // await client.revert(filePath);
                             break;
                     }
                 }
@@ -175,16 +172,16 @@ export function activate(context: vscode.ExtensionContext) {
         stagedStates = [];
         changedStates = [];
         ignoredStates = [];
-        for (const state of status) {
-            if (ignoredFiles.includes(state.relativePath)) {
+        for (const state of status.status) {
+            if (ignoredFiles.includes(state.path)) {
                 ignoredStates.push(getResourceState(state));
             } else {
-                switch (state.fileChange) {
-                    case SvnFileChange.Added:
-                    case SvnFileChange.Deleted:
-                    case SvnFileChange.Modified:
-                    case SvnFileChange.TypeChanged:
-                        stagedFiles.push(state.relativePath);
+                switch (state.textStatus) {
+                    case Client.StatusKind.added:
+                    case Client.StatusKind.deleted:
+                    case Client.StatusKind.modified:
+                    case Client.StatusKind.obstructed:
+                        stagedFiles.push(state.path);
                         stagedStates.push(getResourceState(state));
                         break;
                     default:

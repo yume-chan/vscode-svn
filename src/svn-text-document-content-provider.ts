@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 
-import { SvnClient, SvnError } from "./svn-client";
+import { Client } from "../svn";
 
 export class SvnTextDocumentContentProvider implements vscode.TextDocumentContentProvider, vscode.Disposable {
     private onDidChangeEvent: vscode.EventEmitter<vscode.Uri> = new vscode.EventEmitter<vscode.Uri>();
 
-    constructor(private client: SvnClient) { }
+    constructor(private client: Client) { }
 
     get onDidChange() { return this.onDidChangeEvent.event; }
 
@@ -16,11 +16,9 @@ export class SvnTextDocumentContentProvider implements vscode.TextDocumentConten
 
     async provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): Promise<string> {
         try {
-            return await this.client.cat(uri.fsPath);
+            return this.client.cat(uri.fsPath).toString("utf8");
         } catch (err) {
-            if (err instanceof SvnError)
-                return "";
-            throw err;
+            return "";
         }
     }
 
