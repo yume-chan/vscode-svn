@@ -18,7 +18,7 @@ namespace Svn
 class Client : public node::ObjectWrap
 {
   public:
-    static void Init(v8::Local<v8::Object> exports);
+    static void Init(v8::Local<v8::Object> exports, v8::Isolate* isolate, v8::Local<v8::Context> context);
 
   private:
     explicit Client();

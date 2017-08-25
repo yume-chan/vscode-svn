@@ -2,7 +2,6 @@
 
 namespace Svn
 {
-
 using v8::Array;
 using v8::Boolean;
 using v8::Context;
@@ -15,23 +14,21 @@ using v8::Isolate;
 using v8::Local;
 using v8::Object;
 using v8::String;
+using v8::NewStringType;
 using v8::Persistent;
 using v8::Promise;
 using v8::PropertyAttribute;
 using v8::Value;
 using v8::Promise;
 
-#define DefineReadOnlyValue(object, name, value) (object)->DefineOwnProperty(context, String::NewFromUtf8(isolate, (name)), (value), (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete))
-#define DefineReadOnlyValueInt(object, name, value) (object)->DefineOwnProperty(context, String::NewFromUtf8(isolate, (name)), Integer::New(isolate, (value)), (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete))
+#define DefineReadOnlyValue(object, name, value) (object)->DefineOwnProperty(context, String::NewFromUtf8(isolate, (name), NewStringType::kNormal).ToLocalChecked(), (value), (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete))
+#define DefineReadOnlyValueInt(object, name, value) (object)->DefineOwnProperty(context, String::NewFromUtf8(isolate, (name), NewStringType::kNormal).ToLocalChecked(), Integer::New(isolate, (value)), (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete))
 
 Persistent<Function> Client::constructor;
 
-void Client::Init(Local<Object> exports)
+void Client::Init(Local<Object> exports, v8::Isolate *isolate, v8::Local<v8::Context> context)
 {
-    auto isolate = exports->GetIsolate();
-    auto context = isolate->GetCurrentContext();
-
-    Local<FunctionTemplate> template_ = FunctionTemplate::New(isolate, New);
+    auto template_ = FunctionTemplate::New(isolate, New);
     template_->SetClassName(String::NewFromUtf8(isolate, "Client"));
     template_->InstanceTemplate()->SetInternalFieldCount(1);
 
@@ -64,7 +61,8 @@ void Client::Init(Local<Object> exports)
     DefineReadOnlyValue(function, "StatusKind", statusKind);
 
     constructor.Reset(isolate, function);
-    exports->Set(String::NewFromUtf8(isolate, "Client"), function);
+
+    DefineReadOnlyValue(exports, "Client", function);
 }
 
 Client::Client()

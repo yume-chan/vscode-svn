@@ -6,7 +6,7 @@ export interface SvnVersion {
     patch: number;
 }
 
-export function version(): SvnVersion;
+export var version: SvnVersion;
 
 export namespace Client {
     export enum Kind {
