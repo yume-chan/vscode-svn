@@ -65,7 +65,7 @@
     "devDependencies": {
         "@types/fs-extra": "^3.0.3",
         "@types/mocha": "^2.2.32",
-        "@types/node": "^6.0.40",
+        "@types/node": "^6.0.88",
         "mocha": "^2.3.3",
         "typescript": "^2.4.1",
         "vscode": "^1.0.0"

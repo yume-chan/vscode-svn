@@ -1,4 +1,4 @@
-const svn = require("./build/Release/svn.node");
+const svn = require("./build/Debug/svn.node");
 
 console.log(svn.version());
 console.log(svn.Client);
