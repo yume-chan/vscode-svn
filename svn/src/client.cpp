@@ -2,6 +2,8 @@
 
 namespace Svn
 {
+using std::function;
+
 using v8::Array;
 using v8::Boolean;
 using v8::Context;
@@ -26,7 +28,7 @@ using v8::Promise;
 
 Persistent<Function> Client::constructor;
 
-void Client::Init(Local<Object> exports, v8::Isolate *isolate, v8::Local<v8::Context> context)
+void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
 {
     auto template_ = FunctionTemplate::New(isolate, New);
     template_->SetClassName(String::NewFromUtf8(isolate, "Client"));
@@ -67,14 +69,21 @@ void Client::Init(Local<Object> exports, v8::Isolate *isolate, v8::Local<v8::Con
 
 Client::Client()
 {
+    loop = (uv_loop_t *)malloc(sizeof(uv_loop_t));
+    uv_loop_init(loop);
+
     apr_initialize();
-    apr_pool_create(&this->pool, nullptr);
-    svn_client_create_context(&this->context, this->pool);
+    apr_pool_create(&pool, nullptr);
+    svn_client_create_context(&context, this->pool);
 }
 
 Client::~Client()
 {
-    apr_pool_destroy(this->pool);
+    uv_stop(loop);
+    uv_loop_close(loop);
+    delete loop;
+
+    apr_pool_destroy(pool);
     apr_terminate();
 }
 
@@ -114,87 +123,72 @@ void Client::New(const FunctionCallbackInfo<Value> &args)
 //     }
 // };
 
-svn_error_t *Client::StatusCallback(void *baton, const char *path, const svn_client_status_t *status, apr_pool_t *scratch_pool)
-{
-    // auto persistent = (PersistentAndIsolate<Promise::Resolver> *)baton;
-    // Local<Promise::Resolver> resolver = persistent->Get();
-
-    auto array = *(Local<Array> *)baton;
-    auto isolate = array->GetIsolate();
-
-    auto vStatus = Object::New(isolate);
-    vStatus->Set(String::NewFromUtf8(isolate, "path"), String::NewFromUtf8(isolate, path));
-    vStatus->Set(String::NewFromUtf8(isolate, "kind"), Integer::New(isolate, status->kind));
-    vStatus->Set(String::NewFromUtf8(isolate, "textStatus"), Integer::New(isolate, status->text_status));
-    vStatus->Set(String::NewFromUtf8(isolate, "propStatus"), Integer::New(isolate, status->prop_status));
-    vStatus->Set(String::NewFromUtf8(isolate, "copied"), Boolean::New(isolate, status->copied));
-    vStatus->Set(String::NewFromUtf8(isolate, "switched"), Boolean::New(isolate, status->switched));
-
-    array->Set(array->Length(), vStatus);
-
-    // resolver->Resolve();
-    // delete persistent;
-    return SVN_NO_ERROR;
-}
-
 void Client::Status(const FunctionCallbackInfo<Value> &args)
 {
     auto isolate = args.GetIsolate();
     auto context = isolate->GetCurrentContext();
 
+    auto resolver = Promise::Resolver::New(context).ToLocalChecked();
+    args.GetReturnValue().Set(resolver->GetPromise());
+
     if (args.Length() < 1)
     {
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` is required.")));
+        resolver->Reject(context, Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` is required.")));
         return;
     }
 
     if (!args[0]->IsString())
     {
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` must be a string.")));
+        resolver->Reject(context, Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` must be a string.")));
         return;
     }
 
-    auto client = ObjectWrap::Unwrap<Client>(args.Holder());
+    queue_work(uv_default_loop(), [&](uv_work_t *req) -> void {
+        auto client = ObjectWrap::Unwrap<Client>(args.Holder());
 
-    svn_revnum_t result_rev;
-    svn_opt_revision_t revision{svn_opt_revision_working};
-    auto status = Array::New(isolate);
-    auto error = svn_client_status6(&result_rev,                 // result_rev
-                                    client->context,             // ctx
-                                    *String::Utf8Value(args[0]), // path
-                                    &revision,                   // revision
-                                    svn_depth_infinity,          // depth
-                                    false,                       // get_all
-                                    false,                       // check_out_of_date
-                                    false,                       // check_working_copy
-                                    false,                       // no_ignore
-                                    false,                       // ignore_externals
-                                    false,                       // depth_as_sticky,
-                                    nullptr,                     // changelists
-                                    StatusCallback,              // status_func
-                                    &status,                     // status_baton
-                                    client->pool);               // scratch_pool
+        svn_revnum_t result_rev;
+        svn_opt_revision_t revision{svn_opt_revision_working};
+        auto array = Array::New(isolate);
+        auto error = svn_client_status6(&result_rev,                 // result_rev
+                                        client->context,             // ctx
+                                        *String::Utf8Value(args[0]), // path
+                                        &revision,                   // revision
+                                        svn_depth_infinity,          // depth
+                                        false,                       // get_all
+                                        false,                       // check_out_of_date
+                                        false,                       // check_working_copy
+                                        false,                       // no_ignore
+                                        false,                       // ignore_externals
+                                        false,                       // depth_as_sticky,
+                                        nullptr,                     // changelists
+                                        execute_svn_status,          // status_func
+                                        svn_status_callback {
+                                            auto vStatus = Object::New(isolate);
+                                            vStatus->Set(String::NewFromUtf8(isolate, "path"), String::NewFromUtf8(isolate, path));
+                                            vStatus->Set(String::NewFromUtf8(isolate, "kind"), Integer::New(isolate, status->kind));
+                                            vStatus->Set(String::NewFromUtf8(isolate, "textStatus"), Integer::New(isolate, status->text_status));
+                                            vStatus->Set(String::NewFromUtf8(isolate, "propStatus"), Integer::New(isolate, status->prop_status));
+                                            vStatus->Set(String::NewFromUtf8(isolate, "copied"), Boolean::New(isolate, status->copied));
+                                            vStatus->Set(String::NewFromUtf8(isolate, "switched"), Boolean::New(isolate, status->switched));
 
-    if (error != SVN_NO_ERROR)
-    {
-        auto exception = Exception::Error(String::NewFromUtf8(isolate, error->message));
-        isolate->ThrowException(exception);
-        return;
-    }
+                                            array->Set(array->Length(), vStatus);
+                                        },             // status_baton
+                                        client->pool); // scratch_pool
 
-    auto result = Object::New(isolate);
-    result->Set(context, String::NewFromUtf8(isolate, "status"), status);
-    result->Set(context, String::NewFromUtf8(isolate, "version"), Integer::New(isolate, result_rev));
-    args.GetReturnValue().Set(result);
+        if (error != SVN_NO_ERROR)
+        {
+            isolate->Enter();
+            auto exception = Exception::Error(String::NewFromUtf8(isolate, error->message));
+            resolver->Reject(context, exception);
+            isolate->Exit();
+            return;
+        }
 
-    // Local<Promise::Resolver> resolver = Promise::Resolver::New(isolate);
-    // auto persistent = new PersistentAndIsolate<Promise::Resolver>(resolver, isolate);
-
-    //     resolver->Reject(Exception::Error(String::NewFromUtf8(isolate, error->message)));
-    //     delete persistent;
-    // }
-
-    // args.GetReturnValue().Set(resolver->GetPromise());
+        auto result = Object::New(isolate);
+        result->Set(context, String::NewFromUtf8(isolate, "status"), array);
+        result->Set(context, String::NewFromUtf8(isolate, "revision"), Integer::New(isolate, result_rev));
+        resolver->Resolve(context, result);
+    });
 }
 
 void Client::Cat(const FunctionCallbackInfo<Value> &args)

@@ -1,4 +1,5 @@
 #include "client.h"
+#include "svn_error.h"
 
 namespace Svn
 {
@@ -41,6 +42,7 @@ void Init(Local<Object> exports)
 						 (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete)); // attribute
 
 	Client::Init(exports, isolate, context);
+	SvnError::Init(exports, isolate, context);
 }
 
 NODE_MODULE(svn, Init)

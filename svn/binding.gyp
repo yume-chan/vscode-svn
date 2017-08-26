@@ -11,8 +11,10 @@
                 "<(module_root_dir)/lib/win32_64/libsvn_tsvn.lib"
             ],
             "sources": [
-                "src/export.cc",
-                "src/client.cc"
+                "src/export.cpp",
+                "src/svn_error.cpp",
+                "src/client.cpp",
+                "src/utils.cpp"
             ]
         }
     ]
