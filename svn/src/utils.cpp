@@ -12,16 +12,17 @@ struct queue_work_data
 
 void execute_uv_work(uv_work_t *req)
 {
-	auto callback = (queue_work_data *)req->data;
-	callback->work();
+	auto data = (queue_work_data *)req->data;
+	data->work();
 }
 
 void after_uv_work(uv_work_t *req, int status)
 {
-	auto callback = (queue_work_data *)req->data;
-	callback->after_work();
+	auto data = (queue_work_data *)req->data;
+	if (data->after_work != nullptr)
+		data->after_work();
 
-	delete callback;
+	delete data;
 	delete req;
 }
 
