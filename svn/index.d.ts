@@ -42,14 +42,9 @@ export interface SvnStatus {
     switched: boolean;
 }
 
-export interface SvnStatusResult {
-    status: SvnStatus[];
-    version: number;
-}
-
 export class Client {
     public constructor();
 
-    public status(path: string): SvnStatusResult;
+    public status(path: string): Promise<SvnStatus[] & { version?: number }>;
     public cat(path: string): Buffer;
 }

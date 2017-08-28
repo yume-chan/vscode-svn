@@ -12,28 +12,28 @@
 #include <svn_version.h>
 #include <svn_wc.h>
 
-#include "uv_utils.h"
+#include "utils.h"
 
 namespace Svn
 {
 class Client : public node::ObjectWrap
 {
-  public:
-    static void Init(v8::Local<v8::Object> exports, v8::Isolate *isolate, v8::Local<v8::Context> context);
+public:
+  static void Init(v8::Local<v8::Object> exports, v8::Isolate *isolate, v8::Local<v8::Context> context);
 
-  private:
-    explicit Client();
-    ~Client();
+private:
+  explicit Client();
+  ~Client();
 
-    static void Status(const v8::FunctionCallbackInfo<v8::Value> &args);
-    static void Cat(const v8::FunctionCallbackInfo<v8::Value> &args);
+  static void Status(const v8::FunctionCallbackInfo<v8::Value> &args);
+  static void Cat(const v8::FunctionCallbackInfo<v8::Value> &args);
 
-    static void New(const v8::FunctionCallbackInfo<v8::Value> &args);
-    static v8::Persistent<v8::Function> constructor;
+  static void New(const v8::FunctionCallbackInfo<v8::Value> &args);
+  static v8::Persistent<v8::Function> constructor;
 
-    uv_loop_t *loop;
-    apr_pool_t *pool;
-    svn_client_ctx_t *context;
+  uv_loop_t *loop;
+  apr_pool_t *pool;
+  svn_client_ctx_t *context;
 };
 }
 

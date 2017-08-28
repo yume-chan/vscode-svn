@@ -31,7 +31,7 @@ void Constructor(const FunctionCallbackInfo<Value> &args)
 void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
 {
     auto template_ = FunctionTemplate::New(isolate, Constructor);
-	
+
     auto Error = context->Global()->Get(context, String::NewFromUtf8(isolate, "Error", NewStringType::kNormal).ToLocalChecked()).ToLocalChecked().As<Function>();
     //template_->SetPrototypeProviderTemplate(Error);
 

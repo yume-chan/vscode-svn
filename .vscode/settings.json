@@ -9,6 +9,9 @@
     "git.confirmSync": false,
     "files.associations": {
         "*.cfg": "javascript",
-        "functional": "cpp"
+        "functional": "cpp",
+        "vector": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp"
     }
 }
