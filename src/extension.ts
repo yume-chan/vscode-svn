@@ -172,7 +172,7 @@ export function activate(context: vscode.ExtensionContext) {
         stagedStates = [];
         changedStates = [];
         ignoredStates = [];
-        for (const state of status.status) {
+        for (const state of status) {
             if (ignoredFiles.includes(state.path)) {
                 ignoredStates.push(getResourceState(state));
             } else {

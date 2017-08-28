@@ -208,43 +208,67 @@ void Client::Status(const FunctionCallbackInfo<Value> &args)
 void Client::Cat(const FunctionCallbackInfo<Value> &args)
 {
     auto isolate = args.GetIsolate();
+    auto context = isolate->GetCurrentContext();
+
+    auto resolver = Promise::Resolver::New(context).ToLocalChecked();
+    args.GetReturnValue().Set(resolver->GetPromise());
 
     if (args.Length() < 1)
     {
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` is required.")));
+        resolver->Reject(context, Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` is required.")));
         return;
     }
 
     if (!args[0]->IsString())
     {
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` must be a string.")));
+        resolver->Reject(context, Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` must be a string.")));
         return;
     }
 
     auto client = ObjectWrap::Unwrap<Client>(args.Holder());
+    auto path = to_string(args[0]);
+    auto _buffer = make_shared<svn_stringbuf_t *>();
+    auto _error = make_shared<svn_error_t *>();
+    auto work = [_buffer, client, path, _error]() -> void {
+        apr_hash_t *props;
+        *_buffer = svn_stringbuf_create_empty(client->pool);
+        auto stream = svn_stream_from_stringbuf(*_buffer, client->pool);
+        svn_opt_revision_t revision{svn_opt_revision_working};
+        *_error = svn_client_cat3(&props,          // props
+                                  stream,          // out
+                                  path->c_str(),   // path_or_url
+                                  &revision,       // peg_revision
+                                  &revision,       // revision
+                                  false,           // expand_keywords
+                                  client->context, // ctx
+                                  client->pool,    // result_pool
+                                  client->pool);   // scratch_pool
+    };
 
-    apr_hash_t *props;
-    auto buffer = svn_stringbuf_create_empty(client->pool);
-    auto stream = svn_stream_from_stringbuf(buffer, client->pool);
-    svn_opt_revision_t revision{svn_opt_revision_working};
-    auto error = svn_client_cat3(&props,                      // props
-                                 stream,                      // out
-                                 *String::Utf8Value(args[0]), // path_or_url
-                                 &revision,                   // peg_revision
-                                 &revision,                   // revision
-                                 false,                       // expand_keywords
-                                 client->context,             // ctx
-                                 client->pool,                // result_pool
-                                 client->pool);               // scratch_pool
+    auto _resolver = new Persistent<Promise::Resolver>(isolate, resolver);
+    auto after_work = [isolate, _resolver, _error, _buffer]() -> void {
+        auto context = isolate->GetCallingContext();
+        HandleScope scope(isolate);
 
-    if (error != SVN_NO_ERROR)
-    {
-        auto exception = Exception::Error(String::NewFromUtf8(isolate, error->message));
-        isolate->ThrowException(exception);
+        auto resolver = _resolver->Get(isolate);
+        _resolver->Reset();
+        delete _resolver;
+
+        auto error = *_error;
+        if (error != SVN_NO_ERROR)
+        {
+            auto exception = Exception::Error(String::NewFromUtf8(isolate, error->message, NewStringType::kNormal).ToLocalChecked());
+            resolver->Reject(context, exception);
+            return;
+        }
+
+        auto buffer = *_buffer;
+
+        auto result = node::Buffer::New(isolate, buffer->data, buffer->len).ToLocalChecked();
+        resolver->Resolve(context, result);
         return;
-    }
+    };
 
-    auto result = node::Buffer::New(isolate, buffer->data, buffer->len);
-    args.GetReturnValue().Set(result.ToLocalChecked());
+    queue_work(uv_default_loop(), work, after_work);
 }
 }
