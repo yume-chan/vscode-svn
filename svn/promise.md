@@ -39,7 +39,13 @@ To create a native addon:
 }
 ````
 
+See [node docs](https://nodejs.org/api/addons.html) for more setup.
+
 ## Basic types of V8
+
+(Applies to V8 5.8.282 (node8.0.0), [online documentation](https://v8docs.nodesource.com/node-8.0/))
+
+Note: V8 will frequently introduce breaking changes!
 
 * `v8::Isolate` an instance of V8 engine.
 
