@@ -13,7 +13,9 @@
     "license": "MIT",
     "devDependencies": {
         "@types/chai": "^4.0.4",
+        "@types/chai-as-promised": "0.0.31",
         "chai": "^4.1.1",
+        "chai-as-promised": "^7.1.1",
         "mocha": "^3.5.0"
     }
 }

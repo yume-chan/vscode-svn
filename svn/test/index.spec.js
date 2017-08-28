@@ -1,16 +1,14 @@
-const { expect } = require("chai");
+const chai = require("chai");
+const chaiAsPromised = require("chai-as-promised");
 
-if (typeof describe === "undefined")
-    global.describe = (description, callback) => callback();
-
-if (typeof it === "undefined")
-    global.it = (expectation, callback) => callback();
+chai.use(chaiAsPromised);
+const { expect } = chai;
 
 describe("svn", function() {
     let svn;
 
     it("should load", function() {
-        svn = require("..");
+        expect(svn = require("..")).to.exist;
     });
 
     describe(".version", function() {
@@ -60,14 +58,6 @@ describe("svn", function() {
             expect(svn.Client).to.be.an("function");
         });
 
-        it("should throw if not be invoked with new", function() {
-            expect(svn.Client).to.throw();
-        });
-
-        it("should be a constructor", function() {
-            expect(new svn.Client()).to.be.an.instanceof(svn.Client);
-        });
-
         it("should have `Kind`", function() {
             expect(svn.Client).to.have.property("Kind").that.is.an("object");
 
@@ -82,33 +72,43 @@ describe("svn", function() {
                 expect(svn.Client.StatusKind[key], key).to.be.a("number");
         });
 
+        it("should throw if not be invoked with new", function() {
+            expect(svn.Client).to.throw();
+        });
+
+        let client;
+
+        it("should be a constructor", function() {
+            expect(client = new svn.Client()).to.be.an.instanceof(svn.Client);
+        });
+
         describe("#status", function() {
             it("should exist", function() {
-                expect(new svn.Client().status).to.be.a("function");
+                expect(client.status).to.be.a("function");
             });
 
             it("should take a string", function() {
-                expect(() => { new svn.Client().status(); }).to.throw();
-                expect(() => { new svn.Client().status(undefined); }).to.throw();
-                expect(() => { new svn.Client().status(1); }).to.throw();
-                expect(() => { new svn.Client().status(true); }).to.throw();
-                expect(() => { new svn.Client().status(["path"]); }).to.throw();
-                expect(() => { new svn.Client().status({ "path": "" }); }).to.throw();
+                expect(client.status()).to.be.rejected;
+                expect(client.status(undefined)).to.be.rejected;
+                expect(client.status(1)).to.be.rejected;
+                expect(client.status(true)).to.be.rejected;
+                expect(client.status(["path"])).to.be.rejected;
+                expect(client.status({ "path": "" })).to.be.rejected;
             });
         });
 
-        describe("Client#cat", function() {
+        describe("#cat", function() {
             it("should exist", function() {
-                expect(new svn.Client().cat).to.be.a("function");
+                expect(client.cat).to.be.a("function");
             });
 
             it("should take a string", function() {
-                expect(() => { new svn.Client().cat(); }).to.throw();
-                expect(() => { new svn.Client().cat(undefined); }).to.throw();
-                expect(() => { new svn.Client().cat(1); }).to.throw();
-                expect(() => { new svn.Client().cat(true); }).to.throw();
-                expect(() => { new svn.Client().cat(["path"]); }).to.throw();
-                expect(() => { new svn.Client().cat({ "path": "" }); }).to.throw();
+                expect(client.cat()).to.be.rejected;
+                expect(client.cat(undefined)).to.be.rejected;
+                expect(client.cat(1)).to.be.rejected;
+                expect(client.cat(true)).to.be.rejected;
+                expect(client.cat(["path"])).to.be.rejected;
+                expect(client.cat({ "path": "" })).to.be.rejected;
             });
         });
     });
