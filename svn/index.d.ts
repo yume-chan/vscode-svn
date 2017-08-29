@@ -50,3 +50,7 @@ export class Client {
     public status(path: string): Promise<SvnStatusResult>;
     public cat(path: string): Promise<Buffer>;
 }
+
+export class SvnError extends Error {
+    constructor(message: string);
+}

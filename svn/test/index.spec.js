@@ -41,6 +41,54 @@ describe("svn", function() {
         });
     });
 
+    describe(".SvnError", function() {
+        it("should exist", function() {
+            expect(svn).to.have.property("SvnError");
+        });
+
+        it("should be non-configurable", function() {
+            expect(svn).to.have.ownPropertyDescriptor("SvnError").that.has.property("configurable", false);
+        });
+
+        it("should be non-writable", function() {
+            expect(svn).to.have.ownPropertyDescriptor("SvnError").that.has.property("writable", false);
+        });
+
+        it("should be a function", function() {
+            expect(svn.SvnError).to.be.an("function");
+        });
+
+        it("should throw if not be invoked with new", function() {
+            expect(svn.SvnError).to.throw();
+        });
+
+        let error;
+
+        it("should be a constructor", function() {
+            expect(error = new svn.SvnError()).to.be.an.instanceof(svn.SvnError);
+        });
+
+        it("should extend Error", function() {
+            expect(error).to.be.an.instanceof(Error);
+        });
+
+        it("should have name", function() {
+            expect(error).to.have.property("name", "SvnError");
+        });
+
+        it("should have stack", function() {
+            expect(error).to.have.property("stack");
+        });
+
+        it("should have empty message if no parameter", function() {
+            expect(error).to.have.property("message", "");
+        });
+
+        it("should have message if have parameter", function() {
+            expect(new svn.SvnError("test")).to.have.property("message", "test");
+        });
+    });
+
     describe(".Client", function() {
         it("should exist", function() {
             expect(svn).to.have.property("Client");

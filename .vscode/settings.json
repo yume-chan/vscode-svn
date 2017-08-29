@@ -13,5 +13,6 @@
         "vector": "cpp",
         "xstring": "cpp",
         "xutility": "cpp"
-    }
+    },
+    "git.enableSmartCommit": true
 }

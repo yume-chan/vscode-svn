@@ -60,7 +60,7 @@ void Test(const v8::FunctionCallbackInfo<Value> &args)
 void Init(Local<Object> exports)
 {
 	auto isolate = exports->GetIsolate();
-	auto context = Context::New(isolate);
+	auto context = isolate->GetCurrentContext();
 
 	exports->SetAccessor(context,																			// context
 						 String::NewFromUtf8(isolate, "version", NewStringType::kNormal).ToLocalChecked(),  // name
