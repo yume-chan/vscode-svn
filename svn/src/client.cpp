@@ -1,4 +1,5 @@
 #include "client.h"
+#include "svn_error.h"
 
 namespace Svn
 {
@@ -185,8 +186,7 @@ void Client::Status(const FunctionCallbackInfo<Value> &args)
         auto error = *_error;
         if (error != SVN_NO_ERROR)
         {
-            auto exception = Exception::Error(String::NewFromUtf8(isolate, error->message, NewStringType::kNormal).ToLocalChecked());
-            resolver->Reject(context, exception);
+            resolver->Reject(context, SvnError::New(isolate, context, error->apr_err, error->message));
             return;
         }
 
@@ -257,8 +257,7 @@ void Client::Cat(const FunctionCallbackInfo<Value> &args)
         auto error = *_error;
         if (error != SVN_NO_ERROR)
         {
-            auto exception = Exception::Error(String::NewFromUtf8(isolate, error->message, NewStringType::kNormal).ToLocalChecked());
-            resolver->Reject(context, exception);
+            resolver->Reject(context, SvnError::New(isolate, context, error->apr_err, error->message));
             return;
         }
 

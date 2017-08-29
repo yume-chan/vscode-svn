@@ -10,6 +10,7 @@ using v8::Exception;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::FunctionTemplate;
+using v8::Integer;
 using v8::Isolate;
 using v8::MaybeLocal;
 using v8::Local;
@@ -37,10 +38,29 @@ void Constructor(const FunctionCallbackInfo<Value> &args)
         return;
     }
 
+    if (args.Length() < 1)
+    {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Arguments `code` and `message` are required.")));
+        return;
+    }
+
+    if (!args[0]->IsNumber())
+    {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Argument `code` must be a number.")));
+        return;
+    }
+
+    if (!args[1]->IsString())
+    {
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Argument `message` must be a string.")));
+        return;
+    }
+
     auto _this = args.This();
 
-    if (args.Length() > 0)
-        SetProperty(_this, "message", args[0]->ToString(context).ToLocalChecked());
+    SetProperty(_this, "code", args[0]);
+
+    SetProperty(_this, "message", args[1]->ToString(context).ToLocalChecked());
 
     auto error = Exception::Error(String::NewFromUtf8(isolate, "SvnError", NewStringType::kNormal).ToLocalChecked()).As<Object>();
     SetProperty(_this, "stack", GetProperty(error, "stack"));
@@ -63,6 +83,16 @@ void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
 
     _svn_error.Reset(isolate, function);
     DefineReadOnlyValue(exports, "SvnError", function);
+}
+
+Local<Value> New(Isolate *isolate, Local<Context> context, int code, char *message)
+{
+    auto error = _svn_error.Get(isolate);
+    const auto argc = 2;
+    Local<Value> argv[argc] = {
+        Integer::New(isolate, code),
+        String::NewFromUtf8(isolate, message, NewStringType::kNormal).ToLocalChecked()};
+    return error->CallAsConstructor(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
 }
 }
 }
