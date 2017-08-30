@@ -50,26 +50,28 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     auto function = template_->GetFunction();
 
     auto kind = Object::New(isolate);
-    DefineReadOnlyValueInt(kind, "none", svn_node_none);
-    DefineReadOnlyValueInt(kind, "file", svn_node_file);
-    DefineReadOnlyValueInt(kind, "dir", svn_node_dir);
-    DefineReadOnlyValueInt(kind, "unknown", svn_node_unknown);
+#define DefineKind(name) DefineReadOnlyValueInt(kind, #name, svn_node_##name)
+    DefineKind(none);
+    DefineKind(file);
+    DefineKind(dir);
+    DefineKind(unknown);
     DefineReadOnlyValue(function, "Kind", kind);
 
     auto statusKind = Object::New(isolate);
-    DefineReadOnlyValueInt(statusKind, "none", svn_wc_status_none);
-    DefineReadOnlyValueInt(statusKind, "unversioned", svn_wc_status_unversioned);
-    DefineReadOnlyValueInt(statusKind, "normal", svn_wc_status_normal);
-    DefineReadOnlyValueInt(statusKind, "added", svn_wc_status_added);
-    DefineReadOnlyValueInt(statusKind, "missing", svn_wc_status_missing);
-    DefineReadOnlyValueInt(statusKind, "deleded", svn_wc_status_deleted);
-    DefineReadOnlyValueInt(statusKind, "replaced", svn_wc_status_replaced);
-    DefineReadOnlyValueInt(statusKind, "modified", svn_wc_status_modified);
-    DefineReadOnlyValueInt(statusKind, "conflicted", svn_wc_status_conflicted);
-    DefineReadOnlyValueInt(statusKind, "ignored", svn_wc_status_ignored);
-    DefineReadOnlyValueInt(statusKind, "obstructed", svn_wc_status_obstructed);
-    DefineReadOnlyValueInt(statusKind, "external", svn_wc_status_external);
-    DefineReadOnlyValueInt(statusKind, "incomplete", svn_wc_status_incomplete);
+#define DefineStatusKind(name) DefineReadOnlyValueInt(statusKind, #name, svn_wc_status_##name)
+    DefineStatusKind(none);
+    DefineStatusKind(unversioned);
+    DefineStatusKind(normal);
+    DefineStatusKind(added);
+    DefineStatusKind(missing);
+    DefineStatusKind(deleted);
+    DefineStatusKind(replaced);
+    DefineStatusKind(modified);
+    DefineStatusKind(conflicted);
+    DefineStatusKind(ignored);
+    DefineStatusKind(obstructed);
+    DefineStatusKind(external);
+    DefineStatusKind(incomplete);
     DefineReadOnlyValue(function, "StatusKind", statusKind);
 
     constructor.Reset(isolate, function);
@@ -142,6 +144,83 @@ string to_string(Local<Value> value)
     return string(*utf8, utf8.length());
 }
 
+void Client::Cat(const FunctionCallbackInfo<Value> &args)
+{
+    auto isolate = args.GetIsolate();
+    auto context = isolate->GetCurrentContext();
+
+    auto resolver = Promise::Resolver::New(context).ToLocalChecked();
+    args.GetReturnValue().Set(resolver->GetPromise());
+
+    if (args.Length() < 1)
+    {
+        resolver->Reject(context, Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` is required.")));
+        return;
+    }
+
+    if (!args[0]->IsString())
+    {
+        resolver->Reject(context, Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` must be a string.")));
+        return;
+    }
+
+    auto client = ObjectWrap::Unwrap<Client>(args.Holder());
+    apr_pool_t *pool;
+    apr_pool_create(&pool, client->pool);
+
+    apr_pool_t *scratch_pool;
+    apr_pool_create(&scratch_pool, pool);
+
+    auto path = make_shared<string>(to_string(args[0]));
+    auto _buffer = make_shared<svn_stringbuf_t *>();
+    auto _error = make_shared<svn_error_t *>();
+    auto work = [_buffer, client, path, _error, pool, scratch_pool]() -> void {
+        apr_hash_t *props;
+        *_buffer = svn_stringbuf_create_empty(pool);
+        auto stream = svn_stream_from_stringbuf(*_buffer, pool);
+        svn_opt_revision_t revision{svn_opt_revision_working};
+        *_error = svn_client_cat3(&props,          // props
+                                  stream,          // out
+                                  path->c_str(),   // path_or_url
+                                  &revision,       // peg_revision
+                                  &revision,       // revision
+                                  false,           // expand_keywords
+                                  client->context, // ctx
+                                  pool,            // result_pool
+                                  scratch_pool);   // scratch_pool
+
+        apr_pool_destroy(pool);
+    };
+
+    auto _resolver = new Persistent<Promise::Resolver>(isolate, resolver);
+    auto after_work = [isolate, _resolver, _error, _buffer]() -> void {
+        auto context = isolate->GetCallingContext();
+        HandleScope scope(isolate);
+
+        auto resolver = _resolver->Get(isolate);
+        _resolver->Reset();
+        delete _resolver;
+
+        auto error = *_error;
+        if (error != SVN_NO_ERROR)
+        {
+            resolver->Reject(context, SvnError::New(isolate, context, error->apr_err, error->message));
+            return;
+        }
+
+        auto buffer = *_buffer;
+
+        auto result = node::Buffer::New(isolate, buffer->data, buffer->len).ToLocalChecked();
+        resolver->Resolve(context, result);
+        return;
+    };
+
+    if (!queue_work(uv_default_loop(), work, after_work))
+    {
+        resolver->Reject(context, Exception::Error(String::NewFromUtf8(isolate, "Failed starting async work")));
+    }
+}
+
 void Client::Checkout(const FunctionCallbackInfo<Value> &args)
 {
     auto isolate = args.GetIsolate();
@@ -169,7 +248,7 @@ void Client::Checkout(const FunctionCallbackInfo<Value> &args)
                          false,             // ignore_externals
                          false,             // allow_unver_obstructions
                          client->context,   // ctx
-                         pool);     // pool
+                         pool);             // pool
 
     apr_pool_destroy(pool);
 }
@@ -295,7 +374,7 @@ void Client::Update(const FunctionCallbackInfo<Value> &args)
     auto paths = args[0].As<v8::Array>();
     auto strings = vector<string>();
     auto _paths = apr_array_make(client->pool, paths->Length(), sizeof(char *));
-    for (auto i = 0; i < paths->Length(); i++)
+    for (auto i = 0U; i < paths->Length(); i++)
     {
         auto string = to_string(paths->Get(context, i).ToLocalChecked());
         APR_ARRAY_IDX(_paths, i, const char *) = string.c_str();
@@ -315,82 +394,5 @@ void Client::Update(const FunctionCallbackInfo<Value> &args)
                        pool);              // pool
 
     apr_pool_destroy(pool);
-}
-
-void Client::Cat(const FunctionCallbackInfo<Value> &args)
-{
-    auto isolate = args.GetIsolate();
-    auto context = isolate->GetCurrentContext();
-
-    auto resolver = Promise::Resolver::New(context).ToLocalChecked();
-    args.GetReturnValue().Set(resolver->GetPromise());
-
-    if (args.Length() < 1)
-    {
-        resolver->Reject(context, Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` is required.")));
-        return;
-    }
-
-    if (!args[0]->IsString())
-    {
-        resolver->Reject(context, Exception::TypeError(String::NewFromUtf8(isolate, "Argument `path` must be a string.")));
-        return;
-    }
-
-    auto client = ObjectWrap::Unwrap<Client>(args.Holder());
-    apr_pool_t *pool;
-    apr_pool_create(&pool, client->pool);
-
-    apr_pool_t *scratch_pool;
-    apr_pool_create(&scratch_pool, pool);
-
-    auto path = make_shared<string>(to_string(args[0]));
-    auto _buffer = make_shared<svn_stringbuf_t *>();
-    auto _error = make_shared<svn_error_t *>();
-    auto work = [_buffer, client, path, _error, pool, scratch_pool]() -> void {
-        apr_hash_t *props;
-        *_buffer = svn_stringbuf_create_empty(pool);
-        auto stream = svn_stream_from_stringbuf(*_buffer, pool);
-        svn_opt_revision_t revision{svn_opt_revision_working};
-        *_error = svn_client_cat3(&props,          // props
-                                  stream,          // out
-                                  path->c_str(),   // path_or_url
-                                  &revision,       // peg_revision
-                                  &revision,       // revision
-                                  false,           // expand_keywords
-                                  client->context, // ctx
-                                  pool,            // result_pool
-                                  scratch_pool);   // scratch_pool
-
-        apr_pool_destroy(pool);
-    };
-
-    auto _resolver = new Persistent<Promise::Resolver>(isolate, resolver);
-    auto after_work = [isolate, _resolver, _error, _buffer]() -> void {
-        auto context = isolate->GetCallingContext();
-        HandleScope scope(isolate);
-
-        auto resolver = _resolver->Get(isolate);
-        _resolver->Reset();
-        delete _resolver;
-
-        auto error = *_error;
-        if (error != SVN_NO_ERROR)
-        {
-            resolver->Reject(context, SvnError::New(isolate, context, error->apr_err, error->message));
-            return;
-        }
-
-        auto buffer = *_buffer;
-
-        auto result = node::Buffer::New(isolate, buffer->data, buffer->len).ToLocalChecked();
-        resolver->Resolve(context, result);
-        return;
-    };
-
-    if (!queue_work(uv_default_loop(), work, after_work))
-    {
-        resolver->Reject(context, Exception::Error(String::NewFromUtf8(isolate, "Failed starting async work")));
-    }
 }
 }

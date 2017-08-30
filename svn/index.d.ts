@@ -47,8 +47,10 @@ export type SvnStatusResult = SvnStatus[] & { version?: number };
 export class Client {
     public constructor();
 
-    public status(path: string): Promise<SvnStatusResult>;
     public cat(path: string): Promise<Buffer>;
+    public checkout(paths: string[]): Promise<void>;
+    public status(path: string): Promise<SvnStatusResult>;
+    public update(path: string): Promise<void>;
 }
 
 export class SvnError extends Error {
