@@ -83,7 +83,7 @@ Note: The grammar is:
 return type   method name  (              parameter type            parameter name  )
 ````
 
-Note: For more information about C++ parameter types, you can see [this](http://en.cppreference.com/w/cpp/language/type).
+Note: `const` is a part of parameter type. For more information about C++ types, you can see [this](http://en.cppreference.com/w/cpp/language/type).
 
 To create a JavaScript `String`, use
 
@@ -120,6 +120,8 @@ Note: `value1` is a `int32_t`, an integer, while `value2` is a `double`, a float
 
 Note: `Integer::New` and `Number::New` both create JavaSript `Number`, but from different C++ types.
 
+As you can see, `isolate` is required for almost all V8 operations, so you definitly want to get it at the beginning of every method.
+
 ## Execution of an async function
 
 The future of async JavaScript belongs to `Promise`, so I won't talk about callbacks.
@@ -135,6 +137,8 @@ args.GetReturnValue().Set(promise);
 Note: `->` is used to get a pointer's member, `Local<T>` is a pointer, thus you need `->`, not `.` or `::`.
 
 Note: **MAYBE** `context` is from `isolate->GetCurrentContext();`
+
+Also, lots of (and more and more) operations need `context` as well, so you should also get it at the beginning of methods.
 
 ### Use libuv to execute methods non-blocking
 

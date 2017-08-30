@@ -4,6 +4,7 @@
 namespace Svn
 {
 using std::make_shared;
+using std::make_unique;
 using std::function;
 using std::shared_ptr;
 using std::string;
@@ -38,6 +39,9 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
 {
     auto template_ = FunctionTemplate::New(isolate, New);
     template_->SetClassName(String::NewFromUtf8(isolate, "Client"));
+    // This internal field is used for saving the pointer to a Client instance.
+    // Client.wrap will set its pointer to the internal field
+    // And ObjectWrap::Unwrap will read the internal field and cast it to Client.
     template_->InstanceTemplate()->SetInternalFieldCount(1);
 
     NODE_SET_PROTOTYPE_METHOD(template_, "status", Status);
@@ -73,22 +77,46 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     DefineReadOnlyValue(exports, "Client", function);
 }
 
+void notify2(void *baton, const svn_wc_notify_t *notify, apr_pool_t *pool)
+{
+    auto client = static_cast<Client *>(baton);
+
+    switch (notify->action)
+    {
+    case svn_wc_notify_update_delete:
+    case svn_wc_notify_update_add:
+    case svn_wc_notify_update_update:
+    case svn_wc_notify_update_external:
+    case svn_wc_notify_update_replace:
+    case svn_wc_notify_update_skip_obstruction:
+    case svn_wc_notify_update_skip_working_only:
+    case svn_wc_notify_update_skip_access_denied:
+    case svn_wc_notify_update_external_removed:
+    case svn_wc_notify_update_shadowed_add:
+    case svn_wc_notify_update_shadowed_update:
+    case svn_wc_notify_update_shadowed_delete:
+        auto callback = client->update_callback;
+        if (callback != nullptr)
+            callback(notify);
+        break;
+    }
+
+    auto callback = *static_cast<function<void(const svn_wc_notify_t *)> *>(baton);
+    callback(notify);
+}
+
 Client::Client()
 {
-    loop = (uv_loop_t *)malloc(sizeof(uv_loop_t));
-    uv_loop_init(loop);
-
     apr_initialize();
     apr_pool_create(&pool, nullptr);
     svn_client_create_context(&context, this->pool);
+
+    context->notify_baton2 = this;
+    context->notify_func2 = notify2;
 }
 
 Client::~Client()
 {
-    uv_stop(loop);
-    uv_loop_close(loop);
-    delete loop;
-
     apr_pool_destroy(pool);
     apr_terminate();
 }
@@ -108,10 +136,33 @@ void Client::New(const FunctionCallbackInfo<Value> &args)
     args.GetReturnValue().Set(args.This());
 }
 
-shared_ptr<string> to_string(Local<Value> value)
+string to_string(Local<Value> value)
 {
     String::Utf8Value utf8(value);
-    return make_shared<string>(*utf8, utf8.length());
+    return string(*utf8, utf8.length());
+}
+
+void Client::Checkout(const FunctionCallbackInfo<Value> &args)
+{
+    auto isolate = args.GetIsolate();
+    auto context = isolate->GetCurrentContext();
+
+    auto client = ObjectWrap::Unwrap<Client>(args.Holder());
+
+    auto _result_rev = make_shared<svn_revnum_t *>();
+    auto url = to_string(args[0]);
+    auto path = to_string(args[1]);
+    svn_opt_revision_t revision{svn_opt_revision_head};
+    svn_client_checkout3(*_result_rev,      // result_rev
+                         url.c_str(),       // URL
+                         path.c_str(),      // path
+                         &revision,         // peg_revision
+                         &revision,         // revision
+                         svn_depth_unknown, // depth
+                         false,             // ignore_externals
+                         false,             // allow_unver_obstructions
+                         client->context,   // ctx
+                         client->pool);     // pool
 }
 
 void Client::Status(const FunctionCallbackInfo<Value> &args)
@@ -152,7 +203,7 @@ void Client::Status(const FunctionCallbackInfo<Value> &args)
 
     auto _result_rev = make_shared<svn_revnum_t *>();
     auto client = ObjectWrap::Unwrap<Client>(args.Holder());
-    auto path = to_string(args[0]);
+    auto path = make_shared<string>(to_string(args[0]));
     auto _error = make_shared<svn_error_t *>();
     auto _callback = make_shared<function<void(const char *, const svn_client_status_t *, apr_pool_t *)>>(callback);
     auto work = [_result_rev, client, path, _callback, _error]() -> void {
@@ -208,6 +259,47 @@ void Client::Status(const FunctionCallbackInfo<Value> &args)
     }
 }
 
+void Client::Update(const FunctionCallbackInfo<Value> &args)
+{
+    auto isolate = args.GetIsolate();
+    auto context = isolate->GetCurrentContext();
+
+    auto resolver = Promise::Resolver::New(context).ToLocalChecked();
+    auto promise = resolver->GetPromise();
+    args.GetReturnValue().Set(promise);
+
+    auto client = ObjectWrap::Unwrap<Client>(args.Holder());
+
+    auto notify = [](const svn_wc_notify_t *notify) -> void {
+
+    };
+    auto svn_client = client->context;
+    svn_client->notify_baton2 = new function<void(svn_wc_notify_t *)>(notify);
+
+    auto _result_rev = make_shared<apr_array_header_t *>();
+    auto paths = args[0].As<v8::Array>();
+    auto strings = vector<string>();
+    auto _paths = apr_array_make(client->pool, paths->Length(), sizeof(char *));
+    for (auto i = 0; i < paths->Length(); i++)
+    {
+        auto string = to_string(paths->Get(context, i).ToLocalChecked());
+        APR_ARRAY_IDX(_paths, i, const char *) = string.c_str();
+        strings.push_back(std::move(string));
+    }
+    svn_opt_revision_t revision{svn_opt_revision_working};
+    svn_client_update4(_result_rev.get(),  // result_revs
+                       _paths,             // paths
+                       &revision,          // revision
+                       svn_depth_infinity, // depth
+                       false,              // depth_is_sticky
+                       false,              // ignore_externals
+                       false,              // allow_unver_obstructions
+                       true,               // adds_as_modification
+                       true,               // make_parents
+                       svn_client,         // ctx
+                       client->pool);      // pool
+}
+
 void Client::Cat(const FunctionCallbackInfo<Value> &args)
 {
     auto isolate = args.GetIsolate();
@@ -229,7 +321,7 @@ void Client::Cat(const FunctionCallbackInfo<Value> &args)
     }
 
     auto client = ObjectWrap::Unwrap<Client>(args.Holder());
-    auto path = to_string(args[0]);
+    auto path = make_shared<string>(to_string(args[0]));
     auto _buffer = make_shared<svn_stringbuf_t *>();
     auto _error = make_shared<svn_error_t *>();
     auto work = [_buffer, client, path, _error]() -> void {

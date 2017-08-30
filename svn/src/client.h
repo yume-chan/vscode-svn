@@ -21,17 +21,21 @@ class Client : public node::ObjectWrap
 public:
   static void Init(v8::Local<v8::Object> exports, v8::Isolate *isolate, v8::Local<v8::Context> context);
 
+  std::function<void(const svn_wc_notify_t *)> checkout_callback;
+  std::function<void(const svn_wc_notify_t *)> update_callback;
+
 private:
   explicit Client();
   ~Client();
 
+  static void Checkout(const v8::FunctionCallbackInfo<v8::Value> &args);
   static void Status(const v8::FunctionCallbackInfo<v8::Value> &args);
+  static void Update(const v8::FunctionCallbackInfo<v8::Value> &args);
   static void Cat(const v8::FunctionCallbackInfo<v8::Value> &args);
 
   static void New(const v8::FunctionCallbackInfo<v8::Value> &args);
   static v8::Persistent<v8::Function> constructor;
 
-  uv_loop_t *loop;
   apr_pool_t *pool;
   svn_client_ctx_t *context;
 };

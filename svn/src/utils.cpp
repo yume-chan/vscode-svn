@@ -3,6 +3,7 @@
 namespace Svn
 {
 using std::function;
+using std::move;
 
 class WorkData
 {
@@ -17,13 +18,13 @@ class WorkData
 
 void execute_uv_work(uv_work_t *req)
 {
-	auto data = (WorkData *)req->data;
+	auto data = static_cast<WorkData *>(req->data);
 	data->work();
 }
 
 void after_uv_work(uv_work_t *req, int status)
 {
-	auto data = (WorkData *)req->data;
+	auto data = static_cast<WorkData *>(req->data);
 	data->after_work();
 
 	delete data;
@@ -36,13 +37,13 @@ int32_t queue_work(uv_loop_t *loop, const std::function<void()> work, const std:
 		return -1;
 
 	uv_work_t *req = new uv_work_t;
-	req->data = new WorkData(std::move(work), std::move(after_work));
+	req->data = new WorkData(move(work), move(after_work));
 	return uv_queue_work(loop, req, execute_uv_work, after_uv_work);
 }
 
 svn_error_t *execute_svn_status(void *baton, const char *path, const svn_client_status_t *status, apr_pool_t *scratch_pool)
 {
-	auto method = *(function<void(const char *, const svn_client_status_t *, apr_pool_t *)> *)baton;
+	auto method = *static_cast<function<void(const char *, const svn_client_status_t *, apr_pool_t *)> *>(baton);
 	method(path, status, scratch_pool);
 	return SVN_NO_ERROR;
 }
