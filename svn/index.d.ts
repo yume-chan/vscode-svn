@@ -52,5 +52,8 @@ export class Client {
 }
 
 export class SvnError extends Error {
-    constructor(message: string);
+    code: number;
+    message: string;
+
+    constructor(code: number, message: string);
 }

@@ -85,7 +85,7 @@ void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
     DefineReadOnlyValue(exports, "SvnError", function);
 }
 
-Local<Value> New(Isolate *isolate, Local<Context> context, int code, char *message)
+Local<Value> New(Isolate *isolate, Local<Context> context, int code, const char *message)
 {
     auto error = _svn_error.Get(isolate);
     const auto argc = 2;

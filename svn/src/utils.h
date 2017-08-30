@@ -9,7 +9,7 @@
 
 namespace Svn
 {
-void queue_work(uv_loop_t *loop, std::function<void()> work, std::function<void()> after_work = nullptr);
+int32_t queue_work(uv_loop_t *loop, std::function<void()> work, std::function<void()> after_work = nullptr);
 
 svn_error_t *execute_svn_status(void *baton, const char *path, const svn_client_status_t *status, apr_pool_t *scratch_pool);
 }

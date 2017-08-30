@@ -8,7 +8,7 @@ namespace Svn
 namespace SvnError
 {
 void Init(v8::Local<v8::Object> exports, v8::Isolate *isolate, v8::Local<v8::Context> context);
-v8::Local<v8::Value> New(v8::Isolate *isolate, v8::Local<v8::Context> context, int code, char *message);
+v8::Local<v8::Value> New(v8::Isolate *isolate, v8::Local<v8::Context> context, int code, const char *message);
 }
 }
 

@@ -202,7 +202,10 @@ void Client::Status(const FunctionCallbackInfo<Value> &args)
         return;
     };
 
-    queue_work(uv_default_loop(), work, after_work);
+    if (!queue_work(uv_default_loop(), work, after_work))
+    {
+        resolver->Reject(context, Exception::Error(String::NewFromUtf8(isolate, "Failed starting async work")));
+    }
 }
 
 void Client::Cat(const FunctionCallbackInfo<Value> &args)
@@ -268,6 +271,9 @@ void Client::Cat(const FunctionCallbackInfo<Value> &args)
         return;
     };
 
-    queue_work(uv_default_loop(), work, after_work);
+    if (!queue_work(uv_default_loop(), work, after_work))
+    {
+        resolver->Reject(context, Exception::Error(String::NewFromUtf8(isolate, "Failed starting async work")));
+    }
 }
 }

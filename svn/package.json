@@ -2,7 +2,7 @@
     "name": "svn",
     "version": "1.0.0",
     "description": "",
-    "main": "build/Debug/svn.node",
+    "main": "build/Release/svn.node",
     "typings": "index.d.ts",
     "scripts": {
         "test": "mocha",

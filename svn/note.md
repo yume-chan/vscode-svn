@@ -10,10 +10,12 @@
     - [More basic types of V8](#more-basic-types-of-v8)
     - [Execution of a normal function](#execution-of-a-normal-function)
     - [Execution of an async function](#execution-of-an-async-function)
-        - [Use libuv to execute method on other threads](#use-libuv-to-execute-method-on-other-threads)
+        - [Use libuv to execute methods non-blocking](#use-libuv-to-execute-methods-non-blocking)
         - [Pass the `Promise::Resolver` to `after_work_cb`](#pass-the-`promiseresolver`-to-`afterworkcb`)
+    - [Configuring](#configuring)
     - [Compiling](#compiling)
-    - [Debugging](#debugging)
+    - [Using Visual Studio](#using-visual-studio)
+    - [Testing](#testing)
 
 ## Basic of native addon
 
@@ -28,7 +30,7 @@ To create a native addon:
 {
     "targets": [
         {
-            "target_name": "svn",
+            "target_name": "module_name",
             "include_dirs": [
             ],
             "sources": [
@@ -43,11 +45,9 @@ See [node docs](https://nodejs.org/api/addons.html) for more setup.
 
 ## Basic types of V8
 
-(Applies to V8 5.8.282 (node8.0.0), [online documentation](https://v8docs.nodesource.com/node-8.0/))
+(Applies to V8 5.8.282 for node 8.0.0, see online documentation [here](https://v8docs.nodesource.com/node-8.0/))
 
 Note: V8 will frequently introduce breaking changes!
-
-* `v8::Isolate` an instance of V8 engine.
 
 * `v8::Local<T>` a smart pointer for V8 objects. It is valid only in its own method. When the method finished, V8 will delete the object.
 * `v8::Persistent<T>` a normal pointer for V8 objects. You need to delete it when you finished using it.
@@ -64,10 +64,11 @@ So you cannot use ordinal C++ pointers.
 
 ## More basic types of V8
 
+* `v8::Isolate` an instance of V8 engine.
 * `v8::Value` the base class of all V8 objects.
-* `v8::String` JavaScript `String` type.
-* `v8::FunctionCallbackInfo<T>` JavaScript `arguments` type.
-* `v8::Promise` JavaScript `Promise` type.
+* `v8::String` represents the `String` type in JavaScript.
+* `v8::FunctionCallbackInfo<T>` represents the `arguments` type in JavaScript.
+* `v8::Promise` represents the `Promise` type in JavaScript.
 * `v8::Promise::Resolver` a type used to `resolve` or `reject` a `v8::Promise`.
 
 ## Execution of a normal function
@@ -77,35 +78,67 @@ To create a C++ method that can be used in JavaScript, you need to declare it as
 Note: The grammar is:
 
 ````plaintext
-    void         Method    (   const FunctionCallbackInfo<Value>&        args       )
+    void        Method     (   const FunctionCallbackInfo<Value>&        args       )
       ↑            ↑       ↑                    ↑                         ↑         ↑
 return type   method name  (              parameter type            parameter name  )
 ````
 
-To create a string, use `auto value = String::NewFromUtf8(isolate, str, NewStringType::kNormal).ToLocalChecked()`.
+Note: For more information about C++ parameter types, you can see [this](http://en.cppreference.com/w/cpp/language/type).
 
-Note: `isolate` can be retrieved from `args.GetIsolate()`
+To create a JavaScript `String`, use
 
-Note: `auto` is like `var` in JavaScript
+```` C++
+auto isolate = args.GetIsolate();
+auto chars = "Hello, World";
+auto string = String::NewFromUtf8(isolate, chars, NewStringType::kNormal).ToLocalChecked();
+````
 
-To return a value, use `args.GetReturnValue().Set(value)`.
+Note: The type of `chars` is `char *`.
+
+Note: `auto` is like `var` in JavaScript.
+
+To return a value to JavaScript, use
+
+```` C++
+args.GetReturnValue().Set(value);
+
+````
+
+Note: The return type of this C++ method is `void`, means it doesn't return anything, so you cannot use `return`.
+
+Similarly, to create a JavaScript `Number`, use
+
+```` C++
+auto value1 = 42;
+auto number1 = Integer::New(isolate, value1);
+
+auto value2 = 42.0;
+auto number2 = Number::New(isolate, value2);
+````
+
+Note: `value1` is a `int32_t`, an integer, while `value2` is a `double`, a float number.
+
+Note: `Integer::New` and `Number::New` both create JavaSript `Number`, but from different C++ types.
 
 ## Execution of an async function
 
-To create a `Promise`, create a `Promise::Resolver` first.
+The future of async JavaScript belongs to `Promise`, so I won't talk about callbacks.
+
+To create a `Promise`, create a `Promise::Resolver` instead.
 
 ```` C++
 auto resolver = Promise::Resolver::New(context).ToLocalChecked();
-args.GetReturnValue().Set(resolver->GetPromise());
+auto promise = resolver->GetPromise();
+args.GetReturnValue().Set(promise);
 ````
 
-Note: `->` is used to get pointer member, if the type has a `*` at last, you need `->`, not `.`.
+Note: `->` is used to get a pointer's member, `Local<T>` is a pointer, thus you need `->`, not `.` or `::`.
 
 Note: **MAYBE** `context` is from `isolate->GetCurrentContext();`
 
-### Use libuv to execute method on other threads
+### Use libuv to execute methods non-blocking
 
-````C++
+```` C++
 int uv_queue_work(uv_loop_t* loop, uv_work_t* req, uv_work_cb work_cb, uv_after_work_cb after_work_cb)
 ````
 
@@ -120,35 +153,40 @@ For simplify the work with C function pointers (`work_cb` and `after_work_cb` pa
 ````C++
 using std::function;
 
-struct queue_work_data
+class WorkData
 {
-    const std::function<void()> work;
-    const std::function<void()> after_work;
+  public:
+	WorkData(const function<void()> work, const function<void()> after_work)
+		: work(work),
+		  after_work(after_work) {}
+
+	const function<void()> work;
+	const function<void()> after_work;
 };
 
 void execute_uv_work(uv_work_t *req)
 {
-    auto data = (queue_work_data *)req->data;
-    data->work();
+	auto data = (WorkData *)req->data;
+	data->work();
 }
 
 void after_uv_work(uv_work_t *req, int status)
 {
-    auto data = (queue_work_data *)req->data;
-    if (data->after_work != nullptr)
-        data->after_work();
+	auto data = (WorkData *)req->data;
+	data->after_work();
 
-    delete data;
-    delete req;
+	delete data;
+	delete req;
 }
 
-void queue_work(uv_loop_t *loop, std::function<void()> work, std::function<void()> after_work)
+int32_t queue_work(uv_loop_t *loop, const std::function<void()> work, const std::function<void()> after_work)
 {
-    uv_work_t *req = new uv_work_t;
-    queue_work_data *data = new queue_work_data{std::move(work), std::move(after_work)};
-    req->data = data;
-    uv_queue_work(loop, req, execute_uv_work, after_uv_work);
-    uv_run(loop, UV_RUN_ONCE);
+	if (work == nullptr || after_work == nullptr)
+		return -1;
+
+	uv_work_t *req = new uv_work_t;
+	req->data = new WorkData(std::move(work), std::move(after_work));
+	return uv_queue_work(loop, req, execute_uv_work, after_uv_work);
 }
 ````
 
@@ -181,17 +219,59 @@ To resolve, use `resolver->Resolve(context, result)`, to reject, use `resolver->
 
 Note: To create an exception, use `Exception::Error(String::NewFromUtf8(isolate, message, NewStringType::kNormal).ToLocalChecked())`, there are more error types in `Exception`.
 
-## Compiling
+## Configuring
 
 ```` shell
 node-gyp configure
+````
+
+## Compiling
+
+```` shell
 node-gyp build
 ````
 
-## Debugging
+Debug build:
 
-Highly-recommend Visual Studio!
+```` shell
+node-gyp --debug build
+````
 
-Run `node-gyp configure`, then you can open `binding.sln` in `build` folder with Visual Studio, it's powerful.
+To specify which build configuration to use when `require`d, edit the `main` field in `package.json`.
 
-To add or remove files, close solution in Visual Studio, edit `binding.gyp`, run `node-gyp configure` again, then open in Visual Studio again.
+## Using Visual Studio
+
+Highly recommend Visual Studio!
+
+* Developing
+
+    1. Run `node-gyp configure`.
+    2. Open `build/binding.sln` in Visual Studio.
+
+    You may add the `.h` files to `binding.gyp`, to make the Visual Studio project contains them.
+
+* Debugging
+
+    1. Change the debug settings:
+        * Set executable to the full path of `node`.
+        * Set arguments to a test script (`src/index.js` is used for this).
+    1. Press <kbd>F5</kbd> to debug.
+
+    Everytime you re-generate the solution with `node-gyp configure`, you need to do `i.` again.
+
+* Adding or removing files
+
+    1. Close solution in Visual Studio.
+    1. Edit `sources` in `binding.gyp`.
+    1. Run `node-gyp configure` again.
+    1. Open `build/binding.sln` in Visual Studio again.
+
+## Testing
+
+I use `mocha` for testing. Run
+
+```` shell
+npm test
+````
+
+To run tests.

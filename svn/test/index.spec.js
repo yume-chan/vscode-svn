@@ -65,7 +65,7 @@ describe("svn", function() {
         let error;
 
         it("should be a constructor", function() {
-            expect(error = new svn.SvnError()).to.be.an.instanceof(svn.SvnError);
+            expect(error = new svn.SvnError(0, "")).to.be.an.instanceof(svn.SvnError);
         });
 
         it("should extend Error", function() {
@@ -80,12 +80,12 @@ describe("svn", function() {
             expect(error).to.have.property("stack");
         });
 
-        it("should have empty message if no parameter", function() {
-            expect(error).to.have.property("message", "");
+        it("should have code", function() {
+            expect(new svn.SvnError(42, "test")).to.have.property("code", 42);
         });
 
-        it("should have message if have parameter", function() {
-            expect(new svn.SvnError("test")).to.have.property("message", "test");
+        it("should have message", function() {
+            expect(new svn.SvnError(0, "test")).to.have.property("message", "test");
         });
     });
 
