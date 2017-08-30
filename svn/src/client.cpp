@@ -95,7 +95,7 @@ void notify2(void *baton, const svn_wc_notify_t *notify, apr_pool_t *pool)
     case svn_wc_notify_update_shadowed_add:
     case svn_wc_notify_update_shadowed_update:
     case svn_wc_notify_update_shadowed_delete:
-        auto callback = client->update_callback;
+        auto callback = client->update_notify;
         if (callback != nullptr)
             callback(notify);
         break;
@@ -148,6 +148,13 @@ void Client::Checkout(const FunctionCallbackInfo<Value> &args)
     auto context = isolate->GetCurrentContext();
 
     auto client = ObjectWrap::Unwrap<Client>(args.Holder());
+    apr_pool_t *pool;
+    apr_pool_create(&pool, client->pool);
+
+    auto notify = [](const svn_wc_notify_t *notify) -> void {
+
+    };
+    client->checkout_notify = notify;
 
     auto _result_rev = make_shared<svn_revnum_t *>();
     auto url = to_string(args[0]);
@@ -162,7 +169,9 @@ void Client::Checkout(const FunctionCallbackInfo<Value> &args)
                          false,             // ignore_externals
                          false,             // allow_unver_obstructions
                          client->context,   // ctx
-                         client->pool);     // pool
+                         pool);     // pool
+
+    apr_pool_destroy(pool);
 }
 
 void Client::Status(const FunctionCallbackInfo<Value> &args)
@@ -201,12 +210,15 @@ void Client::Status(const FunctionCallbackInfo<Value> &args)
         result->Set(result->Length(), item);
     };
 
-    auto _result_rev = make_shared<svn_revnum_t *>();
     auto client = ObjectWrap::Unwrap<Client>(args.Holder());
+    apr_pool_t *pool;
+    apr_pool_create(&pool, client->pool);
+
+    auto _result_rev = make_shared<svn_revnum_t *>();
     auto path = make_shared<string>(to_string(args[0]));
     auto _error = make_shared<svn_error_t *>();
     auto _callback = make_shared<function<void(const char *, const svn_client_status_t *, apr_pool_t *)>>(callback);
-    auto work = [_result_rev, client, path, _callback, _error]() -> void {
+    auto work = [_result_rev, client, path, _callback, _error, pool]() -> void {
         svn_opt_revision_t revision{svn_opt_revision_working};
         *_error = svn_client_status6(*_result_rev,       // result_rev
                                      client->context,    // ctx
@@ -222,7 +234,9 @@ void Client::Status(const FunctionCallbackInfo<Value> &args)
                                      nullptr,            // changelists
                                      execute_svn_status, // status_func
                                      _callback.get(),    // status_baton
-                                     client->pool);      // scratch_pool
+                                     pool);              // scratch_pool
+
+        apr_pool_destroy(pool);
     };
 
     auto _resolver = new Persistent<Promise::Resolver>(isolate, resolver);
@@ -269,12 +283,13 @@ void Client::Update(const FunctionCallbackInfo<Value> &args)
     args.GetReturnValue().Set(promise);
 
     auto client = ObjectWrap::Unwrap<Client>(args.Holder());
+    apr_pool_t *pool;
+    apr_pool_create(&pool, client->pool);
 
     auto notify = [](const svn_wc_notify_t *notify) -> void {
 
     };
-    auto svn_client = client->context;
-    svn_client->notify_baton2 = new function<void(svn_wc_notify_t *)>(notify);
+    client->update_notify = notify;
 
     auto _result_rev = make_shared<apr_array_header_t *>();
     auto paths = args[0].As<v8::Array>();
@@ -296,8 +311,10 @@ void Client::Update(const FunctionCallbackInfo<Value> &args)
                        false,              // allow_unver_obstructions
                        true,               // adds_as_modification
                        true,               // make_parents
-                       svn_client,         // ctx
-                       client->pool);      // pool
+                       client->context,    // ctx
+                       pool);              // pool
+
+    apr_pool_destroy(pool);
 }
 
 void Client::Cat(const FunctionCallbackInfo<Value> &args)
@@ -321,13 +338,19 @@ void Client::Cat(const FunctionCallbackInfo<Value> &args)
     }
 
     auto client = ObjectWrap::Unwrap<Client>(args.Holder());
+    apr_pool_t *pool;
+    apr_pool_create(&pool, client->pool);
+
+    apr_pool_t *scratch_pool;
+    apr_pool_create(&scratch_pool, pool);
+
     auto path = make_shared<string>(to_string(args[0]));
     auto _buffer = make_shared<svn_stringbuf_t *>();
     auto _error = make_shared<svn_error_t *>();
-    auto work = [_buffer, client, path, _error]() -> void {
+    auto work = [_buffer, client, path, _error, pool, scratch_pool]() -> void {
         apr_hash_t *props;
-        *_buffer = svn_stringbuf_create_empty(client->pool);
-        auto stream = svn_stream_from_stringbuf(*_buffer, client->pool);
+        *_buffer = svn_stringbuf_create_empty(pool);
+        auto stream = svn_stream_from_stringbuf(*_buffer, pool);
         svn_opt_revision_t revision{svn_opt_revision_working};
         *_error = svn_client_cat3(&props,          // props
                                   stream,          // out
@@ -336,8 +359,10 @@ void Client::Cat(const FunctionCallbackInfo<Value> &args)
                                   &revision,       // revision
                                   false,           // expand_keywords
                                   client->context, // ctx
-                                  client->pool,    // result_pool
-                                  client->pool);   // scratch_pool
+                                  pool,            // result_pool
+                                  scratch_pool);   // scratch_pool
+
+        apr_pool_destroy(pool);
     };
 
     auto _resolver = new Persistent<Promise::Resolver>(isolate, resolver);

@@ -21,8 +21,8 @@ class Client : public node::ObjectWrap
 public:
   static void Init(v8::Local<v8::Object> exports, v8::Isolate *isolate, v8::Local<v8::Context> context);
 
-  std::function<void(const svn_wc_notify_t *)> checkout_callback;
-  std::function<void(const svn_wc_notify_t *)> update_callback;
+  std::function<void(const svn_wc_notify_t *)> checkout_notify;
+  std::function<void(const svn_wc_notify_t *)> update_notify;
 
 private:
   explicit Client();
