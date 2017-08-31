@@ -44,11 +44,15 @@ export interface SvnStatus {
 
 export type SvnStatusResult = SvnStatus[] & { version?: number };
 
+export interface SvnNotify {
+
+}
+
 export class Client {
     public constructor();
 
     public cat(path: string): Promise<Buffer>;
-    public checkout(paths: string[]): Promise<void>;
+    public checkout(url: string, path: string): Promise<void>;
     public status(path: string): Promise<SvnStatusResult>;
     public update(path: string | string[]): Promise<void>;
 }

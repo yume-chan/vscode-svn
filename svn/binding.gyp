@@ -13,8 +13,13 @@
             "sources": [
                 "src/export.cpp",
                 "src/svn_error.cpp",
-                "src/client.cpp",
-                "src/utils.cpp"
+                "src/utils.cpp",
+                "src/client/init.cpp",
+                "src/client/new.cpp",
+                "src/client/cat.cpp",
+                "src/client/checkout.cpp",
+                "src/client/status.cpp",
+                "src/client/update.cpp"
             ]
         }
     ]
