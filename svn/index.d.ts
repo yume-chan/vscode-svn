@@ -50,7 +50,7 @@ export class Client {
     public cat(path: string): Promise<Buffer>;
     public checkout(paths: string[]): Promise<void>;
     public status(path: string): Promise<SvnStatusResult>;
-    public update(path: string): Promise<void>;
+    public update(path: string | string[]): Promise<void>;
 }
 
 export class SvnError extends Error {
