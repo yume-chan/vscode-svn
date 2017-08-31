@@ -39,10 +39,15 @@ Client::Client()
     context->notify_baton2 = this;
     context->notify_func2 = notify2;
 
-	svn_auth_baton_t* auth_baton;
-	apr_array_header_t* providers = apr_array_make(pool, 4, sizeof(svn_auth_provider_object_t*));
-	svn_auth_open(&auth_baton, providers, pool);
-	context->auth_baton = auth_baton;
+    apr_array_header_t *providers = apr_array_make(pool, 4, sizeof(svn_auth_provider_object_t *));
+
+	svn_auth_provider_object_t * provider;
+    svn_auth_get_simple_provider(&provider, pool);
+	APR_ARRAY_PUSH(providers, svn_auth_provider_object_t*) = provider;
+
+	svn_auth_baton_t *auth_baton;
+    svn_auth_open(&auth_baton, providers, pool);
+    context->auth_baton = auth_baton;
 }
 
 Client::~Client()
