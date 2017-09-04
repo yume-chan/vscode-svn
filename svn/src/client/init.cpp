@@ -1,5 +1,23 @@
 #include "client.h"
 
+#define SetKind(name) Util::SetReadOnly(isolate, context, Kind, #name, Util_New(Integer, svn_node_##name))
+#define SetStatusKind(name) Util::SetReadOnly(isolate, context, StatusKind, #name, Util_New(Integer, svn_wc_status_##name))
+
+#define SetPrototypeMethod(receiver, prototype, name, callback, length)                                   \
+    {                                                                                                     \
+        auto signature = v8::Signature::New(isolate, receiver);                                           \
+        auto function = v8::FunctionTemplate::New(isolate,                                                \
+                                                  callback,                                               \
+                                                  v8::Local<v8::Value>(),                                 \
+                                                  signature,                                              \
+                                                  length);                                                \
+        auto key = Util_String(name);                                                                     \
+        function->SetClassName(key);                                                                      \
+        prototype->Set(key,                                                                               \
+                       function,                                                                          \
+                       (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete)); \
+    }
+
 namespace Svn
 {
 Persistent<Function> Client::constructor;
@@ -13,22 +31,22 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     // And ObjectWrap::Unwrap will read the internal field and cast it to Client.
     ClientTemplate->InstanceTemplate()->SetInternalFieldCount(1);
 
-    NODE_SET_PROTOTYPE_METHOD(ClientTemplate, "status", Status);
-    NODE_SET_PROTOTYPE_METHOD(ClientTemplate, "cat", Cat);
+    auto prototype = ClientTemplate->PrototypeTemplate();
+    SetPrototypeMethod(ClientTemplate, prototype, "cat", Cat, 1);
+    SetPrototypeMethod(ClientTemplate, prototype, "checkout", Checkout, 2);
+    SetPrototypeMethod(ClientTemplate, prototype, "status", Status, 1);
+    SetPrototypeMethod(ClientTemplate, prototype, "update", Update, 1);
 
     auto Client = ClientTemplate->GetFunction();
 
     auto Kind = Object::New(isolate);
-#define SetKind(name) Util::SetReadOnly(isolate, context, Kind, #name, Util_New(Integer, svn_node_##name))
     SetKind(none);
     SetKind(file);
     SetKind(dir);
     SetKind(unknown);
-#undef SetKind
-    Util_SetReadOnly(Client, Kind);
+    Util_SetReadOnly2(Client, Kind);
 
     auto StatusKind = Object::New(isolate);
-#define SetStatusKind(name) Util::SetReadOnly(isolate, context, StatusKind, #name, Util_New(Integer, svn_wc_status_##name))
     SetStatusKind(none);
     SetStatusKind(unversioned);
     SetStatusKind(normal);
@@ -42,11 +60,9 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     SetStatusKind(obstructed);
     SetStatusKind(external);
     SetStatusKind(incomplete);
-#undef SetStatusKind
-    Util_SetReadOnly(Client, StatusKind);
+    Util_SetReadOnly2(Client, StatusKind);
 
     constructor.Reset(isolate, Client);
-
-    Util_SetReadOnly(exports, Client);
+    Util_SetReadOnly2(exports, Client);
 }
 }

@@ -8,33 +8,48 @@ Util_Method(Client::Update)
     auto promise = resolver->GetPromise();
     Util_Return(promise);
 
-    Util_Reject(args.Length() < 1, Util_Error(TypeError, "Argument `path` is required."));
+    Util_Reject(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
 
     Util_PreparePool();
 
     auto arg = args[0];
-    auto strings = vector<string>();
     apr_array_header_t *_paths;
     if (arg->IsString())
     {
-        auto path = to_string(arg);
+        String::Utf8Value string(arg);
+        auto length = string.length();
+        Util_Reject(!Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+
+        length++;
+        auto c = (char *)apr_pcalloc(pool.get(), length);
+        apr_cpystrn(c, *string, length);
+
         _paths = apr_array_make(pool.get(), 1, sizeof(char *));
-        strings.push_back(std::move(path));
+        APR_ARRAY_IDX(_paths, 0, const char *) = c;
     }
     else if (arg->IsArray())
     {
-        auto paths = arg.As<v8::Array>();
-        _paths = apr_array_make(pool.get(), paths->Length(), sizeof(char *));
-        for (auto i = 0U; i < paths->Length(); i++)
+        auto array = arg.As<v8::Array>();
+        _paths = apr_array_make(pool.get(), array->Length(), sizeof(char *));
+        for (auto i = 0U; i < array->Length(); i++)
         {
-            auto string = to_string(paths->Get(context, i).ToLocalChecked());
-            APR_ARRAY_IDX(_paths, i, const char *) = string.c_str();
-            strings.push_back(std::move(string));
+            auto value = array->Get(context, i).ToLocalChecked();
+            Util_Reject(value->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
+
+            String::Utf8Value string(value);
+            auto length = string.length();
+            Util_Reject(!Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be an array of string without null bytes"));
+
+            length++;
+            auto c = (char *)apr_pcalloc(pool.get(), length);
+            apr_cpystrn(c, *string, length);
+
+            APR_ARRAY_IDX(_paths, i, const char *) = c;
         }
     }
     else
     {
-        Util_Reject(false, Util_Error(TypeError, "Argument `path` must be a string."));
+        Util_Reject(false, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
     }
 
     client->update_notify = [](const svn_wc_notify_t *notify) -> void {
@@ -58,14 +73,12 @@ Util_Method(Client::Update)
                                      pool.get());        // pool
     };
 
-    auto _resolver = Util_Persistent(Promise::Resolver, resolver);
+    auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
     auto after_work = [isolate, _resolver, _error]() -> void {
         auto context = isolate->GetCallingContext();
         HandleScope scope(isolate);
 
         auto resolver = _resolver->Get(isolate);
-        _resolver->Reset();
-        delete _resolver;
 
         auto error = *_error;
         Util_Reject(error == SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));

@@ -2,35 +2,105 @@
 #define NODE_SVN_UTILS_H
 
 #include <functional>
+#include <thread>
 
 #include <v8.h>
 #include <uv.h>
 
 #include <svn_client.h>
 
+#include "svn_error.h"
+
+using std::make_shared;
+using std::make_unique;
+using std::function;
+using std::shared_ptr;
+using std::string;
+using std::vector;
+
+using v8::Array;
+using v8::Boolean;
+using v8::Context;
+using v8::Exception;
+using v8::Function;
+using v8::FunctionCallbackInfo;
+using v8::FunctionTemplate;
+using v8::HandleScope;
+using v8::Integer;
+using v8::Isolate;
+using v8::Local;
+using v8::Object;
+using v8::String;
+using v8::NewStringType;
+using v8::Persistent;
+using v8::Promise;
+using v8::PropertyAttribute;
+using v8::Value;
+using v8::Promise;
+
+#define Util_String(value) String::NewFromUtf8(isolate, value, NewStringType::kNormal).ToLocalChecked()
+#define Util_New(type, value) type::New(isolate, value)
+#define Util_NewMaybe(type, ...) type::New(context, __VA_ARGS__).ToLocalChecked()
+#define Util_Persistent(type, value) new Persistent<type, v8::CopyablePersistentTraits<type>>(isolate, value)
+#define Util_SharedPersistent(type, value) make_shared<Persistent<type, v8::CopyablePersistentTraits<type>>>(isolate, value)
+
 namespace Svn
 {
 namespace Util
 {
-int32_t QueueWork(uv_loop_t *loop, std::function<void()> work, std::function<void()> after_work = nullptr);
+int32_t QueueWork(uv_loop_t *loop, function<void()> work, function<void()> after_work = nullptr);
 
 svn_error_t *SvnStatusCallback(void *baton, const char *path, const svn_client_status_t *status, apr_pool_t *scratch_pool);
 
-inline void Set(v8::Isolate *isolate, v8::Local<v8::Context> context, v8::Local<v8::Object> object, char *name, v8::Local<v8::Value> value)
+inline bool ContainsNull(const char *value, size_t length)
+{
+	for (auto i = 0; i < length; i++)
+		if (!value[i])
+			return true;
+	return false;
+}
+
+inline bool ContainsNull(string value)
+{
+	return ContainsNull(value.c_str(), value.length());
+}
+
+inline void Set(Isolate *isolate, Local<Context> context, Local<Object> object, char *name, Local<Value> value)
 {
 	object->Set(context,
-				v8::String::NewFromUtf8(isolate, name, v8::NewStringType::kNormal).ToLocalChecked(),
+				Util_String(name),
 				value);
 }
 
-inline void SetReadOnly(v8::Isolate *isolate, v8::Local<v8::Context> context, v8::Local<v8::Object> object, char *name, v8::Local<v8::Value> value)
+inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> object, char *name, Local<Value> value)
 {
 	object->DefineOwnProperty(context,
-							  v8::String::NewFromUtf8(isolate, name, v8::NewStringType::kNormal).ToLocalChecked(),
+							  Util_String(name),
 							  value,
-							  (v8::PropertyAttribute)(v8::PropertyAttribute::ReadOnly | v8::PropertyAttribute::DontDelete));
+							  (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete));
 }
 }
 }
+
+#define Util_Method(name)                              \
+	void name(const FunctionCallbackInfo<Value> &args) \
+	{                                                  \
+		auto isolate = args.GetIsolate();              \
+		auto context = isolate->GetCurrentContext();
+#define Util_MethodEnd }
+#define Util_Return(value) args.GetReturnValue().Set(value);
+
+#define Util_Set(object, name, value) Util::Set(isolate, context, object, name, value)
+
+#define Util_SetReadOnly2(object, name) Util_SetReadOnly3(object, #name, name)
+#define Util_SetReadOnly3(object, name, value) Util::SetReadOnly(isolate, context, object, name, value)
+
+#define Util_Error(type, message) Exception::type(Util_String(message))
+#define Util_Reject(expression, error)    \
+	if (!(expression))                    \
+	{                                     \
+		resolver->Reject(context, error); \
+		return;                           \
+	}
 
 #endif

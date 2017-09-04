@@ -135,6 +135,10 @@ describe("svn", function() {
                 expect(client.status).to.be.a("function");
             });
 
+            it("should have length 1", function() {
+                expect(client.status.length).to.equal(1);
+            });
+
             it("should take a string", function() {
                 expect(client.status()).to.be.rejected;
                 expect(client.status(undefined)).to.be.rejected;
@@ -148,6 +152,10 @@ describe("svn", function() {
         describe("#cat", function() {
             it("should exist", function() {
                 expect(client.cat).to.be.a("function");
+            });
+
+            it("should have length 1", function() {
+                expect(client.cat.length).to.equal(1);
             });
 
             it("should take a string", function() {

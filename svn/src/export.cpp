@@ -1,5 +1,4 @@
 #include "client.h"
-#include "svn_error.h"
 
 namespace Svn
 {
@@ -28,34 +27,20 @@ void Version(Local<Name> property, const PropertyCallbackInfo<Value> &args)
 	args.GetReturnValue().Set(oVersion);
 }
 
-void Test(const v8::FunctionCallbackInfo<Value> &args)
+Util_Method(Test)
 {
-	auto isolate = args.GetIsolate();
-	auto context = isolate->GetCurrentContext();
+	const char *c;
+	vector<string> strings;
 
-	auto resolver = v8::Promise::Resolver::New(context).ToLocalChecked();
-	auto promise = resolver->GetPromise();
-	auto persistent = new v8::Persistent<v8::Promise::Resolver>(isolate, resolver);
+	{
+		auto s = std::string("Hello world");
+		c = s.c_str();
+		strings.push_back(std::move(s));
+	}
 
-	uv_work_t *handle = new uv_work_t;
-	handle->data = persistent;
-	auto work = [](uv_work_t *handle) -> void {
-	};
-	auto after_work = [](uv_work_t *handle, int) -> void {
-		auto isolate = v8::Isolate::GetCurrent();
-		v8::HandleScope scope(isolate);
-		auto persistent = static_cast<v8::Persistent<v8::Promise::Resolver> *>(handle->data);
-
-		auto resolver = persistent->Get(isolate);
-		resolver->Resolve(String::NewFromUtf8(isolate, "Done"));
-
-		persistent->Reset();
-		delete persistent;
-	};
-	uv_queue_work(uv_default_loop(), handle, work, after_work);
-
-	args.GetReturnValue().Set(promise);
+	auto len = strlen(c);
 }
+Util_MethodEnd;
 
 void Init(Local<Object> exports)
 {

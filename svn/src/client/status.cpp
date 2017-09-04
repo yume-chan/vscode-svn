@@ -7,11 +7,12 @@ Util_Method(Client::Status)
     auto resolver = Util_NewMaybe(Promise::Resolver);
     Util_Return(resolver->GetPromise());
 
-    Util_Reject(args.Length() < 1, Util_Error(TypeError, "Argument `path` is required."));
+	Util_Reject(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string"));
 
     auto arg = args[0];
-    Util_Reject(arg->IsString(), Util_Error(TypeError, "Argument `path` must be a string."));
+	Util_Reject(arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string"));
     auto path = make_shared<string>(to_string(arg));
+	Util_Reject(!Util::ContainsNull(*path), Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
 
     Util_PreparePool();
 
@@ -55,14 +56,12 @@ Util_Method(Client::Status)
                                      pool.get());             // scratch_pool
     };
 
-    auto _resolver = Util_Persistent(Promise::Resolver, resolver);
+    auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
     auto after_work = [isolate, _resolver, _result, _error, _result_rev]() -> void {
         auto context = isolate->GetCallingContext();
         HandleScope scope(isolate);
 
         auto resolver = _resolver->Get(isolate);
-        _resolver->Reset();
-        delete _resolver;
 
         auto error = *_error;
         Util_Reject(error == SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));

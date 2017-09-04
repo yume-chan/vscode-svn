@@ -41,11 +41,11 @@ Client::Client()
 
     apr_array_header_t *providers = apr_array_make(pool, 4, sizeof(svn_auth_provider_object_t *));
 
-	svn_auth_provider_object_t * provider;
+    svn_auth_provider_object_t *provider;
     svn_auth_get_simple_provider(&provider, pool);
-	APR_ARRAY_PUSH(providers, svn_auth_provider_object_t*) = provider;
+    APR_ARRAY_PUSH(providers, svn_auth_provider_object_t *) = provider;
 
-	svn_auth_baton_t *auth_baton;
+    svn_auth_baton_t *auth_baton;
     svn_auth_open(&auth_baton, providers, pool);
     context->auth_baton = auth_baton;
 }
