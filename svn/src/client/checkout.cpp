@@ -7,19 +7,19 @@ Util_Method(Client::Checkout)
     auto resolver = Util_NewMaybe(Promise::Resolver);
     Util_Return(resolver->GetPromise());
 
-    Util_Reject(args.Length() == 0, Util_Error(TypeError, "Argument \"url\" must be a string."));
+    Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"url\" must be a string."));
 
     auto arg = args[0];
-    Util_Reject(arg->IsString(), Util_Error(TypeError, "Argument \"url\" must be a string."));
+    Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"url\" must be a string."));
     auto url = make_shared<string>(to_string(arg));
-    Util_Reject(!Util::ContainsNull(*url), Util_Error(Error, "Argument \"url\" must be a string without null bytes"));
+    Util_RejectIf(Util::ContainsNull(*url), Util_Error(Error, "Argument \"url\" must be a string without null bytes"));
 
-	Util_Reject(args.Length() == 1, Util_Error(TypeError, "Argument \"path\" must be a string."));
+    Util_RejectIf(args.Length() == 1, Util_Error(TypeError, "Argument \"path\" must be a string."));
 
     arg = args[1];
-    Util_Reject(arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string."));
+    Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string."));
     auto path = make_shared<string>(to_string(arg));
-    Util_Reject(!Util::ContainsNull(*path), Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+    Util_RejectIf(Util::ContainsNull(*path), Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
 
     Util_PreparePool();
 
@@ -51,12 +51,12 @@ Util_Method(Client::Checkout)
         auto resolver = _resolver->Get(isolate);
 
         auto error = *_error;
-        Util_Reject(error == SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
+        Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
 
         resolver->Resolve(context, v8::Undefined(isolate));
     };
 
-    Util_Reject(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed to start async work"));
+    Util_RejectIf(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed to start async work"));
 }
 Util_MethodEnd;
 }

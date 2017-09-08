@@ -8,7 +8,7 @@ Util_Method(Client::Update)
     auto promise = resolver->GetPromise();
     Util_Return(promise);
 
-    Util_Reject(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
+    Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
 
     Util_PreparePool();
 
@@ -18,7 +18,7 @@ Util_Method(Client::Update)
     {
         String::Utf8Value string(arg);
         auto length = string.length();
-        Util_Reject(!Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+        Util_RejectIf(Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
 
         length++;
         auto c = (char *)apr_pcalloc(pool.get(), length);
@@ -34,11 +34,11 @@ Util_Method(Client::Update)
         for (auto i = 0U; i < array->Length(); i++)
         {
             auto value = array->Get(context, i).ToLocalChecked();
-            Util_Reject(value->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
+            Util_RejectIf(!value->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
 
             String::Utf8Value string(value);
             auto length = string.length();
-            Util_Reject(!Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be an array of string without null bytes"));
+            Util_RejectIf(Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be an array of string without null bytes"));
 
             length++;
             auto c = (char *)apr_pcalloc(pool.get(), length);
@@ -49,7 +49,7 @@ Util_Method(Client::Update)
     }
     else
     {
-        Util_Reject(false, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
+        Util_RejectIf(true, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
     }
 
     client->update_notify = [](const svn_wc_notify_t *notify) -> void {
@@ -81,12 +81,12 @@ Util_Method(Client::Update)
         auto resolver = _resolver->Get(isolate);
 
         auto error = *_error;
-        Util_Reject(error == SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
+        Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
 
         resolver->Resolve(context, v8::Undefined(isolate));
     };
 
-    Util_Reject(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed starting async work"));
+    Util_RejectIf(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed starting async work"));
 }
 Util_MethodEnd;
 }

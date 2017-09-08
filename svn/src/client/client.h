@@ -6,7 +6,7 @@
 #define Util_PreparePool()                                      \
     auto client = ObjectWrap::Unwrap<Client>(args.Holder());    \
     shared_ptr<apr_pool_t> pool;                                \
-    {                                                           \
+    { /* Add a scope to hide extra variables */                 \
         apr_pool_t *_pool;                                      \
         apr_pool_create(&_pool, client->pool);                  \
         pool = shared_ptr<apr_pool_t>(_pool, apr_pool_destroy); \

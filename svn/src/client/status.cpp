@@ -2,36 +2,52 @@
 
 namespace Svn
 {
+struct SvnClientStatus
+{
+    SvnClientStatus(const svn_client_status_t *status) : kind(status->kind),
+                                                         local_abspath(status->local_abspath),
+                                                         filesize(status->filesize),
+                                                         versioned(status->versioned),
+                                                         conflicted(status->conflicted),
+                                                         node_status(status->node_status),
+                                                         text_status(status->text_status),
+                                                         prop_status(status->prop_status),
+                                                         copied(status->copied),
+                                                         revision(status->revision),
+                                                         changed_rev(status->changed_rev),
+                                                         switched(status->switched) {}
+
+    svn_node_kind_t kind;
+    string local_abspath;
+    svn_filesize_t filesize;
+    svn_boolean_t versioned;
+    svn_boolean_t conflicted;
+    enum svn_wc_status_kind node_status;
+    enum svn_wc_status_kind text_status;
+    enum svn_wc_status_kind prop_status;
+    svn_boolean_t copied;
+    svn_revnum_t revision;
+    svn_revnum_t changed_rev;
+    svn_boolean_t switched;
+};
+
 Util_Method(Client::Status)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
     Util_Return(resolver->GetPromise());
 
-	Util_Reject(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string"));
+    Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string"));
 
     auto arg = args[0];
-	Util_Reject(arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string"));
+    Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string"));
     auto path = make_shared<string>(to_string(arg));
-	Util_Reject(!Util::ContainsNull(*path), Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+    Util_RejectIf(Util::ContainsNull(*path), Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
 
     Util_PreparePool();
 
-    auto result = Array::New(isolate);
-    auto _result = new Persistent<Array>(isolate, result);
-    auto callback = [isolate, _result](const char *path, const svn_client_status_t *status, apr_pool_t *) -> void {
-        auto context = isolate->GetCallingContext();
-        HandleScope scope(isolate);
-
-        auto item = Object::New(isolate);
-        Util_Set(item, "path", Util_String(path));
-        Util_Set(item, "kind", Util_New(Integer, status->kind));
-        Util_Set(item, "textStatus", Util_New(Integer, status->text_status));
-        Util_Set(item, "propStatus", Util_New(Integer, status->prop_status));
-        Util_Set(item, "copied", Util_New(Boolean, status->copied));
-        Util_Set(item, "switched", Util_New(Boolean, status->switched));
-
-        auto result = _result->Get(isolate);
-        result->Set(context, result->Length(), item);
+    auto list = make_shared<vector<SvnClientStatus>>();
+    auto callback = [list](const char *path, const svn_client_status_t *status, apr_pool_t *) -> void {
+        list->emplace_back(status);
     };
 
     auto _result_rev = make_shared<svn_revnum_t *>();
@@ -57,18 +73,29 @@ Util_Method(Client::Status)
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
-    auto after_work = [isolate, _resolver, _result, _error, _result_rev]() -> void {
+    auto after_work = [isolate, _resolver, list, _error, _result_rev]() -> void {
         auto context = isolate->GetCallingContext();
         HandleScope scope(isolate);
 
         auto resolver = _resolver->Get(isolate);
 
         auto error = *_error;
-        Util_Reject(error == SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
+        Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
 
-        auto result = _result->Get(isolate);
-        _result->Reset();
-        delete _result;
+        auto result = Array::New(isolate);
+
+        for (auto status = list->begin(); status < list->end(); status++)
+        {
+            auto item = Object::New(isolate);
+            Util_Set(item, "path", Util_StringFromStd(status->local_abspath));
+            Util_Set(item, "kind", Util_New(Integer, status->kind));
+            Util_Set(item, "textStatus", Util_New(Integer, status->text_status));
+            Util_Set(item, "nodeStatus", Util_New(Integer, status->node_status));
+            Util_Set(item, "propStatus", Util_New(Integer, status->prop_status));
+            Util_Set(item, "copied", Util_New(Boolean, status->copied));
+            Util_Set(item, "switched", Util_New(Boolean, status->switched));
+            result->Set(context, result->Length(), item);
+        }
 
         auto result_rev = *_result_rev;
         if (result_rev != nullptr)
@@ -78,7 +105,7 @@ Util_Method(Client::Status)
         return;
     };
 
-    Util_Reject(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed starting async work"));
+    Util_RejectIf(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed starting async work"));
 }
 Util_MethodEnd;
 }

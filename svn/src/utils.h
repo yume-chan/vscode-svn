@@ -39,6 +39,7 @@ using v8::Value;
 using v8::Promise;
 
 #define Util_String(value) String::NewFromUtf8(isolate, value, NewStringType::kNormal).ToLocalChecked()
+#define Util_StringFromStd(value) String::NewFromUtf8(isolate, value.c_str(), NewStringType::kNormal, value.length()).ToLocalChecked()
 #define Util_New(type, value) type::New(isolate, value)
 #define Util_NewMaybe(type, ...) type::New(context, __VA_ARGS__).ToLocalChecked()
 #define Util_Persistent(type, value) new Persistent<type, v8::CopyablePersistentTraits<type>>(isolate, value)
@@ -48,45 +49,53 @@ namespace Svn
 {
 namespace Util
 {
-int32_t QueueWork(uv_loop_t *loop, function<void()> work, function<void()> after_work = nullptr);
+int32_t QueueWork(uv_loop_t *loop, function<void()> work, function<void()> after_work);
 
 svn_error_t *SvnStatusCallback(void *baton, const char *path, const svn_client_status_t *status, apr_pool_t *scratch_pool);
 
 inline bool ContainsNull(const char *value, size_t length)
 {
-	for (auto i = 0; i < length; i++)
-		if (!value[i])
-			return true;
-	return false;
+    for (auto i = 0; i < length; i++)
+        if (!value[i])
+            return true;
+    return false;
 }
 
 inline bool ContainsNull(string value)
 {
-	return ContainsNull(value.c_str(), value.length());
+    return ContainsNull(value.c_str(), value.length());
 }
 
 inline void Set(Isolate *isolate, Local<Context> context, Local<Object> object, char *name, Local<Value> value)
 {
-	object->Set(context,
-				Util_String(name),
-				value);
+    object->Set(context,
+                Util_String(name),
+                value);
 }
 
 inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> object, char *name, Local<Value> value)
 {
-	object->DefineOwnProperty(context,
-							  Util_String(name),
-							  value,
-							  (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete));
+    object->DefineOwnProperty(context,
+                              Util_String(name),
+                              value,
+                              (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete));
+}
+
+inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> object, uint32_t index, Local<Value> value)
+{
+    object->DefineOwnProperty(context,
+                              Local<String>::Cast(Integer::New(isolate, index)),
+                              value,
+                              (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete));
 }
 }
 }
 
 #define Util_Method(name)                              \
-	void name(const FunctionCallbackInfo<Value> &args) \
-	{                                                  \
-		auto isolate = args.GetIsolate();              \
-		auto context = isolate->GetCurrentContext();
+    void name(const FunctionCallbackInfo<Value> &args) \
+    {                                                  \
+        auto isolate = args.GetIsolate();              \
+        auto context = isolate->GetCurrentContext();
 #define Util_MethodEnd }
 #define Util_Return(value) args.GetReturnValue().Set(value);
 
@@ -96,11 +105,11 @@ inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> 
 #define Util_SetReadOnly3(object, name, value) Util::SetReadOnly(isolate, context, object, name, value)
 
 #define Util_Error(type, message) Exception::type(Util_String(message))
-#define Util_Reject(expression, error)    \
-	if (!(expression))                    \
-	{                                     \
-		resolver->Reject(context, error); \
-		return;                           \
-	}
+#define Util_RejectIf(expression, error)  \
+    if (expression)                       \
+    {                                     \
+        resolver->Reject(context, error); \
+        return;                           \
+    }
 
 #endif

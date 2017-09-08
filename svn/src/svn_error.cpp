@@ -68,7 +68,10 @@ void Constructor(const FunctionCallbackInfo<Value> &args)
 
 void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
 {
-    auto template_ = FunctionTemplate::New(isolate, Constructor);
+    auto template_ = FunctionTemplate::New(isolate,
+                                           Constructor,
+                                           Local<Value>(),
+                                           Local<v8::Signature>(), 2);
     template_->SetClassName(String::NewFromUtf8(isolate, "SvnError"));
     template_->InstanceTemplate()->SetInternalFieldCount(1);
     auto function = template_->GetFunction();

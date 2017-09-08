@@ -1,16 +1,21 @@
 #include "client.h"
 
-#define SetKind(name) Util::SetReadOnly(isolate, context, Kind, #name, Util_New(Integer, svn_node_##name))
-#define SetStatusKind(name) Util::SetReadOnly(isolate, context, StatusKind, #name, Util_New(Integer, svn_wc_status_##name))
+#define SetKind(name)                                                                     \
+    Util::SetReadOnly(isolate, context, Kind, #name, Util_New(Integer, svn_node_##name)); \
+    Util::SetReadOnly(isolate, context, Kind, svn_node_##name, Util_String(#name))
+
+#define SetStatusKind(name)                                                                          \
+    Util::SetReadOnly(isolate, context, StatusKind, #name, Util_New(Integer, svn_wc_status_##name)); \
+    Util::SetReadOnly(isolate, context, StatusKind, svn_wc_status_##name, Util_String(#name))
 
 #define SetPrototypeMethod(receiver, prototype, name, callback, length)                                   \
-    {                                                                                                     \
+    { /* Add a scope to hide extra variables */                                                           \
         auto signature = v8::Signature::New(isolate, receiver);                                           \
-        auto function = v8::FunctionTemplate::New(isolate,                                                \
-                                                  callback,                                               \
-                                                  v8::Local<v8::Value>(),                                 \
-                                                  signature,                                              \
-                                                  length);                                                \
+        auto function = v8::FunctionTemplate::New(isolate,                /* isolate */                   \
+                                                  callback,               /* callback */                  \
+                                                  v8::Local<v8::Value>(), /* data */                      \
+                                                  signature,              /* signature */                 \
+                                                  length);                /* length */                    \
         auto key = Util_String(name);                                                                     \
         function->SetClassName(key);                                                                      \
         prototype->Set(key,                                                                               \

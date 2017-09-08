@@ -4,29 +4,49 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
-describe("svn", function() {
-    let svn;
+function describeProperty(object, key, type) {
+    it("should exist", function() {
+        expect(eval(object)).to.have.property(key);
+    });
 
+    it("should be a " + type, function() {
+        expect(eval(object)).to.have.property(key).that.is.a(type);
+    });
+
+    it("should be non-configurable", function() {
+        expect(eval(object)).to.have.ownPropertyDescriptor(key).that.has.property("configurable", false);
+    });
+
+    it("should be non-writable", function() {
+        expect(eval(object)).to.have.ownPropertyDescriptor(key).that.has.property("writable", false);
+    });
+}
+
+function describeFunction(object, key, length) {
+    describeProperty(object, key, "function");
+
+    it("should have length equals to " + length, function() {
+        expect(eval(object)).to.have.property(key).that.has.property("length", length);
+    });
+}
+
+function describeConstrcutor(object, key, length) {
+    describeFunction(object, key, length);
+
+    it("should throw if not be invoked with new", function() {
+        expect(eval(object)).to.have.property(key).that.throws();
+    });
+}
+
+let svn;
+
+describe("svn", function() {
     it("should load", function() {
         expect(svn = require("..")).to.exist;
     });
 
     describe(".version", function() {
-        it("should exist", function() {
-            expect(svn).to.have.property("version");
-        });
-
-        it("should be non-configurable", function() {
-            expect(svn).to.have.ownPropertyDescriptor("version").that.has.property("configurable", false);
-        });
-
-        it("should be non-writable", function() {
-            expect(svn).to.have.ownPropertyDescriptor("version").that.has.property("writable", false);
-        });
-
-        it("should be an object", function() {
-            expect(svn.version).to.be.an("object");
-        });
+        describeProperty("svn", "version", "object");
 
         it("should have a number `major`", function() {
             expect(svn.version).to.have.property("major").that.is.a("number");
@@ -42,25 +62,7 @@ describe("svn", function() {
     });
 
     describe(".SvnError", function() {
-        it("should exist", function() {
-            expect(svn).to.have.property("SvnError");
-        });
-
-        it("should be non-configurable", function() {
-            expect(svn).to.have.ownPropertyDescriptor("SvnError").that.has.property("configurable", false);
-        });
-
-        it("should be non-writable", function() {
-            expect(svn).to.have.ownPropertyDescriptor("SvnError").that.has.property("writable", false);
-        });
-
-        it("should be a function", function() {
-            expect(svn.SvnError).to.be.an("function");
-        });
-
-        it("should throw if not be invoked with new", function() {
-            expect(svn.SvnError).to.throw();
-        });
+        describeConstrcutor("svn", "SvnError", 2);
 
         let error;
 
@@ -90,38 +92,40 @@ describe("svn", function() {
     });
 
     describe(".Client", function() {
-        it("should exist", function() {
-            expect(svn).to.have.property("Client");
+        describeConstrcutor("svn", "Client", 0);
+
+        describe("Kind", function() {
+            describeProperty("svn.Client", "Kind", "object");
+
+            it("should be an enum", function() {
+                for (const key in svn.Client.Kind) {
+                    const index = parseInt(key);
+                    if (isNaN(index)) {
+                        expect(svn.Client.Kind).to.have.property(key).that.is.a("number");
+                        expect(svn.Client.Kind).to.have.property(svn.Client.Kind[key], key);
+                    } else {
+                        expect(svn.Client.Kind).to.have.property(key).that.is.a("string");
+                        expect(svn.Client.Kind).to.have.property(svn.Client.Kind[key], index);
+                    }
+                }
+            });
         });
 
-        it("should be non-configurable", function() {
-            expect(svn).to.have.ownPropertyDescriptor("Client").that.has.property("configurable", false);
-        });
+        describe("StatusKind", function() {
+            describeProperty("svn.Client", "StatusKind", "object");
 
-        it("should be non-writable", function() {
-            expect(svn).to.have.ownPropertyDescriptor("Client").that.has.property("writable", false);
-        });
-
-        it("should be a function", function() {
-            expect(svn.Client).to.be.an("function");
-        });
-
-        it("should have `Kind`", function() {
-            expect(svn.Client).to.have.property("Kind").that.is.an("object");
-
-            for (const key in svn.Client.Kind)
-                expect(svn.Client.Kind[key], key).to.be.a("number");
-        });
-
-        it("should have `StatusKind`", function() {
-            expect(svn.Client).to.have.property("StatusKind").that.is.an("object");
-
-            for (const key in svn.Client.StatusKind)
-                expect(svn.Client.StatusKind[key], key).to.be.a("number");
-        });
-
-        it("should throw if not be invoked with new", function() {
-            expect(svn.Client).to.throw();
+            it("should be an enum", function() {
+                for (const key in svn.Client.StatusKind) {
+                    const index = parseInt(key);
+                    if (isNaN(index)) {
+                        expect(svn.Client.StatusKind).to.have.property(key).that.is.a("number");
+                        expect(svn.Client.StatusKind).to.have.property(svn.Client.StatusKind[key], key);
+                    } else {
+                        expect(svn.Client.StatusKind).to.have.property(key).that.is.a("string");
+                        expect(svn.Client.StatusKind).to.have.property(svn.Client.StatusKind[key], index);
+                    }
+                }
+            });
         });
 
         let client;
@@ -130,13 +134,19 @@ describe("svn", function() {
             expect(client = new svn.Client()).to.be.an.instanceof(svn.Client);
         });
 
-        describe("#status", function() {
-            it("should exist", function() {
-                expect(client.status).to.be.a("function");
-            });
+        describe("#checkout", function() {
+            describeFunction("svn.Client.prototype", "checkout", 2);
 
-            it("should have length 1", function() {
-                expect(client.status.length).to.equal(1);
+            it("should exist on instance", function() {
+                expect(client.checkout).to.equal(svn.Client.prototype.checkout);
+            });
+        });
+
+        describe("#status", function() {
+            describeFunction("svn.Client.prototype", "status", 1);
+
+            it("should exist on instance", function() {
+                expect(client.status).to.equal(svn.Client.prototype.status);
             });
 
             it("should take a string", function() {
@@ -150,12 +160,10 @@ describe("svn", function() {
         });
 
         describe("#cat", function() {
-            it("should exist", function() {
-                expect(client.cat).to.be.a("function");
-            });
+            describeFunction("svn.Client.prototype", "cat", 1);
 
-            it("should have length 1", function() {
-                expect(client.cat.length).to.equal(1);
+            it("should exist on instance", function() {
+                expect(client.cat).to.equal(svn.Client.prototype.cat);
             });
 
             it("should take a string", function() {
