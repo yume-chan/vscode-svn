@@ -1,14 +1,5 @@
 #include "client.hpp"
 
-// #define to_apr_string(value)                                                                                                            \
-//     {                                                                                                                                   \
-//         String::Utf8Value string(arg);                                                                                                  \
-//         auto length = string.length();                                                                                                  \
-//         Util_RejectIf(Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be a string without null bytes")); \
-//                                                                                                                                         \
-//         length++;                                                                                                                       \
-//     }
-
 namespace Svn
 {
 inline char *_to_apr_string(Isolate *isolate, Local<Context> context, Local<Promise::Resolver> resolver, shared_ptr<apr_pool_t> pool, Local<Value> &arg)
