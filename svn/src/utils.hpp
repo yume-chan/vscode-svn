@@ -9,11 +9,12 @@
 
 #include <svn_client.h>
 
-#include "svn_error.h"
+#include "svn_error.hpp"
 
+using std::function;
 using std::make_shared;
 using std::make_unique;
-using std::function;
+using std::move;
 using std::shared_ptr;
 using std::string;
 using std::vector;
@@ -29,21 +30,25 @@ using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
-using v8::Object;
-using v8::String;
 using v8::NewStringType;
+using v8::Object;
 using v8::Persistent;
 using v8::Promise;
 using v8::PropertyAttribute;
+using v8::String;
+using v8::Undefined;
 using v8::Value;
-using v8::Promise;
 
 #define Util_String(value) String::NewFromUtf8(isolate, value, NewStringType::kNormal).ToLocalChecked()
 #define Util_StringFromStd(value) String::NewFromUtf8(isolate, value.c_str(), NewStringType::kNormal, value.length()).ToLocalChecked()
+
 #define Util_New(type, value) type::New(isolate, value)
 #define Util_NewMaybe(type, ...) type::New(context, __VA_ARGS__).ToLocalChecked()
+
 #define Util_Persistent(type, value) new Persistent<type, v8::CopyablePersistentTraits<type>>(isolate, value)
 #define Util_SharedPersistent(type, value) make_shared<Persistent<type, v8::CopyablePersistentTraits<type>>>(isolate, value)
+
+#define Util_Undefined Undefined(isolate)
 
 namespace Svn
 {
@@ -88,6 +93,20 @@ inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> 
                               value,
                               (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete));
 }
+
+inline svn_error_t *SvnCommitCallback(const svn_commit_info_t *commit_info, void *baton, apr_pool_t *pool)
+{
+    auto method = *static_cast<function<void(const svn_commit_info_t *commit_info)> *>(baton);
+    method(commit_info);
+    return SVN_NO_ERROR;
+}
+
+inline svn_error_t *SvnStatusCallback(void *baton, const char *path, const svn_client_status_t *status, apr_pool_t *scratch_pool)
+{
+    auto method = *static_cast<function<void(const char *, const svn_client_status_t *, apr_pool_t *)> *>(baton);
+    method(path, status, scratch_pool);
+    return SVN_NO_ERROR;
+}
 }
 }
 
@@ -105,11 +124,11 @@ inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> 
 #define Util_SetReadOnly3(object, name, value) Util::SetReadOnly(isolate, context, object, name, value)
 
 #define Util_Error(type, message) Exception::type(Util_String(message))
-#define Util_RejectIf(expression, error)  \
-    if (expression)                       \
-    {                                     \
-        resolver->Reject(context, error); \
-        return;                           \
+#define Util_RejectIf(expression, error, ...) \
+    if (expression)                           \
+    {                                         \
+        resolver->Reject(context, error);     \
+        return __VA_ARGS__;                   \
     }
 
 #endif

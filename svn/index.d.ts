@@ -36,8 +36,11 @@ export namespace Client {
 export interface SvnStatus {
     path: string;
     kind: Client.Kind;
+    nodeStatus: Client.StatusKind;
     textStatus: Client.StatusKind;
     propStatus: Client.StatusKind;
+    versioned: boolean;
+    conflicted: boolean;
     copied: boolean;
     switched: boolean;
 }
@@ -51,9 +54,12 @@ export interface SvnNotify {
 export class Client {
     public constructor();
 
+    public add(path: string): Promise<void>;
     public cat(path: string): Promise<Buffer>;
     public checkout(url: string, path: string): Promise<void>;
+    public commit(path: string | string[], message: string): Promise<void>;
     public status(path: string): Promise<SvnStatusResult>;
+    public revert(path: string | string[]): Promise<void>;
     public update(path: string | string[]): Promise<void>;
 }
 

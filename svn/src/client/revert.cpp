@@ -2,7 +2,7 @@
 
 namespace Svn
 {
-Util_Method(Client::Update)
+Util_Method(Client::Revert)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
     auto promise = resolver->GetPromise();
@@ -52,23 +52,17 @@ Util_Method(Client::Update)
         Util_RejectIf(true, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
     }
 
-    client->update_notify = [](const svn_wc_notify_t *notify) -> void {
+    client->revert_notify = [](const svn_wc_notify_t *notify) -> void {
 
     };
 
-    auto _result_rev = make_shared<apr_array_header_t *>();
     auto _error = make_shared<svn_error_t *>();
-    auto work = [_result_rev, paths, client, pool, _error]() -> void {
-        svn_opt_revision_t revision{svn_opt_revision_working};
-        *_error = svn_client_update4(_result_rev.get(),  // result_revs
-                                     paths,              // paths
-                                     &revision,          // revision
+    auto work = [paths, client, pool, _error]() -> void {
+        *_error = svn_client_revert3(paths,              // paths
                                      svn_depth_infinity, // depth
-                                     false,              // depth_is_sticky
-                                     false,              // ignore_externals
-                                     false,              // allow_unver_obstructions
-                                     true,               // adds_as_modification
-                                     true,               // make_parents
+                                     nullptr,            // changelists
+                                     true,               // clear_changelists
+                                     false,              // metadata_only
                                      client->context,    // ctx
                                      pool.get());        // pool
     };
@@ -83,10 +77,11 @@ Util_Method(Client::Update)
         auto error = *_error;
         Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
 
-        resolver->Resolve(context, v8::Undefined(isolate));
+        resolver->Resolve(context, Util_Undefined);
+        return;
     };
 
-    Util_RejectIf(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed starting async work"));
+    Util_RejectIf(Util::QueueWork(uv_default_loop(), move(work), move(after_work)), Util_Error(Error, "Failed starting async work"));
 }
 Util_MethodEnd;
 }

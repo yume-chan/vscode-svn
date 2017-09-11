@@ -3,7 +3,7 @@ import * as fs from "fs-extra";
 
 import * as vscode from "vscode";
 
-import { Client, SvnStatus, SvnStatusResult } from "../svn";
+import { Client, SvnStatus, SvnStatusResult, SvnError } from "svn";
 import { SvnTextDocumentContentProvider } from "./svn-text-document-content-provider";
 
 type SvnResourceState = SvnStatus & vscode.SourceControlResourceState;
@@ -82,14 +82,15 @@ export function activate(context: vscode.ExtensionContext) {
 
                 vscode.window.withProgress({ location: vscode.ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
                     try {
-                        // await client.commit({ isFile: false, message }, { isFile: false, files: stagedFiles });
+                        await client.commit(stagedFiles, message);
                         ignoredFiles = [];
                         contentProvider.onCommit(stagedStates);
                     } catch (err) {
-                        // if (err instanceof SvnError) {
-                        //     const first = err.error[0];
-                        //     vscode.window.showErrorMessage(`Commit failed: E${first.id}: ${first.message}`);
-                        // }
+                        if (err instanceof SvnError) {
+                            vscode.window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
+                        } else {
+                            vscode.window.showErrorMessage(`Commit failed: ${err.message}`);
+                        }
                     }
                     finally {
                         vscode.scm.inputBox.value = "";
@@ -103,6 +104,11 @@ export function activate(context: vscode.ExtensionContext) {
             context.subscriptions.push(vscode.commands.registerCommand("svn.stage", async function(...resourceStates: SvnResourceState[]) {
                 for (const value of resourceStates) {
                     const filePath = value.path;
+                    if (!value.versioned) {
+                        await client.add(filePath);
+                        continue;
+                    }
+
                     switch (value.textStatus) {
                         case Client.StatusKind.modified:
                         case Client.StatusKind.obstructed:
@@ -111,9 +117,6 @@ export function activate(context: vscode.ExtensionContext) {
                                 ignoredFiles.splice(index, 1);
                                 stagedFiles.push(filePath);
                             }
-                            break;
-                        case Client.StatusKind.unversioned:
-                            // await client.add(filePath);
                             break;
                     }
                 }
@@ -130,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
                                 ignoredFiles.push(filePath);
                             break;
                         case Client.StatusKind.unversioned:
-                            // await client.revert(filePath);
+                            await client.revert(filePath);
                             break;
                     }
                 }
@@ -176,7 +179,7 @@ export function activate(context: vscode.ExtensionContext) {
             if (ignoredFiles.includes(state.path)) {
                 ignoredStates.push(getResourceState(state));
             } else {
-                switch (state.textStatus) {
+                switch (state.nodeStatus) {
                     case Client.StatusKind.added:
                     case Client.StatusKind.deleted:
                     case Client.StatusKind.modified:

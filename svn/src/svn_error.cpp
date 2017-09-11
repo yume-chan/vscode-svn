@@ -1,4 +1,4 @@
-#include "svn_error.h"
+#include "svn_error.hpp"
 
 namespace Svn
 {
@@ -88,13 +88,14 @@ void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
     DefineReadOnlyValue(exports, "SvnError", function);
 }
 
-Local<Value> New(Isolate *isolate, Local<Context> context, int code, const char *message)
+Local<Value> New(Isolate *isolate, Local<Context> context, int code, const char *message, Local<Value> &child)
 {
     auto error = _svn_error.Get(isolate);
-    const auto argc = 2;
+    const auto argc = 3;
     Local<Value> argv[argc] = {
         Integer::New(isolate, code),
-        String::NewFromUtf8(isolate, message, NewStringType::kNormal).ToLocalChecked()};
+        String::NewFromUtf8(isolate, message, NewStringType::kNormal).ToLocalChecked(),
+        child};
     return error->CallAsConstructor(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
 }
 }

@@ -1,7 +1,7 @@
 #ifndef NODE_SVN_CLIENT_CLIENT_H
 #define NODE_SVN_CLIENT_CLIENT_H
 
-#include "../client.h"
+#include "../client.hpp"
 
 #define Util_PreparePool()                                      \
     auto client = ObjectWrap::Unwrap<Client>(args.Holder());    \

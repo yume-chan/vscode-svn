@@ -1,4 +1,5 @@
-#include "client.h"
+#include "client.hpp"
+#include "pool_ptr.hpp"
 
 namespace Svn
 {
@@ -16,12 +17,12 @@ Util_Method(Client::Cat)
 
     Util_PreparePool();
 
-    auto buffer = svn_stringbuf_create_empty(pool.get());
+    auto buffer = make_pool_ptr(svn_stringbuf_t, svn_stringbuf_create_empty(pool.get()), pool);
     auto _error = make_shared<svn_error_t *>();
-    auto work = [buffer, pool, client, path, _error]() -> void {
+    auto work = [buffer, pool, path, client, _error]() -> void {
         apr_hash_t *props;
 
-        auto stream = svn_stream_from_stringbuf(buffer, pool.get());
+        auto stream = svn_stream_from_stringbuf(buffer.get(), pool.get());
 
         svn_opt_revision_t revision{svn_opt_revision_working};
 
@@ -40,8 +41,7 @@ Util_Method(Client::Cat)
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
-    // Capture `pool` in `after_work` because I still need `buffer`
-    auto after_work = [isolate, _resolver, _error, buffer, pool]() -> void {
+    auto after_work = [isolate, _resolver, _error, buffer]() -> void {
         auto context = isolate->GetCallingContext();
         HandleScope scope(isolate);
 
@@ -55,7 +55,7 @@ Util_Method(Client::Cat)
         return;
     };
 
-    Util_RejectIf(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed to start async work"));
+    Util_RejectIf(Util::QueueWork(uv_default_loop(), move(work), move(after_work)), Util_Error(Error, "Failed to start async work"));
 }
 Util_MethodEnd;
 }

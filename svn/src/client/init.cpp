@@ -1,4 +1,4 @@
-#include "client.h"
+#include "client.hpp"
 
 #define SetKind(name)                                                                     \
     Util::SetReadOnly(isolate, context, Kind, #name, Util_New(Integer, svn_node_##name)); \
@@ -37,9 +37,12 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     ClientTemplate->InstanceTemplate()->SetInternalFieldCount(1);
 
     auto prototype = ClientTemplate->PrototypeTemplate();
+    SetPrototypeMethod(ClientTemplate, prototype, "add", Add, 1);
     SetPrototypeMethod(ClientTemplate, prototype, "cat", Cat, 1);
     SetPrototypeMethod(ClientTemplate, prototype, "checkout", Checkout, 2);
+    SetPrototypeMethod(ClientTemplate, prototype, "commit", Commit, 2);
     SetPrototypeMethod(ClientTemplate, prototype, "status", Status, 1);
+    SetPrototypeMethod(ClientTemplate, prototype, "revert", Revert, 1);
     SetPrototypeMethod(ClientTemplate, prototype, "update", Update, 1);
 
     auto Client = ClientTemplate->GetFunction();

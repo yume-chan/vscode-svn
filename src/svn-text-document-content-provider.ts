@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { Client } from "../svn";
+import { Client, SvnError } from "svn";
 
 export class SvnTextDocumentContentProvider implements vscode.TextDocumentContentProvider, vscode.Disposable {
     private onDidChangeEvent: vscode.EventEmitter<vscode.Uri> = new vscode.EventEmitter<vscode.Uri>();
@@ -18,7 +18,9 @@ export class SvnTextDocumentContentProvider implements vscode.TextDocumentConten
         try {
             return (await this.client.cat(uri.fsPath)).toString("utf8");
         } catch (err) {
-            return "";
+            if (err instanceof SvnError)
+                return "";
+            throw err;
         }
     }
 

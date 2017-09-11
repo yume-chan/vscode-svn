@@ -94,7 +94,7 @@ describe("svn", function() {
     describe(".Client", function() {
         describeConstrcutor("svn", "Client", 0);
 
-        describe("Kind", function() {
+        describe(".Kind", function() {
             describeProperty("svn.Client", "Kind", "object");
 
             it("should be an enum", function() {
@@ -111,7 +111,7 @@ describe("svn", function() {
             });
         });
 
-        describe("StatusKind", function() {
+        describe(".StatusKind", function() {
             describeProperty("svn.Client", "StatusKind", "object");
 
             it("should be an enum", function() {
@@ -134,28 +134,20 @@ describe("svn", function() {
             expect(client = new svn.Client()).to.be.an.instanceof(svn.Client);
         });
 
-        describe("#checkout", function() {
-            describeFunction("svn.Client.prototype", "checkout", 2);
+        describe("#add", function() {
+            describeFunction("svn.Client.prototype", "add", 1);
 
             it("should exist on instance", function() {
-                expect(client.checkout).to.equal(svn.Client.prototype.checkout);
-            });
-        });
-
-        describe("#status", function() {
-            describeFunction("svn.Client.prototype", "status", 1);
-
-            it("should exist on instance", function() {
-                expect(client.status).to.equal(svn.Client.prototype.status);
+                expect(client).to.have.property("add", svn.Client.prototype.add);
             });
 
             it("should take a string", function() {
-                expect(client.status()).to.be.rejected;
-                expect(client.status(undefined)).to.be.rejected;
-                expect(client.status(1)).to.be.rejected;
-                expect(client.status(true)).to.be.rejected;
-                expect(client.status(["path"])).to.be.rejected;
-                expect(client.status({ "path": "" })).to.be.rejected;
+                expect(client.add()).to.be.rejected;
+                expect(client.add(undefined)).to.be.rejected;
+                expect(client.add(1)).to.be.rejected;
+                expect(client.add(true)).to.be.rejected;
+                expect(client.add(["path"])).to.be.rejected;
+                expect(client.add({ "path": "" })).to.be.rejected;
             });
         });
 
@@ -163,7 +155,7 @@ describe("svn", function() {
             describeFunction("svn.Client.prototype", "cat", 1);
 
             it("should exist on instance", function() {
-                expect(client.cat).to.equal(svn.Client.prototype.cat);
+                expect(client).to.have.property("cat", svn.Client.prototype.cat);
             });
 
             it("should take a string", function() {
@@ -173,6 +165,31 @@ describe("svn", function() {
                 expect(client.cat(true)).to.be.rejected;
                 expect(client.cat(["path"])).to.be.rejected;
                 expect(client.cat({ "path": "" })).to.be.rejected;
+            });
+        });
+
+        describe("#checkout", function() {
+            describeFunction("svn.Client.prototype", "checkout", 2);
+
+            it("should exist on instance", function() {
+                expect(client).to.have.property("checkout", svn.Client.prototype.checkout);
+            });
+        });
+
+        describe("#status", function() {
+            describeFunction("svn.Client.prototype", "status", 1);
+
+            it("should exist on instance", function() {
+                expect(client).to.have.property("status", svn.Client.prototype.status);
+            });
+
+            it("should take a string", function() {
+                expect(client.status()).to.be.rejected;
+                expect(client.status(undefined)).to.be.rejected;
+                expect(client.status(1)).to.be.rejected;
+                expect(client.status(true)).to.be.rejected;
+                expect(client.status(["path"])).to.be.rejected;
+                expect(client.status({ "path": "" })).to.be.rejected;
             });
         });
     });

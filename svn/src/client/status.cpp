@@ -1,7 +1,11 @@
-#include "client.h"
+#include "client.hpp"
 
 namespace Svn
 {
+// I need to copy the svn_client_status_t so I can use it in after_work.
+// Is there any better way? For example constrcut V8 objects directly in _callback?
+// (Currently I cannot find how to use V8 in work, I tried v8::Isolate->Enter and v8::Locker)
+// (But v8::Locker cannot acquire the lock, and I worry the lag of thread switching)
 struct SvnClientStatus
 {
     SvnClientStatus(const svn_client_status_t *status) : kind(status->kind),
@@ -52,8 +56,8 @@ Util_Method(Client::Status)
 
     auto _result_rev = make_shared<svn_revnum_t *>();
     auto _error = make_shared<svn_error_t *>();
-    auto _callback = make_shared<function<void(const char *, const svn_client_status_t *, apr_pool_t *)>>(callback);
-    auto work = [_result_rev, client, path, _callback, _error, pool]() -> void {
+    auto _callback = make_shared<function<void(const char *, const svn_client_status_t *, apr_pool_t *)>>(move(callback));
+    auto work = [_result_rev, client, path, _callback, pool, _error]() -> void {
         svn_opt_revision_t revision{svn_opt_revision_working};
         *_error = svn_client_status6(*_result_rev,            // result_rev
                                      client->context,         // ctx
@@ -73,7 +77,7 @@ Util_Method(Client::Status)
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
-    auto after_work = [isolate, _resolver, list, _error, _result_rev]() -> void {
+    auto after_work = [isolate, _resolver, _error, list, _result_rev]() -> void {
         auto context = isolate->GetCallingContext();
         HandleScope scope(isolate);
 
@@ -92,6 +96,8 @@ Util_Method(Client::Status)
             Util_Set(item, "textStatus", Util_New(Integer, status->text_status));
             Util_Set(item, "nodeStatus", Util_New(Integer, status->node_status));
             Util_Set(item, "propStatus", Util_New(Integer, status->prop_status));
+            Util_Set(item, "versioned", Util_New(Boolean, status->versioned));
+            Util_Set(item, "conflicted", Util_New(Boolean, status->conflicted));
             Util_Set(item, "copied", Util_New(Boolean, status->copied));
             Util_Set(item, "switched", Util_New(Boolean, status->switched));
             result->Set(context, result->Length(), item);
@@ -105,7 +111,7 @@ Util_Method(Client::Status)
         return;
     };
 
-    Util_RejectIf(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed starting async work"));
+    Util_RejectIf(Util::QueueWork(uv_default_loop(), move(work), move(after_work)), Util_Error(Error, "Failed starting async work"));
 }
 Util_MethodEnd;
 }

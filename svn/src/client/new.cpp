@@ -1,4 +1,4 @@
-#include "client.h"
+#include "client.hpp"
 
 namespace Svn
 {
@@ -8,6 +8,18 @@ void notify2(void *baton, const svn_wc_notify_t *notify, apr_pool_t *pool)
 
     switch (notify->action)
     {
+    case svn_wc_notify_commit_modified:
+        if (client->commit_notify)
+            client->commit_notify(notify);
+        break;
+    case svn_wc_notify_add:
+        if (client->add_notify)
+            client->add_notify(notify);
+        break;
+    case svn_wc_notify_revert:
+        if (client->revert_notify)
+            client->revert_notify(notify);
+        break;
     case svn_wc_notify_update_delete:
     case svn_wc_notify_update_add:
     case svn_wc_notify_update_update:
@@ -20,14 +32,16 @@ void notify2(void *baton, const svn_wc_notify_t *notify, apr_pool_t *pool)
     case svn_wc_notify_update_shadowed_add:
     case svn_wc_notify_update_shadowed_update:
     case svn_wc_notify_update_shadowed_delete:
-        auto callback = client->update_notify;
-        if (callback != nullptr)
-            callback(notify);
+        if (client->update_notify)
+            client->update_notify(notify);
         break;
     }
+}
 
-    auto callback = *static_cast<function<void(const svn_wc_notify_t *)> *>(baton);
-    callback(notify);
+svn_error_t *log3(const char **log_msg, const char **tmp_file, const apr_array_header_t *commit_items, void *baton, apr_pool_t *pool)
+{
+    *log_msg = static_cast<const char *>(baton);
+    return SVN_NO_ERROR;
 }
 
 Client::Client()
@@ -38,6 +52,8 @@ Client::Client()
 
     context->notify_baton2 = this;
     context->notify_func2 = notify2;
+
+    context->log_msg_func3 = log3;
 
     apr_array_header_t *providers = apr_array_make(pool, 4, sizeof(svn_auth_provider_object_t *));
 

@@ -1,18 +1,17 @@
-#include "utils.h"
+#include "utils.hpp"
 
 namespace Svn
 {
 namespace Util
 {
-using std::function;
-using std::move;
-
 class WorkData
 {
   public:
-    WorkData(const function<void()> work, const function<void()> after_work)
-        : work(work),
-          after_work(after_work) {}
+    WorkData(function<void()> work, function<void()> after_work)
+        : work(move(work)),
+          after_work(move(after_work)) {}
+
+    WorkData(const WorkData &other) = delete;
 
     const function<void()> work;
     const function<void()> after_work;
@@ -39,16 +38,9 @@ int32_t QueueWork(uv_loop_t *loop, const std::function<void()> work, const std::
     if (work == nullptr || after_work == nullptr)
         return -1;
 
-    uv_work_t *req = new uv_work_t;
+    auto req = new uv_work_t;
     req->data = new WorkData(move(work), move(after_work));
     return uv_queue_work(loop, req, execute_uv_work, after_uv_work);
-}
-
-svn_error_t *SvnStatusCallback(void *baton, const char *path, const svn_client_status_t *status, apr_pool_t *scratch_pool)
-{
-    auto method = *static_cast<function<void(const char *, const svn_client_status_t *, apr_pool_t *)> *>(baton);
-    method(path, status, scratch_pool);
-    return SVN_NO_ERROR;
 }
 }
 }
