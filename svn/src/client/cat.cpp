@@ -48,7 +48,7 @@ Util_Method(Client::Cat)
         auto resolver = _resolver->Get(isolate);
 
         auto error = *_error;
-        Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
+        Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error));
 
         auto result = node::Buffer::New(isolate, buffer->data, buffer->len).ToLocalChecked();
         resolver->Resolve(context, result);

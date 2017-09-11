@@ -4,23 +4,6 @@ namespace Svn
 {
 namespace SvnError
 {
-using v8::AccessControl;
-using v8::Context;
-using v8::Exception;
-using v8::Function;
-using v8::FunctionCallbackInfo;
-using v8::FunctionTemplate;
-using v8::Integer;
-using v8::Isolate;
-using v8::MaybeLocal;
-using v8::Local;
-using v8::NewStringType;
-using v8::Object;
-using v8::Persistent;
-using v8::PropertyAttribute;
-using v8::String;
-using v8::Value;
-
 Persistent<Function> _svn_error;
 
 #define DefineReadOnlyValue(object, name, value) (object)->DefineOwnProperty(context, String::NewFromUtf8(isolate, (name), NewStringType::kNormal).ToLocalChecked(), (value), (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete))
@@ -88,15 +71,24 @@ void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
     DefineReadOnlyValue(exports, "SvnError", function);
 }
 
-Local<Value> New(Isolate *isolate, Local<Context> context, int code, const char *message, Local<Value> &child)
+Local<Value> New(Isolate *isolate, Local<Context> context, int code, const char *message, Local<Value> &child = Local<Value>())
 {
-    auto error = _svn_error.Get(isolate);
     const auto argc = 3;
     Local<Value> argv[argc] = {
         Integer::New(isolate, code),
         String::NewFromUtf8(isolate, message, NewStringType::kNormal).ToLocalChecked(),
         child};
-    return error->CallAsConstructor(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
+    return _svn_error.Get(isolate)->CallAsConstructor(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
+}
+
+Local<Value> New(Isolate *isolate, Local<Context> context, svn_error_t *error)
+{
+    const auto argc = 3;
+    Local<Value> argv[argc] = {
+        Integer::New(isolate, error->apr_err),
+        String::NewFromUtf8(isolate, error->message, NewStringType::kNormal).ToLocalChecked(),
+        error->child != nullptr ? New(isolate, context, error->child) : Undefined(isolate)};
+    return _svn_error.Get(isolate)->CallAsConstructor(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
 }
 }
 }

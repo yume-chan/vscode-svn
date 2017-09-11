@@ -84,7 +84,7 @@ Util_Method(Client::Status)
         auto resolver = _resolver->Get(isolate);
 
         auto error = *_error;
-        Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
+        Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error));
 
         auto result = Array::New(isolate);
 

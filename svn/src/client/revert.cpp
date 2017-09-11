@@ -75,7 +75,7 @@ Util_Method(Client::Revert)
         auto resolver = _resolver->Get(isolate);
 
         auto error = *_error;
-        Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error->apr_err, error->message));
+        Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error));
 
         resolver->Resolve(context, Util_Undefined);
         return;
