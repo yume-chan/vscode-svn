@@ -1,49 +1,34 @@
 {
-    "name": "vscode-svn",
-    "displayName": "vscode-svn",
-    "description": "",
-    "version": "0.0.1",
-    "publisher": "cnsimonchan",
-    "engines": {
-        "vscode": "^1.13.0"
-    },
-    "categories": [
-        "Other"
-    ],
     "activationEvents": [
         "*"
     ],
-    "main": "./out/src/extension",
+    "categories": [
+        "Other"
+    ],
     "contributes": {
         "commands": [
             {
+                "category": "SVN",
                 "command": "svn.update",
-                "title": "Update",
-                "category": "SVN"
+                "title": "Update"
             },
             {
+                "category": "SVN",
                 "command": "svn.commit",
-                "title": "Commit",
-                "category": "SVN"
+                "title": "Commit"
             },
             {
+                "category": "SVN",
                 "command": "svn.stage",
-                "title": "Stage",
-                "category": "SVN"
+                "title": "Stage"
             },
             {
+                "category": "SVN",
                 "command": "svn.unstage",
-                "title": "Unstage",
-                "category": "SVN"
+                "title": "Unstage"
             }
         ],
         "menus": {
-            "scm/title": [
-                {
-                    "command": "svn.commit",
-                    "when": "scmProvider == svn && svnState == running"
-                }
-            ],
             "scm/resourceState/context": [
                 {
                     "command": "svn.stage",
@@ -53,25 +38,42 @@
                     "command": "svn.unstage",
                     "when": "scmProvider == svn && svnState == running"
                 }
+            ],
+            "scm/title": [
+                {
+                    "command": "svn.commit",
+                    "when": "scmProvider == svn && svnState == running"
+                }
             ]
         }
     },
-    "scripts": {
-        "vscode:prepublish": "tsc -p ./",
-        "compile": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "node ./node_modules/vscode/bin/test"
+    "dependencies": {
+        "fs-extra": "^3.0.1"
     },
+    "description": "",
     "devDependencies": {
-        "@types/fs-extra": "^3.0.3",
-        "@types/mocha": "^2.2.32",
-        "@types/node": "^6.0.88",
-        "mocha": "^2.3.3",
-        "typescript": "^2.4.1",
+        "@types/fs-extra": "^4.0.2",
+        "@types/mocha": "^2.2.43",
+        "@types/node": "^8.0.28",
+        "mocha": "^3.5.3",
+        "tslint": "^5.7.0",
+        "tslint-language-service": "^0.9.6",
+        "typescript": "^2.5.2",
         "vscode": "^1.0.0"
     },
-    "dependencies": {
-        "fs-extra": "^3.0.1",
-        "svn": "file:svn"
-    }
+    "displayName": "SVN",
+    "engines": {
+        "vscode": "^1.13.0"
+    },
+    "license": "MIT",
+    "main": "./out/extension",
+    "name": "vscode-svn",
+    "publisher": "cnsimonchan",
+    "scripts": {
+        "compile": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test",
+        "vscode:prepublish": "tsc -p ./"
+    },
+    "version": "0.0.1"
 }

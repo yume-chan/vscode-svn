@@ -1,9 +1,9 @@
-import * as path from "path";
 import * as fs from "fs-extra";
+import * as path from "path";
 
 import * as vscode from "vscode";
 
-import { Client, SvnStatus, SvnStatusResult, SvnError } from "svn";
+import { Client, SvnError, SvnStatus, SvnStatusResult } from "../svn";
 import { SvnTextDocumentContentProvider } from "./svn-text-document-content-provider";
 
 type SvnResourceState = SvnStatus & vscode.SourceControlResourceState;
@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const client = new Client();
 
-    const iconsRootPath = path.join(path.dirname(__dirname), "..", 'resources', 'icons');
+    const iconsRootPath = path.join(path.dirname(__dirname), "..", "resources", "icons");
     const statusIcons = {
         [Client.StatusKind.modified]: "modified",
         [Client.StatusKind.unversioned]: "untracked",
@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
         const resourceUri = vscode.Uri.file(state.path);
         const filename: string = path.basename(state.path);
         const icon = statusIcons[state.textStatus];
-        const command: vscode.Command = state.textStatus == Client.StatusKind.modified ?
+        const command: vscode.Command = state.textStatus === Client.StatusKind.modified ?
             { command: "vscode.diff", title: "Diff", arguments: [resourceUri.with({ scheme: "svn" }), resourceUri, filename] } :
             { command: "vscode.open", title: "Open", arguments: [resourceUri] };
         return {
@@ -34,9 +34,9 @@ export function activate(context: vscode.ExtensionContext) {
             resourceUri,
             command,
             decorations: {
-                light: { iconPath: vscode.Uri.file(path.resolve(iconsRootPath, "light", `status-${icon}.svg`)), },
-                dark: { iconPath: vscode.Uri.file(path.resolve(iconsRootPath, "dark", `status-${icon}.svg`)), },
-            }
+                dark: { iconPath: vscode.Uri.file(path.resolve(iconsRootPath, "dark", `status-${icon}.svg`)) },
+                light: { iconPath: vscode.Uri.file(path.resolve(iconsRootPath, "light", `status-${icon}.svg`)) },
+            },
         };
     }
 
@@ -62,8 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
         let status: SvnStatusResult;
         try {
             status = await client.status(base!);
-        }
-        catch (err) {
+        } catch (err) {
             vscode.commands.executeCommand("setContext", "svnState", "idle");
             return;
         }
@@ -75,12 +74,12 @@ export function activate(context: vscode.ExtensionContext) {
             context.subscriptions.push(contentProvider);
             context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("svn", contentProvider));
 
-            context.subscriptions.push(vscode.commands.registerCommand("svn.commit", async function() {
+            context.subscriptions.push(vscode.commands.registerCommand("svn.commit", async () => {
                 const message = vscode.scm.inputBox.value;
                 if (message === undefined || message === "")
                     return;
 
-                if (stagedFiles.length == 0)
+                if (stagedFiles.length === 0)
                     return;
 
                 vscode.window.withProgress({ location: vscode.ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
@@ -89,13 +88,11 @@ export function activate(context: vscode.ExtensionContext) {
                         ignoredFiles = [];
                         contentProvider.onCommit(stagedStates);
                     } catch (err) {
-                        if (err instanceof SvnError) {
+                        if (err instanceof SvnError)
                             vscode.window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
-                        } else {
+                        else
                             vscode.window.showErrorMessage(`Commit failed: ${err.message}`);
-                        }
-                    }
-                    finally {
+                    } finally {
                         vscode.scm.inputBox.value = "";
                         onWorkspaceChange();
                     }
@@ -104,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             ignoredFiles = context.workspaceState.get<string[]>("svn.unstage") || [];
 
-            context.subscriptions.push(vscode.commands.registerCommand("svn.stage", async function(...resourceStates: SvnResourceState[]) {
+            context.subscriptions.push(vscode.commands.registerCommand("svn.stage", async (...resourceStates: SvnResourceState[]) => {
                 for (const value of resourceStates) {
                     const filePath = value.path;
                     if (!value.versioned) {
@@ -126,7 +123,7 @@ export function activate(context: vscode.ExtensionContext) {
                 context.workspaceState.update("svn.unstage", ignoredFiles);
                 onWorkspaceChange();
             }));
-            context.subscriptions.push(vscode.commands.registerCommand("svn.unstage", async function(...resourceStates: SvnResourceState[]) {
+            context.subscriptions.push(vscode.commands.registerCommand("svn.unstage", async (...resourceStates: SvnResourceState[]) => {
                 for (const value of resourceStates) {
                     const filePath = value.path;
                     switch (value.nodeStatus) {
@@ -201,7 +198,4 @@ export function activate(context: vscode.ExtensionContext) {
         ignored.resourceStates = ignoredStates;
     }
     onWorkspaceChange();
-}
-
-export function deactivate() {
 }

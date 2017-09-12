@@ -12,17 +12,12 @@
                 "name": "tslint-language-service"
             }
         ],
-        "rootDir": ".",
+        "rootDir": "src",
         "sourceMap": true,
         "strict": true,
         "target": "es2017"
     },
     "include": [
         "src"
-    ],
-    "exclude": [
-        ".vscode-test",
-        "node_modules",
-        "svn"
     ]
 }

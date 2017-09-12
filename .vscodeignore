@@ -6,3 +6,9 @@ src/**
 **/*.map
 .gitignore
 tsconfig.json
+
+linter/**
+svn/**
+!svn/build/*/*.(dll|node)
+!svn/index.js
+!svn/package.json
