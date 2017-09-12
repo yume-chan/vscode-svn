@@ -19,7 +19,7 @@ namespace Svn
 class Client : public node::ObjectWrap
 {
 public:
-  static void Init(v8::Local<v8::Object> exports, v8::Isolate *isolate, v8::Local<v8::Context> context);
+  static void Init(Local<Object> exports, Isolate *isolate, Local<Context> context);
 
   std::function<void(const svn_wc_notify_t *)> add_notify;
   std::function<void(const svn_wc_notify_t *)> checkout_notify;
@@ -31,16 +31,16 @@ private:
   explicit Client();
   ~Client();
 
-  static void Add(const v8::FunctionCallbackInfo<v8::Value> &args);
-  static void Cat(const v8::FunctionCallbackInfo<v8::Value> &args);
-  static void Checkout(const v8::FunctionCallbackInfo<v8::Value> &args);
-  static void Commit(const v8::FunctionCallbackInfo<v8::Value> &args);
-  static void Status(const v8::FunctionCallbackInfo<v8::Value> &args);
-  static void Revert(const v8::FunctionCallbackInfo<v8::Value> &args);
-  static void Update(const v8::FunctionCallbackInfo<v8::Value> &args);
+  static void Add(const FunctionCallbackInfo<Value> &args);
+  static void Cat(const FunctionCallbackInfo<Value> &args);
+  static void Checkout(const FunctionCallbackInfo<Value> &args);
+  static void Commit(const FunctionCallbackInfo<Value> &args);
+  static void Status(const FunctionCallbackInfo<Value> &args);
+  static void Revert(const FunctionCallbackInfo<Value> &args);
+  static void Update(const FunctionCallbackInfo<Value> &args);
 
-  static void New(const v8::FunctionCallbackInfo<v8::Value> &args);
-  static v8::Persistent<v8::Function> constructor;
+  static void New(const FunctionCallbackInfo<Value> &args);
+  static Persistent<Function> constructor;
 
   apr_pool_t *pool;
   svn_client_ctx_t *context;

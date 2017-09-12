@@ -2,20 +2,12 @@
 
 namespace Svn
 {
-inline char *_to_apr_string(Isolate *isolate, Local<Context> context, Local<Promise::Resolver> resolver, shared_ptr<apr_pool_t> pool, Local<Value> &arg)
+inline svn_error_t *invoke_callback(const svn_commit_info_t *commit_info, void *baton, apr_pool_t *pool)
 {
-    String::Utf8Value string(arg);
-    auto length = string.length();
-    Util_RejectIf(Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be a string without null bytes"), nullptr);
-
-    length++;
-    auto result = (char *)apr_pcalloc(pool.get(), length);
-    apr_cpystrn(result, *string, length);
-
-    return result;
+    auto method = *static_cast<function<void(const svn_commit_info_t *commit_info)> *>(baton);
+    method(commit_info);
+    return SVN_NO_ERROR;
 }
-
-#define to_apr_string(value) _to_apr_string(isolate, context, resolver, pool, value)
 
 Util_Method(Client::Commit)
 {
@@ -27,43 +19,15 @@ Util_Method(Client::Commit)
 
     Util_PreparePool();
 
-    auto arg = args[0];
-    apr_array_header_t *paths;
-    if (arg->IsString())
-    {
-        auto path = to_apr_string(arg);
-        if (path == nullptr)
-            return;
-
-        paths = apr_array_make(pool.get(), 1, sizeof(char *));
-        APR_ARRAY_PUSH(paths, const char *) = path;
-    }
-    else if (arg->IsArray())
-    {
-        auto array = arg.As<v8::Array>();
-        paths = apr_array_make(pool.get(), array->Length(), sizeof(char *));
-        for (auto i = 0U; i < array->Length(); i++)
-        {
-            auto value = array->Get(context, i).ToLocalChecked();
-            Util_RejectIf(!value->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
-
-            auto path = to_apr_string(value);
-            if (path == nullptr)
-                return;
-
-            APR_ARRAY_PUSH(paths, const char *) = path;
-        }
-    }
-    else
-    {
-        Util_RejectIf(true, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
-    }
+    auto paths = Util_ToAprStringArray(args[0]);
+    if (paths == nullptr)
+        return;
 
     Util_RejectIf(args.Length() == 1, Util_Error(TypeError, "Argument \"message\" must be a string"));
 
-    arg = args[1];
+    auto arg = args[1];
     Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"message\" must be a string"));
-    auto message = to_apr_string(arg);
+    auto message = Util_ToAprString(arg);
     if (message == nullptr)
         return;
     client->context->log_msg_baton3 = static_cast<void *>(message);
@@ -79,19 +43,19 @@ Util_Method(Client::Commit)
     auto _error = make_shared<svn_error_t *>();
     auto _callback = make_shared<function<void(const svn_commit_info_t *)>>(move(callback));
     auto work = [paths, _callback, client, pool, _error]() -> void {
-        *_error = svn_client_commit6(paths,                   // targets
-                                     svn_depth_infinity,      // depth
-                                     true,                    // keep_locks
-                                     false,                   // keep_changelists
-                                     false,                   // commit_as_operations
-                                     true,                    // include_file_externals
-                                     true,                    // include_dir_externals
-                                     nullptr,                 // changelists
-                                     nullptr,                 // revprop_table
-                                     Util::SvnCommitCallback, // commit_callback
-                                     _callback.get(),         // commit_baton
-                                     client->context,         // ctx
-                                     pool.get());             // scratch_pool
+        *_error = svn_client_commit6(paths,              // targets
+                                     svn_depth_infinity, // depth
+                                     true,               // keep_locks
+                                     false,              // keep_changelists
+                                     false,              // commit_as_operations
+                                     true,               // include_file_externals
+                                     true,               // include_dir_externals
+                                     nullptr,            // changelists
+                                     nullptr,            // revprop_table
+                                     invoke_callback,    // commit_callback
+                                     _callback.get(),    // commit_baton
+                                     client->context,    // ctx
+                                     pool.get());        // scratch_pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

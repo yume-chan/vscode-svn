@@ -126,14 +126,14 @@ export function activate(context: vscode.ExtensionContext) {
             context.subscriptions.push(vscode.commands.registerCommand("svn.unstage", async function(...resourceStates: SvnResourceState[]) {
                 for (const value of resourceStates) {
                     const filePath = value.path;
-                    switch (value.textStatus) {
+                    switch (value.nodeStatus) {
+                        case Client.StatusKind.added:
+                            await client.revert(filePath);
+                            break;
                         case Client.StatusKind.modified:
                         case Client.StatusKind.obstructed:
                             if (!ignoredFiles.includes(filePath))
                                 ignoredFiles.push(filePath);
-                            break;
-                        case Client.StatusKind.unversioned:
-                            await client.revert(filePath);
                             break;
                     }
                 }

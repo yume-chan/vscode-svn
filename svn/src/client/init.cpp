@@ -20,7 +20,7 @@
         function->SetClassName(key);                                                                      \
         prototype->Set(key,                                                                               \
                        function,                                                                          \
-                       (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete)); \
+                       ReadOnlyDontDelete); \
     }
 
 namespace Svn
@@ -29,7 +29,7 @@ Persistent<Function> Client::constructor;
 
 void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
 {
-    auto ClientTemplate = FunctionTemplate::New(isolate, New);
+    auto ClientTemplate = Util_FunctionTemplate(New, 0);
     ClientTemplate->SetClassName(String::NewFromUtf8(isolate, "Client"));
     // This internal field is used for saving the pointer to a Client instance.
     // Client.wrap will set its pointer to the internal field

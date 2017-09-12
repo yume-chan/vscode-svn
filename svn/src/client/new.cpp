@@ -44,6 +44,27 @@ svn_error_t *log3(const char **log_msg, const char **tmp_file, const apr_array_h
     return SVN_NO_ERROR;
 }
 
+#define Util_AprAllocType(pool, type) static_cast<type *>(apr_palloc((pool), sizeof(type)))
+
+svn_error_t *simple_prompt_callback(svn_auth_cred_simple_t **cred, void *baton, const char *realm, const char *username, svn_boolean_t may_save, apr_pool_t *pool)
+{
+    auto result = Util_AprAllocType(pool, svn_auth_cred_simple_t);
+    result->may_save = false;
+    result->username = apr_pstrdup(pool, "write");
+    result->password = apr_pstrdup(pool, "write");
+    *cred = result;
+    return SVN_NO_ERROR;
+}
+
+svn_error_t *ssl_server_trust_prompt_callback(svn_auth_cred_ssl_server_trust_t **cred, void *baton, const char *realm, apr_uint32_t failures, const svn_auth_ssl_server_cert_info_t *cert_info, svn_boolean_t may_save, apr_pool_t *pool)
+{
+    auto result = Util_AprAllocType(pool, svn_auth_cred_ssl_server_trust_t);
+    result->may_save = false;
+    result->accepted_failures = failures;
+    *cred = result;
+    return SVN_NO_ERROR;
+};
+
 Client::Client()
 {
     apr_initialize();
@@ -55,10 +76,16 @@ Client::Client()
 
     context->log_msg_func3 = log3;
 
+    svn_auth_provider_object_t *provider;
     apr_array_header_t *providers = apr_array_make(pool, 4, sizeof(svn_auth_provider_object_t *));
 
-    svn_auth_provider_object_t *provider;
-    svn_auth_get_simple_provider(&provider, pool);
+    svn_auth_get_simple_provider2(&provider, nullptr, nullptr, pool);
+    APR_ARRAY_PUSH(providers, svn_auth_provider_object_t *) = provider;
+
+    svn_auth_get_simple_prompt_provider(&provider, simple_prompt_callback, nullptr, 2, pool);
+    APR_ARRAY_PUSH(providers, svn_auth_provider_object_t *) = provider;
+
+    svn_auth_get_ssl_server_trust_prompt_provider(&provider, ssl_server_trust_prompt_callback, nullptr, pool);
     APR_ARRAY_PUSH(providers, svn_auth_provider_object_t *) = provider;
 
     svn_auth_baton_t *auth_baton;
@@ -74,11 +101,7 @@ Client::~Client()
 
 Util_Method(Client::New)
 {
-    if (!args.IsConstructCall())
-    {
-        isolate->ThrowException(Util_Error(TypeError, "Class constructor Client cannot be invoked without 'new'"));
-        return;
-    }
+    Util_ThrowIf(!args.IsConstructCall(), Util_Error(TypeError, "Class constructor Client cannot be invoked without 'new'"));
 
     auto result = new Client();
     result->Wrap(args.This());

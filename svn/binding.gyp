@@ -12,8 +12,11 @@
             ],
             "sources": [
                 "src/export.cpp",
+                "src/svn_error.hpp",
                 "src/svn_error.cpp",
-                "src/utils.cpp",
+                "src/utils.hpp",
+                "src/client.hpp",
+                "src/client/client.hpp",
                 "src/client/init.cpp",
                 "src/client/new.cpp",
                 "src/client/add.cpp",

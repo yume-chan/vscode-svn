@@ -12,45 +12,9 @@ Util_Method(Client::Update)
 
     Util_PreparePool();
 
-    auto arg = args[0];
-    apr_array_header_t *paths;
-    if (arg->IsString())
-    {
-        String::Utf8Value string(arg);
-        auto length = string.length();
-        Util_RejectIf(Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
-
-        length++;
-        auto c = (char *)apr_pcalloc(pool.get(), length);
-        apr_cpystrn(c, *string, length);
-
-        paths = apr_array_make(pool.get(), 1, sizeof(char *));
-        APR_ARRAY_PUSH(paths, const char *) = c;
-    }
-    else if (arg->IsArray())
-    {
-        auto array = arg.As<v8::Array>();
-        paths = apr_array_make(pool.get(), array->Length(), sizeof(char *));
-        for (auto i = 0U; i < array->Length(); i++)
-        {
-            auto value = array->Get(context, i).ToLocalChecked();
-            Util_RejectIf(!value->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
-
-            String::Utf8Value string(value);
-            auto length = string.length();
-            Util_RejectIf(Util::ContainsNull(*string, length), Util_Error(Error, "Argument \"path\" must be an array of string without null bytes"));
-
-            length++;
-            auto c = (char *)apr_pcalloc(pool.get(), length);
-            apr_cpystrn(c, *string, length);
-
-            APR_ARRAY_PUSH(paths, const char *) = c;
-        }
-    }
-    else
-    {
-        Util_RejectIf(true, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
-    }
+    auto paths = Util_ToAprStringArray(args[0]);
+    if (paths == nullptr)
+        return;
 
     client->update_notify = [](const svn_wc_notify_t *notify) -> void {
 

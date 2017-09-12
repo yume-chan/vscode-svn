@@ -1,11 +1,19 @@
 const svn = require("..");
-// const client = new svn.Client();
-// client.cat("C:/Users/Simon/Desktop/www/bdxkv4/index.html").then(value => value.toString("utf8")).then(value => console.log(value), error => console.error(error));
 
-// (function wait() {
-//     setTimeout(wait, 1000);
-// })();
+console.log(`Path: ${svn.path}`);
 
-const error = new svn.SvnError("");
-console.log(error instanceof svn.SvnError);
-console.log(error instanceof Error);
+(async function() {
+    try {
+        const client = new svn.Client();
+        // console.log(await client.commit("C:/Users/Simon/Desktop/www/test/trunk", "Test"));
+        console.log(await client.update("C:/Users/Simon/Desktop/www/test/trunk"));
+    } catch (e) {
+        console.log(e);
+    }
+
+    process.exit();
+})();
+
+(function wait() {
+    setTimeout(wait, 1000);
+})();

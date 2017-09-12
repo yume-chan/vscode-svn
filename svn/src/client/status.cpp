@@ -35,6 +35,13 @@ struct SvnClientStatus
     svn_boolean_t switched;
 };
 
+inline svn_error_t *invoke_callback(void *baton, const char *path, const svn_client_status_t *status, apr_pool_t *scratch_pool)
+{
+    auto method = *static_cast<function<void(const char *, const svn_client_status_t *, apr_pool_t *)> *>(baton);
+    method(path, status, scratch_pool);
+    return SVN_NO_ERROR;
+}
+
 Util_Method(Client::Status)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
@@ -59,21 +66,21 @@ Util_Method(Client::Status)
     auto _callback = make_shared<function<void(const char *, const svn_client_status_t *, apr_pool_t *)>>(move(callback));
     auto work = [_result_rev, client, path, _callback, pool, _error]() -> void {
         svn_opt_revision_t revision{svn_opt_revision_working};
-        *_error = svn_client_status6(*_result_rev,            // result_rev
-                                     client->context,         // ctx
-                                     path->c_str(),           // path
-                                     &revision,               // revision
-                                     svn_depth_infinity,      // depth
-                                     false,                   // get_all
-                                     false,                   // check_out_of_date
-                                     false,                   // check_working_copy
-                                     false,                   // no_ignore
-                                     false,                   // ignore_externals
-                                     false,                   // depth_as_sticky,
-                                     nullptr,                 // changelists
-                                     Util::SvnStatusCallback, // status_func
-                                     _callback.get(),         // status_baton
-                                     pool.get());             // scratch_pool
+        *_error = svn_client_status6(*_result_rev,       // result_rev
+                                     client->context,    // ctx
+                                     path->c_str(),      // path
+                                     &revision,          // revision
+                                     svn_depth_infinity, // depth
+                                     false,              // get_all
+                                     false,              // check_out_of_date
+                                     false,              // check_working_copy
+                                     false,              // no_ignore
+                                     false,              // ignore_externals
+                                     false,              // depth_as_sticky,
+                                     nullptr,            // changelists
+                                     invoke_callback,    // status_func
+                                     _callback.get(),    // status_baton
+                                     pool.get());        // scratch_pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

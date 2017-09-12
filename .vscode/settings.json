@@ -55,7 +55,9 @@
         "xmemory": "cpp",
         "xmemory0": "cpp",
         "xstddef": "cpp",
-        "xtr1common": "cpp"
+        "xtr1common": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp"
     },
     "git.enableSmartCommit": true
 }

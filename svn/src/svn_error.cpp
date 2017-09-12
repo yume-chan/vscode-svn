@@ -1,4 +1,5 @@
 #include "svn_error.hpp"
+#include "utils.hpp"
 
 namespace Svn
 {
@@ -6,55 +7,43 @@ namespace SvnError
 {
 Persistent<Function> _svn_error;
 
-#define DefineReadOnlyValue(object, name, value) (object)->DefineOwnProperty(context, String::NewFromUtf8(isolate, (name), NewStringType::kNormal).ToLocalChecked(), (value), (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete))
-#define GetProperty(object, name) (object)->Get(context, String::NewFromUtf8(isolate, (name), NewStringType::kNormal).ToLocalChecked()).ToLocalChecked()
-#define SetProperty(object, name, value) (object)->Set(context, String::NewFromUtf8(isolate, (name), NewStringType::kNormal).ToLocalChecked(), (value))
+#define DefineReadOnlyValue(object, name, value)   \
+    (object)->DefineOwnProperty(context,           \
+                                Util_String(name), \
+                                (value),           \
+                                ReadOnlyDontDelete)
+
+#define GetProperty(object, name) (object)->Get(context, Util_String(name)).ToLocalChecked()
+
+#define SetProperty(object, name, value) (object)->Set(context, Util_String(name), (value))
 
 void Constructor(const FunctionCallbackInfo<Value> &args)
 {
     auto isolate = args.GetIsolate();
     auto context = isolate->GetCurrentContext();
 
-    if (!args.IsConstructCall())
-    {
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Class constructor SvnError cannot be invoked without 'new'")));
-        return;
-    }
+    Util_ThrowIf(!args.IsConstructCall(), Util_Error(TypeError, "Class constructor SvnError cannot be invoked without 'new'"));
 
-    if (args.Length() < 1)
-    {
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Arguments `code` and `message` are required.")));
-        return;
-    }
+    Util_ThrowIf(args.Length() == 0, Util_Error(TypeError, "Argument \"code\" must be a number"));
+    Util_ThrowIf(!args[0]->IsNumber(), Util_Error(TypeError, "Argument \"code\" must be a number"));
 
-    if (!args[0]->IsNumber())
-    {
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Argument `code` must be a number.")));
-        return;
-    }
-
-    if (!args[1]->IsString())
-    {
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "Argument `message` must be a string.")));
-        return;
-    }
+    Util_ThrowIf(args.Length() == 1, Util_Error(TypeError, "Argument \"message\" must be a string"));
+    Util_ThrowIf(!args[1]->IsString(), Util_Error(TypeError, "Argument \"message\" must be a string"));
 
     auto _this = args.This();
 
     SetProperty(_this, "code", args[0]);
-
-    SetProperty(_this, "message", args[1]->ToString(context).ToLocalChecked());
+    SetProperty(_this, "message", args[1]);
 
     auto error = Exception::Error(String::NewFromUtf8(isolate, "SvnError", NewStringType::kNormal).ToLocalChecked()).As<Object>();
     SetProperty(_this, "stack", GetProperty(error, "stack"));
+
+    SetProperty(_this, "child", args[2]);
 }
 
 void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
 {
-    auto template_ = FunctionTemplate::New(isolate,
-                                           Constructor,
-                                           Local<Value>(),
-                                           Local<v8::Signature>(), 2);
+    auto template_ = Util_FunctionTemplate(Constructor, 2);
     template_->SetClassName(String::NewFromUtf8(isolate, "SvnError"));
     template_->InstanceTemplate()->SetInternalFieldCount(1);
     auto function = template_->GetFunction();
