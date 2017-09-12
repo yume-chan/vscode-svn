@@ -12,3 +12,4 @@ svn/**
 !svn/build/*/*.(dll|node)
 !svn/index.js
 !svn/package.json
+scripts/**
