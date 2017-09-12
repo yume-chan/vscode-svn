@@ -24,7 +24,7 @@ Util_Method(Client::Cat)
 
         auto stream = svn_stream_from_stringbuf(buffer.get(), pool.get());
 
-        svn_opt_revision_t revision{svn_opt_revision_working};
+        svn_opt_revision_t revision{svn_opt_revision_head};
 
         apr_pool_t *scratch_pool;
         apr_pool_create(&scratch_pool, pool.get());

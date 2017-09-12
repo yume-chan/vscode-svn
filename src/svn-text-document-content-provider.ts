@@ -16,7 +16,9 @@ export class SvnTextDocumentContentProvider implements vscode.TextDocumentConten
 
     async provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): Promise<string> {
         try {
-            return (await this.client.cat(uri.fsPath)).toString("utf8");
+            const buffer = await this.client.cat(uri.fsPath);
+            const content = buffer.toString("utf8");
+            return content;
         } catch (err) {
             if (err instanceof SvnError)
                 return "";

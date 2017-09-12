@@ -5,6 +5,7 @@ namespace Svn
 {
 namespace SvnError
 {
+Persistent<Function> _captureStackTrace;
 Persistent<Function> _svn_error;
 
 #define DefineReadOnlyValue(object, name, value)   \
@@ -13,9 +14,13 @@ Persistent<Function> _svn_error;
                                 (value),           \
                                 ReadOnlyDontDelete)
 
-#define GetProperty(object, name) (object)->Get(context, Util_String(name)).ToLocalChecked()
+#define DefineNonEnumValue(object, name, value)    \
+    (object)->DefineOwnProperty(context,           \
+                                Util_String(name), \
+                                (value),           \
+                                PropertyAttribute::DontEnum)
 
-#define SetProperty(object, name, value) (object)->Set(context, Util_String(name), (value))
+#define GetProperty(object, name) (object)->Get(context, Util_String(name)).ToLocalChecked()
 
 void Constructor(const FunctionCallbackInfo<Value> &args)
 {
@@ -32,13 +37,14 @@ void Constructor(const FunctionCallbackInfo<Value> &args)
 
     auto _this = args.This();
 
-    SetProperty(_this, "code", args[0]);
-    SetProperty(_this, "message", args[1]);
+    DefineNonEnumValue(_this, "code", args[0]);
+    DefineNonEnumValue(_this, "message", args[1]);
 
-    auto error = Exception::Error(String::NewFromUtf8(isolate, "SvnError", NewStringType::kNormal).ToLocalChecked()).As<Object>();
-    SetProperty(_this, "stack", GetProperty(error, "stack"));
+    const auto argc = 1;
+    Local<Value> argv[argc] = {_this};
+    _captureStackTrace.Get(isolate)->CallAsFunction(Undefined(isolate), argc, argv);
 
-    SetProperty(_this, "child", args[2]);
+    DefineNonEnumValue(_this, "child", args[2]);
 }
 
 void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
@@ -52,9 +58,11 @@ void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
     auto error = GetProperty(global, "Error").As<Function>();
     auto error_prototype = GetProperty(error, "prototype");
 
+    _captureStackTrace.Reset(isolate, GetProperty(error, "captureStackTrace").As<Function>());
+
     auto svn_error_prototype = GetProperty(function, "prototype").As<Object>();
     svn_error_prototype->SetPrototype(context, error_prototype);
-    SetProperty(svn_error_prototype, "name", String::NewFromUtf8(isolate, "SvnError", NewStringType::kNormal).ToLocalChecked());
+    DefineReadOnlyValue(svn_error_prototype, "name", Util_String("SvnError"));
 
     _svn_error.Reset(isolate, function);
     DefineReadOnlyValue(exports, "SvnError", function);
