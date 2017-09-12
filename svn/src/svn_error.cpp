@@ -80,11 +80,21 @@ Local<Value> New(Isolate *isolate, Local<Context> context, int code, const char 
 
 Local<Value> New(Isolate *isolate, Local<Context> context, svn_error_t *error)
 {
+    error = svn_error_purge_tracing(error);
+
+    const auto buffer_size = 100;
+    char buffer[buffer_size];
+    auto _message = svn_err_best_message(error, buffer, buffer_size);
+    auto message = Util_String(_message);
+
+    auto _child = error->child;
+    auto child = _child != nullptr ? New(isolate, context, _child) : Undefined(isolate).As<Value>();
+
     const auto argc = 3;
     Local<Value> argv[argc] = {
-        Integer::New(isolate, error->apr_err),
-        String::NewFromUtf8(isolate, error->message, NewStringType::kNormal).ToLocalChecked(),
-        error->child != nullptr ? New(isolate, context, error->child) : Undefined(isolate)};
+        Util_New(Integer, error->apr_err),
+        message,
+        child};
     return _svn_error.Get(isolate)->CallAsConstructor(isolate->GetCurrentContext(), argc, argv).ToLocalChecked();
 }
 }

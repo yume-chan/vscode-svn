@@ -55,7 +55,10 @@ export function activate(context: vscode.ExtensionContext) {
     let stagedFiles: string[];
     let ignoredFiles: string[];
 
-    async function onWorkspaceChange() {
+    async function onWorkspaceChange(file?: vscode.Uri) {
+        if (file !== undefined && file.fsPath.includes(".svn"))
+            return;
+
         let status: SvnStatusResult;
         try {
             status = await client.status(base!);
