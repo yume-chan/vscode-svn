@@ -3,6 +3,12 @@
 
 namespace Svn
 {
+void free_buffer(char *data, void *hint)
+{
+    auto pool = static_cast<apr_pool_t *>(hint);
+    apr_pool_destroy(pool);
+}
+
 Util_Method(Client::Cat)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
@@ -17,12 +23,17 @@ Util_Method(Client::Cat)
 
     Util_PreparePool();
 
-    auto buffer = make_pool_ptr(svn_stringbuf_t, svn_stringbuf_create_empty(pool.get()), pool);
+    // Create a sub pool for `buffer`
+    // To create node::Buffer without copy
+    apr_pool_t *buffer_pool;
+    apr_pool_create(&buffer_pool, client->pool);
+    auto buffer = svn_stringbuf_create_empty(buffer_pool);
+
     auto _error = make_shared<svn_error_t *>();
     auto work = [buffer, pool, path, client, _error]() -> void {
         apr_hash_t *props;
 
-        auto stream = svn_stream_from_stringbuf(buffer.get(), pool.get());
+        auto stream = svn_stream_from_stringbuf(buffer, pool.get());
 
         svn_opt_revision_t revision{svn_opt_revision_head};
 
@@ -41,7 +52,7 @@ Util_Method(Client::Cat)
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
-    auto after_work = [isolate, _resolver, _error, buffer]() -> void {
+    auto after_work = [isolate, _resolver, _error, buffer, buffer_pool]() -> void {
         auto context = isolate->GetCallingContext();
         HandleScope scope(isolate);
 
@@ -50,9 +61,13 @@ Util_Method(Client::Cat)
         auto error = *_error;
         Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error));
 
-        auto result = node::Buffer::New(isolate, buffer->data, buffer->len).ToLocalChecked();
+        auto result = node::Buffer::New(isolate,
+                                        buffer->data,
+                                        buffer->len,
+                                        free_buffer,
+                                        buffer_pool)
+                          .ToLocalChecked();
         resolver->Resolve(context, result);
-        return;
     };
 
     Util_RejectIf(Util::QueueWork(uv_default_loop(), move(work), move(after_work)), Util_Error(Error, "Failed to start async work"));

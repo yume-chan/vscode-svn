@@ -115,7 +115,6 @@ Util_Method(Client::Status)
             Util_Set(result, "revision", Util_New(Integer, *result_rev));
 
         resolver->Resolve(context, result);
-        return;
     };
 
     Util_RejectIf(Util::QueueWork(uv_default_loop(), move(work), move(after_work)), Util_Error(Error, "Failed starting async work"));

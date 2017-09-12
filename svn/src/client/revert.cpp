@@ -42,7 +42,6 @@ Util_Method(Client::Revert)
         Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error));
 
         resolver->Resolve(context, Util_Undefined);
-        return;
     };
 
     Util_RejectIf(Util::QueueWork(uv_default_loop(), move(work), move(after_work)), Util_Error(Error, "Failed starting async work"));
