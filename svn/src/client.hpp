@@ -30,9 +30,6 @@ private:
   explicit Client(Isolate *isolate, const Local<Object> &options);
   ~Client();
 
-  static void simple_prompt(const char *username);
-  static svn_error_t *simple_prompt_callback(svn_auth_cred_simple_t **cred, void *baton, const char *realm, const char *username, svn_boolean_t may_save, apr_pool_t *pool);
-
   static void Add(const FunctionCallbackInfo<Value> &args);
   static void Cat(const FunctionCallbackInfo<Value> &args);
   static void Checkout(const FunctionCallbackInfo<Value> &args);
