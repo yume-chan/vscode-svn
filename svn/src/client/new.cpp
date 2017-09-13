@@ -1,7 +1,10 @@
 #include "client.hpp"
+#include "auth/simple.hpp"
 
 namespace Svn
 {
+Isolate *Client::isolate;
+
 void notify2(void *baton, const svn_wc_notify_t *notify, apr_pool_t *pool)
 {
     auto client = static_cast<Client *>(baton);
@@ -44,28 +47,24 @@ svn_error_t *log3(const char **log_msg, const char **tmp_file, const apr_array_h
     return SVN_NO_ERROR;
 }
 
-#define Util_AprAllocType(pool, type) static_cast<type *>(apr_palloc((pool), sizeof(type)))
+#define Util_AprAllocType(type) static_cast<type *>(apr_palloc(_pool, sizeof(type)))
 
-svn_error_t *simple_prompt_callback(svn_auth_cred_simple_t **cred, void *baton, const char *realm, const char *username, svn_boolean_t may_save, apr_pool_t *pool)
+svn_error_t *ssl_server_trust_prompt_callback(svn_auth_cred_ssl_server_trust_t **cred, void *baton, const char *realm, apr_uint32_t failures, const svn_auth_ssl_server_cert_info_t *cert_info, svn_boolean_t may_save, apr_pool_t *_pool)
 {
-    auto result = Util_AprAllocType(pool, svn_auth_cred_simple_t);
-    result->may_save = false;
-    result->username = apr_pstrdup(pool, "write");
-    result->password = apr_pstrdup(pool, "write");
-    *cred = result;
-    return SVN_NO_ERROR;
-}
-
-svn_error_t *ssl_server_trust_prompt_callback(svn_auth_cred_ssl_server_trust_t **cred, void *baton, const char *realm, apr_uint32_t failures, const svn_auth_ssl_server_cert_info_t *cert_info, svn_boolean_t may_save, apr_pool_t *pool)
-{
-    auto result = Util_AprAllocType(pool, svn_auth_cred_ssl_server_trust_t);
+    auto result = Util_AprAllocType(svn_auth_cred_ssl_server_trust_t);
     result->may_save = false;
     result->accepted_failures = failures;
     *cred = result;
     return SVN_NO_ERROR;
 };
 
-Client::Client()
+struct Client::auth_info_t
+{
+    Auth::Simple *simple;
+};
+
+Client::Client(Isolate *isolate, const Local<Object> &options)
+    : auth_info(new auth_info_t)
 {
     apr_initialize();
     apr_pool_create(&pool, nullptr);
@@ -82,8 +81,15 @@ Client::Client()
     svn_auth_get_simple_provider2(&provider, nullptr, nullptr, pool);
     APR_ARRAY_PUSH(providers, svn_auth_provider_object_t *) = provider;
 
-    svn_auth_get_simple_prompt_provider(&provider, simple_prompt_callback, nullptr, 2, pool);
-    APR_ARRAY_PUSH(providers, svn_auth_provider_object_t *) = provider;
+    if (!options.IsEmpty())
+    {
+        _options.Reset(isolate, options);
+
+        auto context = isolate->GetCurrentContext();
+        auto value = Util_GetProperty(options, "getSimpleCredential");
+        if (value->IsFunction())
+            auth_info->simple = new Auth::Simple(isolate, value.As<Function>(), 2, pool, providers);
+    }
 
     svn_auth_get_ssl_server_trust_prompt_provider(&provider, ssl_server_trust_prompt_callback, nullptr, pool);
     APR_ARRAY_PUSH(providers, svn_auth_provider_object_t *) = provider;
@@ -97,13 +103,21 @@ Client::~Client()
 {
     apr_pool_destroy(pool);
     apr_terminate();
+
+    if (auth_info->simple != nullptr)
+        delete auth_info->simple;
 }
 
 Util_Method(Client::New)
 {
     Util_ThrowIf(!args.IsConstructCall(), Util_Error(TypeError, "Class constructor Client cannot be invoked without 'new'"));
 
-    auto result = new Client();
+    Local<Object> options;
+    auto arg = args[0];
+    if (arg->IsObject())
+        options = arg.As<Object>();
+
+    auto result = new Client(isolate, options);
     result->Wrap(args.This());
 }
 Util_MethodEnd;

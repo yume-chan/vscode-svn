@@ -8,21 +8,6 @@
     Util::SetReadOnly(isolate, context, StatusKind, #name, Util_New(Integer, svn_wc_status_##name)); \
     Util::SetReadOnly(isolate, context, StatusKind, svn_wc_status_##name, Util_String(#name))
 
-#define SetPrototypeMethod(receiver, prototype, name, callback, length)                                   \
-    { /* Add a scope to hide extra variables */                                                           \
-        auto signature = v8::Signature::New(isolate, receiver);                                           \
-        auto function = v8::FunctionTemplate::New(isolate,                /* isolate */                   \
-                                                  callback,               /* callback */                  \
-                                                  v8::Local<v8::Value>(), /* data */                      \
-                                                  signature,              /* signature */                 \
-                                                  length);                /* length */                    \
-        auto key = Util_String(name);                                                                     \
-        function->SetClassName(key);                                                                      \
-        prototype->Set(key,                                                                               \
-                       function,                                                                          \
-                       ReadOnlyDontDelete); \
-    }
-
 namespace Svn
 {
 Persistent<Function> Client::constructor;

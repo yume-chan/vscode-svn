@@ -20,31 +20,28 @@ Util_Method(Client::Revert)
 
     };
 
-    auto _error = make_shared<svn_error_t *>();
-    auto work = [paths, client, pool, _error]() -> void {
-        *_error = svn_client_revert3(paths,              // paths
-                                     svn_depth_infinity, // depth
-                                     nullptr,            // changelists
-                                     true,               // clear_changelists
-                                     false,              // metadata_only
-                                     client->context,    // ctx
-                                     pool.get());        // pool
+    auto work = [paths, client, pool]() -> svn_error_t * {
+        return svn_client_revert3(paths,              // paths
+                                  svn_depth_infinity, // depth
+                                  nullptr,            // changelists
+                                  true,               // clear_changelists
+                                  false,              // metadata_only
+                                  client->context,    // ctx
+                                  pool.get());        // pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
-    auto after_work = [isolate, _resolver, _error]() -> void {
-        auto context = isolate->GetCallingContext();
+    auto after_work = [isolate, _resolver](svn_error_t *error) -> void {
         HandleScope scope(isolate);
+        auto context = isolate->GetCallingContext();
 
         auto resolver = _resolver->Get(isolate);
-
-        auto error = *_error;
         Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error));
 
         resolver->Resolve(context, Util_Undefined);
     };
 
-    Util_RejectIf(Util::QueueWork(uv_default_loop(), move(work), move(after_work)), Util_Error(Error, "Failed starting async work"));
+    RunAsync();
 }
 Util_MethodEnd;
 }

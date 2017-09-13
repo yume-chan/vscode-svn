@@ -6,16 +6,18 @@ import * as vscode from "vscode";
 import { Client, SvnError, SvnStatus, SvnStatusResult } from "../svn";
 import { SvnTextDocumentContentProvider } from "./svn-text-document-content-provider";
 
+import { client } from "./client";
+
 type SvnResourceState = SvnStatus & vscode.SourceControlResourceState;
 
 export function activate(context: vscode.ExtensionContext) {
+    console.log("SVN activated");
+
     const base = vscode.workspace.rootPath;
     if (base === undefined)
         return;
 
-    const client = new Client();
-
-    const iconsRootPath = path.join(path.dirname(__dirname), "..", "resources", "icons");
+    const iconsRootPath = path.join(__dirname, "..", "resources", "icons");
     const statusIcons = {
         [Client.StatusKind.modified]: "modified",
         [Client.StatusKind.unversioned]: "untracked",
@@ -70,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!initialized) {
             initialized = true;
 
-            contentProvider = new SvnTextDocumentContentProvider(client);
+            contentProvider = new SvnTextDocumentContentProvider();
             context.subscriptions.push(contentProvider);
             context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("svn", contentProvider));
 

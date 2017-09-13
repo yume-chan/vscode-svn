@@ -28,35 +28,32 @@ Util_Method(Client::Checkout)
     };
 
     auto _result_rev = make_shared<svn_revnum_t *>();
-    auto _error = make_shared<svn_error_t *>();
-    auto work = [_result_rev, url, path, client, pool, _error]() -> void {
+    auto work = [_result_rev, url, path, client, pool]() -> svn_error_t * {
         svn_opt_revision_t revision{svn_opt_revision_head};
-        *_error = svn_client_checkout3(*_result_rev,      // result_rev
-                                       url->c_str(),      // URL
-                                       path->c_str(),     // path
-                                       &revision,         // peg_revision
-                                       &revision,         // revision
-                                       svn_depth_unknown, // depth
-                                       false,             // ignore_externals
-                                       false,             // allow_unver_obstructions
-                                       client->context,   // ctx
-                                       pool.get());       // pool
+        return svn_client_checkout3(*_result_rev,      // result_rev
+                                    url->c_str(),      // URL
+                                    path->c_str(),     // path
+                                    &revision,         // peg_revision
+                                    &revision,         // revision
+                                    svn_depth_unknown, // depth
+                                    false,             // ignore_externals
+                                    false,             // allow_unver_obstructions
+                                    client->context,   // ctx
+                                    pool.get());       // pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
-    auto after_work = [isolate, _resolver, _error]() -> void {
-        auto context = isolate->GetCallingContext();
+    auto after_work = [isolate, _resolver](svn_error_t *error) -> void {
         HandleScope scope(isolate);
+        auto context = isolate->GetCallingContext();
 
         auto resolver = _resolver->Get(isolate);
-
-        auto error = *_error;
         Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error));
 
-        resolver->Resolve(context, v8::Undefined(isolate));
+        resolver->Resolve(context, Util_Undefined);
     };
 
-    Util_RejectIf(Util::QueueWork(uv_default_loop(), work, after_work), Util_Error(Error, "Failed to start async work"));
+    RunAsync();
 }
 Util_MethodEnd;
 }

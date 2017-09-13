@@ -65,47 +65,70 @@ using std::vector;
                               Local<v8::Signature>(), /* signature */ \
                               length);                /* length */
 
+#define Util_GetProperty(object, name) (object)->Get(context, Util_String(name)).ToLocalChecked()
+
+#define SetPrototypeMethod(receiver, prototype, name, callback, length)                   \
+    { /* Add a scope to hide extra variables */                                           \
+        auto signature = v8::Signature::New(isolate, receiver);                           \
+        auto function = v8::FunctionTemplate::New(isolate,                /* isolate */   \
+                                                  callback,               /* callback */  \
+                                                  v8::Local<v8::Value>(), /* data */      \
+                                                  signature,              /* signature */ \
+                                                  length);                /* length */    \
+        auto key = Util_String(name);                                                     \
+        function->SetClassName(key);                                                      \
+        prototype->Set(key,                                                               \
+                       function,                                                          \
+                       ReadOnlyDontDelete);                                               \
+    }
+
 namespace Svn
 {
 namespace Util
 {
+template <class T>
 class WorkData
 {
   public:
-    WorkData(function<void()> work, function<void()> after_work)
+    WorkData(function<T()> work, function<void(T)> after_work)
         : work(move(work)),
           after_work(move(after_work)) {}
 
     WorkData(const WorkData &other) = delete;
 
-    const function<void()> work;
-    const function<void()> after_work;
+    const function<T()> work;
+    const function<void(T)> after_work;
+
+    T result;
 };
 
+template <class T>
 static void invoke_uv_work(uv_work_t *req)
 {
-    auto data = static_cast<WorkData *>(req->data);
-    data->work();
+    auto data = static_cast<WorkData<T> *>(req->data);
+    data->result = data->work();
 }
 
+template <class T>
 static void invoke_after_uv_work(uv_work_t *req, int status)
 {
-    auto data = static_cast<WorkData *>(req->data);
-    data->after_work();
+    auto data = static_cast<WorkData<T> *>(req->data);
+    data->after_work(data->result);
 
     delete data;
     delete req;
 }
 
 // @return 0 if success.
-inline int32_t QueueWork(uv_loop_t *loop, const function<void()> work, const function<void()> after_work)
+template <class T>
+inline int32_t QueueWork(uv_loop_t *loop, const function<T()> work, const function<void(T)> after_work)
 {
     if (work == nullptr || after_work == nullptr)
         return -1;
 
     auto req = new uv_work_t;
-    req->data = new WorkData(move(work), move(after_work));
-    return uv_queue_work(loop, req, invoke_uv_work, invoke_after_uv_work);
+    req->data = new WorkData<T>(move(work), move(after_work));
+    return uv_queue_work(loop, req, invoke_uv_work<T>, invoke_after_uv_work<T>);
 }
 
 inline bool ContainsNull(const char *value, size_t length)
@@ -144,6 +167,19 @@ inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> 
                               ReadOnlyDontDelete);
 }
 }
+}
+
+#define Util_ToAprString(value) _to_apr_string(value, _pool)
+
+static inline char *_to_apr_string(Local<Value> &arg, apr_pool_t *pool)
+{
+    String::Utf8Value string(arg);
+    auto length = string.length();
+
+    if (Svn::Util::ContainsNull(*string, length))
+        return nullptr;
+
+    return static_cast<char *>(apr_pmemdup(pool, *string, length + 1));
 }
 
 #endif

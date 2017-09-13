@@ -1,4 +1,7 @@
+#include <svn_version.h>
+
 #include "v8.hpp"
+
 #include "client.hpp"
 #include "svn_error.hpp"
 

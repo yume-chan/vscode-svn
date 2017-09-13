@@ -28,8 +28,7 @@ Util_Method(Client::Commit)
     auto arg = args[1];
     Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"message\" must be a string"));
     auto message = Util_ToAprString(arg);
-    if (message == nullptr)
-        return;
+    Util_RejectIf(message == nullptr, Util_Error(Error, "Argument \"message\" must be a string without null bytes"));
     client->context->log_msg_baton3 = static_cast<void *>(message);
 
     client->commit_notify = [](const svn_wc_notify_t *notify) -> void {
@@ -40,38 +39,35 @@ Util_Method(Client::Commit)
 
     };
 
-    auto _error = make_shared<svn_error_t *>();
     auto _callback = make_shared<function<void(const svn_commit_info_t *)>>(move(callback));
-    auto work = [paths, _callback, client, pool, _error]() -> void {
-        *_error = svn_client_commit6(paths,              // targets
-                                     svn_depth_infinity, // depth
-                                     true,               // keep_locks
-                                     false,              // keep_changelists
-                                     false,              // commit_as_operations
-                                     true,               // include_file_externals
-                                     true,               // include_dir_externals
-                                     nullptr,            // changelists
-                                     nullptr,            // revprop_table
-                                     invoke_callback,    // commit_callback
-                                     _callback.get(),    // commit_baton
-                                     client->context,    // ctx
-                                     pool.get());        // scratch_pool
+    auto work = [paths, _callback, client, pool]() -> svn_error_t * {
+        return svn_client_commit6(paths,              // targets
+                                  svn_depth_infinity, // depth
+                                  true,               // keep_locks
+                                  false,              // keep_changelists
+                                  false,              // commit_as_operations
+                                  true,               // include_file_externals
+                                  true,               // include_dir_externals
+                                  nullptr,            // changelists
+                                  nullptr,            // revprop_table
+                                  invoke_callback,    // commit_callback
+                                  _callback.get(),    // commit_baton
+                                  client->context,    // ctx
+                                  pool.get());        // scratch_pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
-    auto after_work = [isolate, _resolver, _error]() -> void {
-        auto context = isolate->GetCallingContext();
+    auto after_work = [isolate, _resolver](svn_error_t *error) -> void {
         HandleScope scope(isolate);
+        auto context = isolate->GetCallingContext();
 
         auto resolver = _resolver->Get(isolate);
-
-        auto error = *_error;
         Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error));
 
         resolver->Resolve(context, Util_Undefined);
     };
 
-    Util_RejectIf(Util::QueueWork(uv_default_loop(), move(work), move(after_work)), Util_Error(Error, "Failed starting async work"));
+    RunAsync();
 }
 Util_MethodEnd;
 }

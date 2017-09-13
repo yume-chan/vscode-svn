@@ -51,8 +51,18 @@ export interface SvnNotify {
 
 }
 
+export interface SimpleCredential {
+    username: string;
+    password: string;
+    save?: boolean;
+}
+
+export interface ClientOptions {
+    getSimpleCredential(realm: string | undefined, username: string | undefined): Promise<SimpleCredential | undefined>;
+}
+
 export class Client {
-    public constructor();
+    public constructor(options?: Partial<ClientOptions>);
 
     public add(path: string): Promise<void>;
     public cat(path: string): Promise<Buffer>;

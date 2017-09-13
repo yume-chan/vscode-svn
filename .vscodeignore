@@ -9,7 +9,7 @@ tsconfig.json
 
 linter/**
 svn/**
-!svn/build/*/*.(dll|node)
+!svn/build/**/*.@(dll|node)
 !svn/index.js
 !svn/package.json
 scripts/**

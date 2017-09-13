@@ -57,7 +57,8 @@
         "xstddef": "cpp",
         "xtr1common": "cpp",
         "chrono": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "thread": "cpp"
     },
     "git.enableSmartCommit": true
 }

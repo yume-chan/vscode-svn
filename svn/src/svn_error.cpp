@@ -20,8 +20,6 @@ Persistent<Function> _svn_error;
                                 (value),           \
                                 PropertyAttribute::DontEnum)
 
-#define GetProperty(object, name) (object)->Get(context, Util_String(name)).ToLocalChecked()
-
 void Constructor(const FunctionCallbackInfo<Value> &args)
 {
     auto isolate = args.GetIsolate();
@@ -42,7 +40,7 @@ void Constructor(const FunctionCallbackInfo<Value> &args)
 
     const auto argc = 1;
     Local<Value> argv[argc] = {_this};
-    _captureStackTrace.Get(isolate)->CallAsFunction(Undefined(isolate), argc, argv);
+    _captureStackTrace.Get(isolate)->Call(Undefined(isolate), argc, argv);
 
     DefineNonEnumValue(_this, "child", args[2]);
 }
@@ -55,12 +53,12 @@ void Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
     auto function = template_->GetFunction();
 
     auto global = context->Global();
-    auto error = GetProperty(global, "Error").As<Function>();
-    auto error_prototype = GetProperty(error, "prototype");
+    auto error = Util_GetProperty(global, "Error").As<Function>();
+    auto error_prototype = Util_GetProperty(error, "prototype");
 
-    _captureStackTrace.Reset(isolate, GetProperty(error, "captureStackTrace").As<Function>());
+    _captureStackTrace.Reset(isolate, Util_GetProperty(error, "captureStackTrace").As<Function>());
 
-    auto svn_error_prototype = GetProperty(function, "prototype").As<Object>();
+    auto svn_error_prototype = Util_GetProperty(function, "prototype").As<Object>();
     svn_error_prototype->SetPrototype(context, error_prototype);
     DefineReadOnlyValue(svn_error_prototype, "name", Util_String("SvnError"));
 

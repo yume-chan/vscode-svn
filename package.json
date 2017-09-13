@@ -48,7 +48,7 @@
         }
     },
     "dependencies": {
-        "fs-extra": "^3.0.1"
+        "fs-extra": "^4.0.2"
     },
     "description": "",
     "devDependencies": {
@@ -59,7 +59,7 @@
         "tslint": "^5.7.0",
         "tslint-language-service": "^0.9.6",
         "typescript": "^2.5.2",
-        "vscode": "^1.0.0"
+        "vscode": "^1.1.5"
     },
     "displayName": "SVN",
     "engines": {

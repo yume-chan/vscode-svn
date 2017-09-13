@@ -11,11 +11,14 @@
                 "<(module_root_dir)/lib/win32_64/libsvn_tsvn.lib"
             ],
             "sources": [
+                "src/uv/async.hpp",
+                "src/uv/semaphore.hpp",
                 "src/export.cpp",
                 "src/svn_error.hpp",
                 "src/svn_error.cpp",
                 "src/utils.hpp",
                 "src/client.hpp",
+                "src/client/auth/simple.hpp",
                 "src/client/client.hpp",
                 "src/client/init.cpp",
                 "src/client/new.cpp",
