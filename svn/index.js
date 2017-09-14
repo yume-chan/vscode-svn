@@ -1,5 +1,7 @@
 // @ts-ignore
 
-/// <reference types="node" />
-
-module.exports = require("./build/Debug/svn.node");
+try {
+    module.exports = require("./build/Debug/svn.node");
+} catch (err) {
+    module.exports = require("./build/Release/svn.node");
+}
