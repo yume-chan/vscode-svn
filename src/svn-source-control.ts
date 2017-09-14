@@ -41,8 +41,10 @@ export class SvnSourceControl implements QuickDiffProvider {
                 getAll: true,
             });
             const item = result[0];
-            const root = path.relative(item.relativePath, item.path);
-            return new SvnSourceControl(folder);
+
+            let root = path.normalize(item.path);
+            root = root.substring(root.length - path.normalize(item.relativePath).length);
+            return new SvnSourceControl(root);
         } catch (err) {
             return undefined;
         }
