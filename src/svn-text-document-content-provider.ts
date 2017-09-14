@@ -1,21 +1,19 @@
-import * as vscode from "vscode";
-import { CancellationToken, Disposable, EventEmitter, TextDocumentContentProvider, Uri } from "vscode";
+import { CancellationToken, Disposable, EventEmitter, TextDocumentContentProvider, Uri, workspace } from "vscode";
 
 import { SvnError } from "../svn";
 
 import { client } from "./client";
 
-export class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
-    private onDidChangeEvent: EventEmitter<Uri> = new EventEmitter<Uri>();
+class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
+    private readonly onDidChangeEvent: EventEmitter<Uri> = new EventEmitter<Uri>();
 
-    private disposable: Disposable;
+    private readonly disposable: Set<Disposable> = new Set();
 
     get onDidChange() { return this.onDidChangeEvent.event; }
 
     public constructor() {
-        const registry = vscode.workspace.registerTextDocumentContentProvider("svn", this);
-
-        this.disposable = Disposable.from(this.onDidChangeEvent, registry);
+        this.disposable.add(this.onDidChangeEvent);
+        this.disposable.add(workspace.registerTextDocumentContentProvider("svn", this));
     }
 
     public onCommit(states: Iterable<string>) {
@@ -29,13 +27,16 @@ export class SvnTextDocumentContentProvider implements TextDocumentContentProvid
             const content = buffer.toString("utf8");
             return content;
         } catch (err) {
-            if (err instanceof SvnError)
-                return "";
-            throw err;
+            return "";
         }
     }
 
     public dispose(): void {
-        this.disposable.dispose();
+        for (const item of this.disposable)
+            item.dispose();
+
+        this.disposable.clear();
     }
 }
+
+export const svnTextDocumentContentProvider = new SvnTextDocumentContentProvider();

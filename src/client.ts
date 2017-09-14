@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { Client, SvnError, SvnStatus, SvnStatusResult } from "../svn";
+import { Client, StatusOptions, SvnError, SvnStatus, SvnStatusResult } from "../svn";
 
 export const client = new Client({
     async getSimpleCredential(realm, username) {
@@ -40,25 +40,3 @@ export const client = new Client({
         };
     },
 });
-
-let time;
-const supress = 1000;
-
-export function delay(timeout: number) {
-    return new Promise((resolve) => setTimeout(resolve, timeout));
-}
-
-export class TaskCanceledError extends Error {
-}
-
-export async function status(path: string) {
-    const now = Date.now();
-    time = now;
-
-    await delay(supress);
-
-    if (time !== now)
-        throw new TaskCanceledError("Task canceled");
-
-    return await client.status(path);
-}

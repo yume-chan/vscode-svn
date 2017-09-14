@@ -63,7 +63,7 @@
     },
     "displayName": "SVN",
     "engines": {
-        "vscode": "^1.13.0"
+        "vscode": "^1.16.0"
     },
     "license": "MIT",
     "main": "./out/extension",

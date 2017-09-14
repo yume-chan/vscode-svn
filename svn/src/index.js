@@ -1,7 +1,5 @@
 const svn = require("..");
 
-console.log(`Path: ${svn.path}`);
-
 (async function() {
     try {
         const client = new svn.Client({
@@ -21,12 +19,12 @@ console.log(`Path: ${svn.path}`);
         // console.log(await client.commit("C:/Users/Simon/Desktop/www/test/trunk", "Test"));
         // console.log(await client.update("C:/Users/Simon/Desktop/www/test/trunk"));
 
-        {
-            const file = "C:/Users/Simon/Desktop/www/webchat/datasvr/invest/getContent.cfg";
-            const buffer = await client.cat(file);
-            const content = buffer.toString("utf8");
-            console.log(content);
-        }
+        // {
+        //     const file = "C:/Users/Simon/Desktop/www/webchat/datasvr/invest/getContent.cfg";
+        //     const buffer = await client.cat(file);
+        //     const content = buffer.toString("utf8");
+        //     console.log(content);
+        // }
 
         {
             const file = "C:/Users/Simon/Desktop/www/test/trunk";

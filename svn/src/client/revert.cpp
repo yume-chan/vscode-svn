@@ -8,20 +8,18 @@ Util_Method(Client::Revert)
     auto promise = resolver->GetPromise();
     Util_Return(promise);
 
-    Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
+    Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or an array of string"));
 
     Util_PreparePool();
 
-    auto paths = Util_ToAprStringArray(args[0]);
-    if (paths == nullptr)
-        return;
+    Util_ToAprStringArray(args[0], path);
 
     client->revert_notify = [](const svn_wc_notify_t *notify) -> void {
 
     };
 
-    auto work = [paths, client, pool]() -> svn_error_t * {
-        return svn_client_revert3(paths,              // paths
+    auto work = [path, client, pool]() -> svn_error_t * {
+        return svn_client_revert3(path,              // paths
                                   svn_depth_infinity, // depth
                                   nullptr,            // changelists
                                   true,               // clear_changelists

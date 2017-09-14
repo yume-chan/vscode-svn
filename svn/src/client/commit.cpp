@@ -15,13 +15,11 @@ Util_Method(Client::Commit)
     auto promise = resolver->GetPromise();
     Util_Return(promise);
 
-    Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
+    Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or an array of string"));
 
     Util_PreparePool();
 
-    auto paths = Util_ToAprStringArray(args[0]);
-    if (paths == nullptr)
-        return;
+    Util_ToAprStringArray(args[0], path);
 
     Util_RejectIf(args.Length() == 1, Util_Error(TypeError, "Argument \"message\" must be a string"));
 
@@ -40,8 +38,8 @@ Util_Method(Client::Commit)
     };
 
     auto _callback = make_shared<function<void(const svn_commit_info_t *)>>(move(callback));
-    auto work = [paths, _callback, client, pool]() -> svn_error_t * {
-        return svn_client_commit6(paths,              // targets
+    auto work = [path, _callback, client, pool]() -> svn_error_t * {
+        return svn_client_commit6(path,               // targets
                                   svn_depth_infinity, // depth
                                   true,               // keep_locks
                                   false,              // keep_changelists

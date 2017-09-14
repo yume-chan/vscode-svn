@@ -17,7 +17,6 @@ Util_Method(Client::Add)
     Util_RejectIf(path == nullptr, Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
 
     client->add_notify = [](const svn_wc_notify_t *notify) -> void {
-
     };
 
     auto work = [path, client, pool]() -> svn_error_t * {

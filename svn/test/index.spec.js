@@ -177,7 +177,7 @@ describe("svn", function() {
         });
 
         describe("#status", function() {
-            describeFunction("svn.Client.prototype", "status", 1);
+            describeFunction("svn.Client.prototype", "status", 2);
 
             it("should exist on instance", function() {
                 expect(client).to.have.property("status", svn.Client.prototype.status);

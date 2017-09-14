@@ -6,8 +6,7 @@
     "typings": "index.d.ts",
     "scripts": {
         "test": "mocha",
-        "postinstall": "node scripts/postinstall.js",
-        "electron": "node-gyp rebuild --target=1.7.7 --arch=x64 --dist-url=https://atom.io/download/electron --debug && node scripts/postinstall.js debug"
+        "postinstall": "node scripts/postinstall.js"
     },
     "keywords": [],
     "author": "Simon Chan",

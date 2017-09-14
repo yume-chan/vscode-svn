@@ -32,9 +32,13 @@ using v8::External;
 class Simple
 {
   public:
-    typedef Uv::Async<Simple *, Uv::Semaphore *, const char *, const char *, svn_auth_cred_simple_t **, apr_pool_t *> SimpleAsync;
+    typedef Uv::Async<Simple *, Uv::Semaphore *, svn_auth_cred_simple_t **, const char *, const char *, apr_pool_t *> SimpleAsync;
 
-    Simple(Isolate *isolate, Local<Function> &callback, int32_t retry_count, apr_pool_t *pool, apr_array_header_t *providers)
+    Simple(Isolate *isolate,
+           Local<Function> &callback,
+           int32_t retry_count,
+           apr_pool_t *pool,
+           apr_array_header_t *providers)
         : isolate(isolate),
           async(SimpleAsync(uv_default_loop()))
     {
@@ -101,7 +105,12 @@ class Simple
     }
     Util_MethodEnd;
 
-    static void invoke_callback(Simple *simple, Uv::Semaphore *semaphore, const char *realm, const char *username, svn_auth_cred_simple_t **result, apr_pool_t *pool)
+    static void invoke_callback(Simple *simple,
+                                Uv::Semaphore *semaphore,
+                                svn_auth_cred_simple_t **result,
+                                const char *realm,
+                                const char *username,
+                                apr_pool_t *pool)
     {
         if (simple->_callback.IsEmpty())
         {
@@ -130,11 +139,16 @@ class Simple
         promise->Then(context, then);
     }
 
-    static svn_error_t *send_callback(svn_auth_cred_simple_t **result, void *baton, const char *realm, const char *username, svn_boolean_t may_save, apr_pool_t *pool)
+    static svn_error_t *send_callback(svn_auth_cred_simple_t **result,
+                                      void *baton,
+                                      const char *realm,
+                                      const char *username,
+                                      svn_boolean_t may_save,
+                                      apr_pool_t *pool)
     {
         auto simple = static_cast<Simple *>(baton);
         auto semaphore = make_unique<Uv::Semaphore>();
-        simple->async.send(invoke_callback, simple, semaphore.get(), realm, username, result, pool);
+        simple->async.send(invoke_callback, simple, semaphore.get(), result, realm, username, pool);
         semaphore->wait();
 
         return SVN_NO_ERROR;

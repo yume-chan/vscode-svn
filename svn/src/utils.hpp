@@ -19,7 +19,7 @@ using std::vector;
 #define Util_String(value) String::NewFromUtf8(isolate, value, NewStringType::kNormal).ToLocalChecked()
 #define Util_StringFromStd(value) String::NewFromUtf8(isolate, value.c_str(), NewStringType::kNormal, value.length()).ToLocalChecked()
 
-#define Util_New(type, value) type::New(isolate, value)
+#define Util_New(type, value) type::New(isolate, (value))
 #define Util_NewMaybe(type, ...) type::New(context, __VA_ARGS__).ToLocalChecked()
 
 #define Util_Persistent(type, value) new Persistent<type, v8::CopyablePersistentTraits<type>>(isolate, value)

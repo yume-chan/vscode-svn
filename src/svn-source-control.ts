@@ -1,11 +1,26 @@
 import * as path from "path";
 
-import * as vscode from "vscode";
-import { CancellationToken, Command, Disposable, ProviderResult, SourceControl, SourceControlResourceGroup, SourceControlResourceState, Uri } from "vscode";
+import {
+    CancellationToken,
+    Command,
+    Disposable,
+    ProgressLocation,
+    ProviderResult,
+    QuickDiffProvider,
+    scm,
+    SourceControl,
+    SourceControlResourceGroup,
+    SourceControlResourceState,
+    Uri,
+    window,
+    workspace,
+} from "vscode";
 
-import { Client, SvnStatus, SvnStatusResult } from "../svn";
+import { Client, SvnError, SvnStatus, SvnStatusResult } from "../svn";
 
-import { WorkspaceState } from "./workspace-state";
+import { client } from "./client";
+import { throttle } from "./git/decorators";
+import { svnTextDocumentContentProvider } from "./svn-text-document-content-provider";
 
 const iconsRootPath = path.join(__dirname, "..", "resources", "icons");
 
@@ -18,7 +33,21 @@ const statusIcons = {
 
 export type SvnResourceState = SvnStatus & SourceControlResourceState;
 
-export class SvnSourceControl {
+export class SvnSourceControl implements QuickDiffProvider {
+    public static async detect(folder: string) {
+        try {
+            const result = await client.status(folder, {
+                depth: Client.Depth.empty,
+                getAll: true,
+            });
+            const item = result[0];
+            const root = path.relative(item.relativePath, item.path);
+            return new SvnSourceControl(folder);
+        } catch (err) {
+            return undefined;
+        }
+    }
+
     public stagedFiles: Set<string> = new Set<string>();
 
     private sourceControl: SourceControl;
@@ -27,57 +56,101 @@ export class SvnSourceControl {
     private changes: SourceControlResourceGroup;
     private ignored: SourceControlResourceGroup;
 
-    private disposable: Disposable;
+    private disposable: Disposable[] = [];
 
-    public constructor(private state: WorkspaceState) {
-        this.sourceControl = vscode.scm.createSourceControl("svn", "SVN");
+    private constructor(public root: string) {
+        this.sourceControl = scm.createSourceControl("svn", `${path.basename(root)} (Svn)`);
         this.sourceControl.acceptInputCommand = { command: "svn.commit", title: "Commit" };
-        this.sourceControl.quickDiffProvider = {
-            provideOriginalResource(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
-                return uri.with({ scheme: "svn" });
-            },
-        };
+        this.sourceControl.quickDiffProvider = this;
+        this.disposable.push(this.sourceControl);
 
         this.staged = this.sourceControl.createResourceGroup("staged", "Staged Changes");
         this.staged.hideWhenEmpty = true;
+        this.disposable.push(this.staged);
 
         this.changes = this.sourceControl.createResourceGroup("changes", "Changes");
+        this.disposable.push(this.changes);
 
         this.ignored = this.sourceControl.createResourceGroup("ignore", "Ignored");
         this.ignored.hideWhenEmpty = true;
+        this.disposable.push(this.ignored);
 
-        this.disposable = Disposable.from(this.sourceControl, this.staged, this.changes, this.ignored);
+        const watcher = workspace.createFileSystemWatcher("**");
+        this.disposable.push(watcher);
+
+        this.disposable.push(watcher.onDidChange(this.refresh, this));
+        this.disposable.push(watcher.onDidCreate(this.refresh, this));
+        this.disposable.push(watcher.onDidDelete(this.refresh, this));
     }
 
-    public update(state: SvnStatusResult) {
-        const stagedStates = [];
-        const changedStates = [];
-        const ignoredStates = [];
-        for (const item of state) {
-            if (this.state.unstage.has(item.path)) {
-                ignoredStates.push(this.getResourceState(item));
-            } else {
-                switch (item.nodeStatus) {
-                    case Client.StatusKind.added:
-                    case Client.StatusKind.deleted:
-                    case Client.StatusKind.modified:
-                    case Client.StatusKind.obstructed:
-                        this.stagedFiles.add(item.path);
-                        stagedStates.push(this.getResourceState(item));
-                        break;
-                    default:
-                        changedStates.push(this.getResourceState(item));
-                        break;
-                }
-            }
-        }
-        this.staged.resourceStates = stagedStates;
-        this.changes.resourceStates = changedStates;
-        this.ignored.resourceStates = ignoredStates;
+    public provideOriginalResource?(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
+        return uri.with({ scheme: "svn" });
     }
 
     public dispose(): void {
-        this.disposable.dispose();
+        for (const item of this.disposable)
+            item.dispose();
+    }
+
+    @throttle
+    private async refresh() {
+        try {
+            const states = await client.status(this.root);
+            const ignored = (await client.status(this.root, { changelists: "ignore-on-commit" })).map((x) => x.path);
+
+            this.stagedFiles.clear();
+
+            const stagedStates: SvnResourceState[] = [];
+            const changedStates: SvnResourceState[] = [];
+            const ignoredStates: SvnResourceState[] = [];
+            for (const item of states) {
+                if (ignored.includes(item.path)) {
+                    ignoredStates.push(this.getResourceState(item));
+                } else {
+                    switch (item.nodeStatus) {
+                        case Client.StatusKind.modified:
+                        case Client.StatusKind.obstructed:
+                            this.stagedFiles.add(item.path);
+                            stagedStates.push(this.getResourceState(item));
+                            break;
+                        default:
+                            changedStates.push(this.getResourceState(item));
+                            break;
+                    }
+                }
+            }
+            this.staged.resourceStates = stagedStates;
+            this.changes.resourceStates = changedStates;
+            this.ignored.resourceStates = ignoredStates;
+        } catch (err) {
+            return;
+        }
+    }
+
+    private async commit(message?: string) {
+        message = message || this.sourceControl.inputBox.value;
+        if (message === undefined || message === "") {
+            window.showErrorMessage("Please input commit message.");
+            return;
+        }
+
+        if (this.stagedFiles.size === 0)
+            return;
+
+        window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
+            try {
+                await client.commit(Array.from(this.stagedFiles), message!);
+                svnTextDocumentContentProvider.onCommit(this.stagedFiles);
+            } catch (err) {
+                if (err instanceof SvnError)
+                    window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
+                else
+                    window.showErrorMessage(`Commit failed: ${err.message}`);
+            } finally {
+                this.sourceControl.inputBox.value = "";
+                this.refresh();
+            }
+        });
     }
 
     private getResourceState(state: SvnStatus): SvnResourceState {

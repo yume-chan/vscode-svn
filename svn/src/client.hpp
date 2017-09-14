@@ -32,8 +32,11 @@ private:
 
   static void Add(const FunctionCallbackInfo<Value> &args);
   static void Cat(const FunctionCallbackInfo<Value> &args);
+  static void ChangelistAdd(const FunctionCallbackInfo<Value> &args);
+  static void ChangelistRemove(const FunctionCallbackInfo<Value> &args);
   static void Checkout(const FunctionCallbackInfo<Value> &args);
   static void Commit(const FunctionCallbackInfo<Value> &args);
+  static void Info(const FunctionCallbackInfo<Value> &args);
   static void Status(const FunctionCallbackInfo<Value> &args);
   static void Revert(const FunctionCallbackInfo<Value> &args);
   static void Update(const FunctionCallbackInfo<Value> &args);

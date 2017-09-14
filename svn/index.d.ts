@@ -9,14 +9,14 @@ export interface SvnVersion {
 export var version: SvnVersion;
 
 export namespace Client {
-    export enum Kind {
+    enum Kind {
         none,
         file,
         dir,
         unknown,
     }
 
-    export enum StatusKind {
+    enum StatusKind {
         none,
         unversioned,
         normal,
@@ -31,18 +31,30 @@ export namespace Client {
         external,
         incomplete,
     }
+
+    enum Depth {
+        unknown,
+        exclude,
+        empty,
+        files,
+        immediates,
+        infinity,
+    }
 }
 
 export interface SvnStatus {
-    path: string;
     kind: Client.Kind;
+    path: string;
+    filesize: number | string;
+    versioned: boolean;
+    conflicted: boolean;
     nodeStatus: Client.StatusKind;
     textStatus: Client.StatusKind;
     propStatus: Client.StatusKind;
-    versioned: boolean;
-    conflicted: boolean;
     copied: boolean;
     switched: boolean;
+    repositoryUrl: string;
+    relativePath: string;
 }
 
 export type SvnStatusResult = SvnStatus[] & { version?: number };
@@ -61,14 +73,28 @@ export interface ClientOptions {
     getSimpleCredential(realm: string | undefined, username: string | undefined): Promise<SimpleCredential | undefined>;
 }
 
+export interface StatusOptions {
+    revision: any;
+    depth: any;
+    getAll: boolean;
+    checkOutOfDate: boolean;
+    checkWorkingCopy: boolean;
+    noIgnore: boolean;
+    ignoreExternals: boolean;
+    depthAsSticky: boolean;
+    changelists: string | string[];
+}
+
 export class Client {
     public constructor(options?: Partial<ClientOptions>);
 
     public add(path: string): Promise<void>;
     public cat(path: string): Promise<Buffer>;
+    public changelistAdd(path: string | string[], changelist: string): Promise<void>;
+    public changelistRemove(path: string | string[]): Promise<void>;
     public checkout(url: string, path: string): Promise<void>;
     public commit(path: string | string[], message: string): Promise<void>;
-    public status(path: string): Promise<SvnStatusResult>;
+    public status(path: string, options?: Partial<StatusOptions>): Promise<SvnStatusResult>;
     public revert(path: string | string[]): Promise<void>;
     public update(path: string | string[]): Promise<void>;
 }

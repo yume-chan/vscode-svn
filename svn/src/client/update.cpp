@@ -8,23 +8,21 @@ Util_Method(Client::Update)
     auto promise = resolver->GetPromise();
     Util_Return(promise);
 
-    Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or array of string"));
+    Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or an array of string"));
 
     Util_PreparePool();
 
-    auto paths = Util_ToAprStringArray(args[0]);
-    if (paths == nullptr)
-        return;
+    Util_ToAprStringArray(args[0], path);
 
     client->update_notify = [](const svn_wc_notify_t *notify) -> void {
 
     };
 
     auto _result_rev = make_shared<apr_array_header_t *>();
-    auto work = [_result_rev, paths, client, pool]() -> svn_error_t * {
+    auto work = [_result_rev, path, client, pool]() -> svn_error_t * {
         svn_opt_revision_t revision{svn_opt_revision_working};
         return svn_client_update4(_result_rev.get(),  // result_revs
-                                  paths,              // paths
+                                  path,               // paths
                                   &revision,          // revision
                                   svn_depth_infinity, // depth
                                   false,              // depth_is_sticky
