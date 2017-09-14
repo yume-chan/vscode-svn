@@ -26,7 +26,7 @@ struct StatusOptions
     bool noIgnore;
     bool ignoreExternals;
     bool depthAsSticky;
-    const apr_array_header_t *changelists;
+    apr_array_header_t *changelists;
 };
 
 Util_Method(Client::Status)
@@ -63,8 +63,9 @@ Util_Method(Client::Status)
         options->ignoreExternals = Util_GetProperty(object, "ignoreExternals")->BooleanValue();
         options->depthAsSticky = Util_GetProperty(object, "depthAsSticky")->BooleanValue();
 
-        Util_ToAprStringArray(Util_GetProperty(object, "changelists"), changelists);
-        options->changelists = changelists;
+        auto changelists = Util_GetProperty(object, "changelists");
+        if (!changelists->IsUndefined())
+            Util_ToAprStringArray(changelists, options->changelists);
     }
 
     auto result = Array::New(isolate);

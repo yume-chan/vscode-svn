@@ -12,6 +12,17 @@ inline svn_error_t *invoke_callback(void *baton, const char *path, const svn_cli
     return SVN_NO_ERROR;
 }
 
+struct InfoOptions
+{
+    svn_opt_revision_t pegRevision;
+    svn_opt_revision_t revision;
+    enum svn_depth_t depth;
+    bool fetchExcluded;
+    bool fetchActualOnly;
+    bool includeExternals;
+    apr_array_header_t *changelists;
+};
+
 Util_Method(Client::Info)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
@@ -25,6 +36,29 @@ Util_Method(Client::Info)
     Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string"));
     auto path = Util_ToAprString(arg);
     Util_RejectIf(path == nullptr, Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+
+    auto options = make_shared<InfoOptions>();
+    options->pegRevision = svn_opt_revision_t{svn_opt_revision_working};
+    options->revision = svn_opt_revision_t{svn_opt_revision_working};
+    options->depth = svn_depth_infinity;
+
+    arg = args[1];
+    if (arg->IsObject())
+    {
+        auto object = arg.As<Object>();
+
+        auto depth = Util_GetProperty(object, "depth");
+        if (depth->IsNumber())
+            options->depth = static_cast<svn_depth_t>(depth->IntegerValue(context).ToChecked());
+
+        options->fetchExcluded = Util_GetProperty(object, "fetchExcluded")->BooleanValue();
+        options->fetchActualOnly = Util_GetProperty(object, "fetchActualOnly")->BooleanValue();
+        options->includeExternals = Util_GetProperty(object, "includeExternals")->BooleanValue();
+
+        auto changelists = Util_GetProperty(object, "changelists");
+        if (!changelists->IsUndefined())
+            Util_ToAprStringArray(changelists, options->changelists);
+    }
 
     auto result = Array::New(isolate);
     auto _result = Util_SharedPersistent(Array, result);
@@ -58,20 +92,19 @@ Util_Method(Client::Info)
 
     auto _result_rev = make_shared<svn_revnum_t *>();
     auto _send_callback = make_shared<function<void(const char *, const svn_client_info2_t *, apr_pool_t *)>>(move(send_callback));
-    auto work = [_result_rev, client, path, _send_callback, pool]() -> svn_error_t * {
-        svn_opt_revision_t revision{svn_opt_revision_working};
-        return svn_client_info4(path,                 // abspath_or_url
-                                &revision,            // peg_revision
-                                &revision,            // revision
-                                svn_depth_infinity,   // depth
-                                false,                // fetch_excluded
-                                true,                 // fetch_actual_only
-                                true,                 // include_externals
-                                nullptr,              // changelists
-                                invoke_callback,      // receiver
-                                _send_callback.get(), // receiver_baton
-                                client->context,      // ctx
-                                pool.get());          // scratch_pool
+    auto work = [_result_rev, client, path, options, _send_callback, pool]() -> svn_error_t * {
+        return svn_client_info4(path,                      // abspath_or_url
+                                &options->pegRevision,     // peg_revision
+                                &options->revision,        // revision
+                                options->depth,            // depth
+                                options->fetchExcluded,    // fetch_excluded
+                                options->fetchActualOnly,  // fetch_actual_only
+                                options->includeExternals, // include_externals
+                                options->changelists,      // changelists
+                                invoke_callback,           // receiver
+                                _send_callback.get(),      // receiver_baton
+                                client->context,           // ctx
+                                pool.get());               // scratch_pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

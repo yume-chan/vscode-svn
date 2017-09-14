@@ -19,6 +19,7 @@ Util_Method(Client::Commit)
 
     Util_PreparePool();
 
+    apr_array_header_t *path;
     Util_ToAprStringArray(args[0], path);
 
     Util_RejectIf(args.Length() == 1, Util_Error(TypeError, "Argument \"message\" must be a string"));

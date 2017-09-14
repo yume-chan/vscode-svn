@@ -15,7 +15,6 @@
     auto pool = shared_ptr<apr_pool_t>(_pool, apr_pool_destroy);
 
 #define Util_ToAprStringArray(arg, name)                                                                                                           \
-    apr_array_header_t *name;                                                                                                                      \
     if (arg->IsString())                                                                                                                           \
     {                                                                                                                                              \
         auto value = Util_ToAprString(arg);                                                                                                        \

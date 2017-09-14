@@ -12,6 +12,7 @@ Util_Method(Client::Revert)
 
     Util_PreparePool();
 
+    apr_array_header_t *path;
     Util_ToAprStringArray(args[0], path);
 
     client->revert_notify = [](const svn_wc_notify_t *notify) -> void {

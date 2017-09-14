@@ -42,6 +42,17 @@ export namespace Client {
     }
 }
 
+export interface SvnStatusOptions {
+    depth: Client.Depth;
+    getAll: boolean;
+    checkOutOfDate: boolean;
+    checkWorkingCopy: boolean;
+    noIgnore: boolean;
+    ignoreExternals: boolean;
+    depthAsSticky: boolean;
+    changelists: string | string[];
+}
+
 export interface SvnStatus {
     kind: Client.Kind;
     path: string;
@@ -73,15 +84,15 @@ export interface ClientOptions {
     getSimpleCredential(realm: string | undefined, username: string | undefined): Promise<SimpleCredential | undefined>;
 }
 
-export interface StatusOptions {
-    revision: any;
-    depth: any;
-    getAll: boolean;
-    checkOutOfDate: boolean;
-    checkWorkingCopy: boolean;
-    noIgnore: boolean;
-    ignoreExternals: boolean;
-    depthAsSticky: boolean;
+export interface SvnInfo {
+
+}
+
+export interface SvnInfoOptions {
+    depth: Client.Depth;
+    fetchExcluded: boolean;
+    fetchActualOnly: boolean;
+    includeExternals: boolean;
     changelists: string | string[];
 }
 
@@ -94,7 +105,8 @@ export class Client {
     public changelistRemove(path: string | string[]): Promise<void>;
     public checkout(url: string, path: string): Promise<void>;
     public commit(path: string | string[], message: string): Promise<void>;
-    public status(path: string, options?: Partial<StatusOptions>): Promise<SvnStatusResult>;
+    public info(path: string | string[], options?: Partial<SvnInfoOptions>): Promise<SvnInfo[]>;
+    public status(path: string, options?: Partial<SvnStatusOptions>): Promise<SvnStatusResult>;
     public revert(path: string | string[]): Promise<void>;
     public update(path: string | string[]): Promise<void>;
 }
