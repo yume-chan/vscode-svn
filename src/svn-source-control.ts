@@ -38,16 +38,11 @@ export interface SvnResourceState extends SvnStatus, SourceControlResourceState 
 export class SvnSourceControl implements QuickDiffProvider {
     public static async detect(folder: string) {
         try {
-            const state = await client.status(folder, {
+            const info = await client.info(folder, {
                 depth: Client.Depth.empty,
-                getAll: true,
             });
-            const item = state[0];
 
-            let root = path.normalize(item.path);
-            root = root.substring(0, root.length - path.normalize(item.relativePath).length);
-
-            const result = new SvnSourceControl(root);
+            const result = new SvnSourceControl(info[0].workingCopy!.rootPath);
             await result.refresh();
             return result;
         } catch (err) {

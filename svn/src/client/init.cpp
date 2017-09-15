@@ -32,6 +32,7 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     SetPrototypeMethod(ClientTemplate, prototype, "changelistRemove", ChangelistRemove, 1);
     SetPrototypeMethod(ClientTemplate, prototype, "checkout", Checkout, 2);
     SetPrototypeMethod(ClientTemplate, prototype, "commit", Commit, 2);
+    SetPrototypeMethod(ClientTemplate, prototype, "info", Info, 2);
     SetPrototypeMethod(ClientTemplate, prototype, "status", Status, 2);
     SetPrototypeMethod(ClientTemplate, prototype, "revert", Revert, 1);
     SetPrototypeMethod(ClientTemplate, prototype, "update", Update, 1);

@@ -84,8 +84,13 @@ export interface ClientOptions {
     getSimpleCredential(realm: string | undefined, username: string | undefined): Promise<SimpleCredential | undefined>;
 }
 
-export interface SvnInfo {
+export interface SvnWorkingCopyInfo {
+    rootPath: string;
+}
 
+export interface SvnInfo {
+    path: string;
+    workingCopy: SvnWorkingCopyInfo | undefined;
 }
 
 export interface SvnInfoOptions {

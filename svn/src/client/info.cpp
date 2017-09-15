@@ -63,14 +63,24 @@ Util_Method(Client::Info)
     auto result = Array::New(isolate);
     auto _result = Util_SharedPersistent(Array, result);
     auto semaphore = make_shared<Uv::Semaphore>();
-    auto async_callback = [isolate, _result, semaphore](const svn_client_info2_t *status) -> void {
+    auto async_callback = [isolate, _result, semaphore](const char *path, const svn_client_info2_t *info) -> void {
         HandleScope scope(isolate);
         auto context = isolate->GetCallingContext();
 
         auto result = _result->Get(isolate);
 
         auto item = Object::New(isolate);
-        // Util_Set(item, "path", Util_String(status->local_abspath));
+
+        Util_Set(item, "path", Util_String(path));
+
+        auto wc_info = info->wc_info;
+        if (wc_info != nullptr)
+        {
+            auto workingCopy = Object::New(isolate);
+            Util_Set(workingCopy, "rootPath", Util_String(wc_info->wcroot_abspath));
+            Util_Set(item, "workingCopy", workingCopy);
+        }
+
         // Util_Set(item, "kind", Util_New(Integer, status->kind));
         // Util_Set(item, "textStatus", Util_New(Integer, status->text_status));
         // Util_Set(item, "nodeStatus", Util_New(Integer, status->node_status));
@@ -84,9 +94,9 @@ Util_Method(Client::Info)
         semaphore->post();
     };
 
-    auto async = make_shared<Uv::Async<const svn_client_info2_t *>>(uv_default_loop());
-    auto send_callback = [async, async_callback, semaphore](const char *, const svn_client_info2_t *info, apr_pool_t *) -> void {
-        async->send(async_callback, info);
+    auto async = make_shared<Uv::Async<const char *, const svn_client_info2_t *>>(uv_default_loop());
+    auto send_callback = [async, async_callback, semaphore](const char *path, const svn_client_info2_t *info, apr_pool_t *) -> void {
+        async->send(async_callback, path, info);
         semaphore->wait();
     };
 

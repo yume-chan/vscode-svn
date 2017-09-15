@@ -34,9 +34,10 @@ class Async
 {
   public:
     Async(uv_loop_t *loop)
-        : loop(loop)
     {
-        init();
+        handle = new uv_async_t;
+        uv_async_init(loop, handle, invoke_callback);
+        handle->data = this;
     }
 
     ~Async()
@@ -52,7 +53,6 @@ class Async
     }
 
   private:
-    uv_loop_t *loop;
     function<void(Args...)> callback;
     tuple<Args...> args;
 
@@ -79,13 +79,6 @@ class Async
     {
         auto async = static_cast<Async<Args...> *>(handle->data);
         expend(async->callback, async->args);
-    }
-
-    void init()
-    {
-        handle = new uv_async_t;
-        uv_async_init(loop, handle, invoke_callback);
-        handle->data = this;
     }
 };
 }

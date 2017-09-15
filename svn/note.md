@@ -10,8 +10,10 @@
     - [More basic types of V8](#more-basic-types-of-v8)
     - [Execution of a normal function](#execution-of-a-normal-function)
     - [Execution of an async function](#execution-of-an-async-function)
+        - [Threading in V8](#threading-in-v8)
         - [Use libuv to execute methods non-blocking](#use-libuv-to-execute-methods-non-blocking)
-        - [Pass the `Promise::Resolver` to `after_work_cb`](#pass-the-`promiseresolver`-to-`afterworkcb`)
+        - [Pass the `Promise::Resolver` to `after_work_cb`](#pass-the-promiseresolver-to-afterworkcb)
+        - [Access V8 things in `work_cb`](#access-v8-things-in-workcb)
     - [Configuring](#configuring)
     - [Compiling](#compiling)
     - [Using Visual Studio](#using-visual-studio)
@@ -140,15 +142,21 @@ Note: **MAYBE** `context` is from `isolate->GetCurrentContext();`
 
 Also, lots of (and more and more) operations need `context` as well, so you should also get it at the beginning of methods.
 
+### Threading in V8
+
+V8 is single-thread, access V8 things from multiple threads without locks will cause crashes (And more badly, crash with no exception).
+
+Standard embeded V8 should be able to use `v8::Locker` and `v8::Unlocker` to switch the active thread. But I cannot archieve it in Node.js, correct me if it's possible.
+
 ### Use libuv to execute methods non-blocking
 
 ```` C++
 int uv_queue_work(uv_loop_t* loop, uv_work_t* req, uv_work_cb work_cb, uv_after_work_cb after_work_cb)
 ````
 
-`work_cb` will run on a pooled thread, `after_work_cb` will run on the loop thread.
+`work_cb` will run on a pooled thread, `after_work_cb` will run on the caller thread.
 
-**MAYBE** only `after_work_cb` can use V8 things, call V8 methods in `work_cb` will cause exception, or even crash without any exception.
+Note: As we already known, you cannot access V8 things in `work_cb`.
 
 So we need to do CPU-bound work in `work_cb`, then `resolve` the `Promise` in `after_work_cb`.
 
@@ -157,44 +165,55 @@ For simplify the work with C function pointers (`work_cb` and `after_work_cb` pa
 ````C++
 using std::function;
 
+template <class T>
 class WorkData
 {
   public:
-	WorkData(const function<void()> work, const function<void()> after_work)
-		: work(work),
-		  after_work(after_work) {}
+    WorkData(function<T()> work, function<void(T)> after_work)
+        : work(move(work)),
+          after_work(move(after_work)) {}
 
-	const function<void()> work;
-	const function<void()> after_work;
+    WorkData(const WorkData &other) = delete;
+
+    const function<T()> work;
+    const function<void(T)> after_work;
+
+    T result;
 };
 
-void execute_uv_work(uv_work_t *req)
+template <class T>
+static void invoke_uv_work(uv_work_t *req)
 {
-	auto data = (WorkData *)req->data;
-	data->work();
+    auto data = static_cast<WorkData<T> *>(req->data);
+    data->result = data->work();
 }
 
-void after_uv_work(uv_work_t *req, int status)
+template <class T>
+static void invoke_after_uv_work(uv_work_t *req, int status)
 {
-	auto data = (WorkData *)req->data;
-	data->after_work();
+    auto data = static_cast<WorkData<T> *>(req->data);
+    data->after_work(data->result);
 
-	delete data;
-	delete req;
+    delete data;
+    delete req;
 }
 
-int32_t queue_work(uv_loop_t *loop, const std::function<void()> work, const std::function<void()> after_work)
+// @return 0 if success.
+template <class T>
+inline int32_t QueueWork(uv_loop_t *loop, const function<T()> work, const function<void(T)> after_work)
 {
-	if (work == nullptr || after_work == nullptr)
-		return -1;
+    if (work == nullptr || after_work == nullptr)
+        return -1;
 
-	uv_work_t *req = new uv_work_t;
-	req->data = new WorkData(std::move(work), std::move(after_work));
-	return uv_queue_work(loop, req, execute_uv_work, after_uv_work);
+    auto req = new uv_work_t;
+    req->data = new WorkData<T>(move(work), move(after_work));
+    return uv_queue_work(loop, req, invoke_uv_work<T>, invoke_after_uv_work<T>);
 }
 ````
 
 Note: `std::function` is a generic function pointer, definitely better than C function pointers.
+
+Note: It's a templated method, so it can carry one value from `work_cb` to `after_work_cb`.
 
 ### Pass the `Promise::Resolver` to `after_work_cb`
 
@@ -219,9 +238,50 @@ auto after_work = [=]() -> void {
 
 Note: **MAYBE** get `context` from `isolate->GetCallingContext()`.
 
-To resolve, use `resolver->Resolve(context, result)`, to reject, use `resolver->Reject(context, exception);`.
+Note: For more information about Lambda expressions, see also [Lambda expressions on cppreference.com](http://en.cppreference.com/w/cpp/language/lambda).
 
-Note: To create an exception, use `Exception::Error(String::NewFromUtf8(isolate, message, NewStringType::kNormal).ToLocalChecked())`, there are more error types in `Exception`.
+To resolve a Promise, call `resolver->Resolve(context, result)`. To reject it, call `resolver->Reject(context, exception);`.
+
+Note: To create an exception, use `Exception::Error(String::NewFromUtf8(isolate, message, NewStringType::kNormal).ToLocalChecked())`, there are more error types in `Exception`, for example, `TypeError` and `RangeError`.
+
+### Access V8 things in `work_cb`
+
+Normally, you cannot access V8 things in `work_cb`. But if you really want to do it, there is a way.
+
+libuv's `uv_async_t` object can make you wake up the main thread, where V8 is useable. The basic usage is:
+
+```` C++
+auto semaphore = new uv_sem_t;
+uv_sem_init(semaphore, 0);
+
+auto callback = [=]() -> void {
+    // Do things
+    semaphore->post();
+};
+
+auto invoke_callback = [](uv_async_t *handle) -> void {
+    auto callback = static_cast<function<void(void)>>(handle->data);
+    callback();
+};
+
+auto async = new uv_async_t;
+auto loop = uv_default_loop();
+uv_async_init(loop, async, invoke_callback);
+
+async->data = new function<void(void)>(callback);
+uv_async_send(async);
+
+semaphore->wait();
+
+auto close_cb = [](uv_handle_t* handle) -> void {
+    delete reinterpret_cast<uv_async_t *>(handle);
+};
+uv_close_t(reinterpret_cast<uv_handle_t *>(async), close_cb);
+````
+
+As usual, I wrapped this method so I can pass `std::function`s instead of C function pointers.
+
+Use the example above, now I can use V8 things in `work_cb`, without crash my Node.
 
 ## Configuring
 
