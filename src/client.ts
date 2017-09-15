@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { Client, SvnStatusOptions, SvnError, SvnStatus, SvnStatusResult } from "../svn";
+import { Client, SvnError, SvnStatus, SvnStatusOptions, SvnStatusResult } from "../svn";
 
 export const client = new Client({
     async getSimpleCredential(realm, username) {

@@ -31,20 +31,25 @@ const statusIcons = {
     [Client.StatusKind.obstructed]: "conflict",
 };
 
-export type SvnResourceState = SvnStatus & SourceControlResourceState;
+export interface SvnResourceState extends SvnStatus, SourceControlResourceState {
+    control: SvnSourceControl;
+}
 
 export class SvnSourceControl implements QuickDiffProvider {
     public static async detect(folder: string) {
         try {
-            const result = await client.status(folder, {
+            const state = await client.status(folder, {
                 depth: Client.Depth.empty,
                 getAll: true,
             });
-            const item = result[0];
+            const item = state[0];
 
             let root = path.normalize(item.path);
             root = root.substring(0, root.length - path.normalize(item.relativePath).length);
-            return new SvnSourceControl(root);
+
+            const result = new SvnSourceControl(root);
+            await result.refresh();
+            return result;
         } catch (err) {
             return undefined;
         }
@@ -58,31 +63,31 @@ export class SvnSourceControl implements QuickDiffProvider {
     private changes: SourceControlResourceGroup;
     private ignored: SourceControlResourceGroup;
 
-    private disposable: Disposable[] = [];
+    private disposables: Disposable[] = [];
 
     private constructor(public root: string) {
         this.sourceControl = scm.createSourceControl("svn", `${path.basename(root)} (Svn)`);
-        this.sourceControl.acceptInputCommand = { command: "svn.commit", title: "Commit" };
+        this.sourceControl.acceptInputCommand = { command: "svn.commit", title: "Commit", arguments: [root] };
         this.sourceControl.quickDiffProvider = this;
-        this.disposable.push(this.sourceControl);
+        this.disposables.push(this.sourceControl);
 
         this.staged = this.sourceControl.createResourceGroup("staged", "Staged Changes");
         this.staged.hideWhenEmpty = true;
-        this.disposable.push(this.staged);
+        this.disposables.push(this.staged);
 
         this.changes = this.sourceControl.createResourceGroup("changes", "Changes");
-        this.disposable.push(this.changes);
+        this.disposables.push(this.changes);
 
         this.ignored = this.sourceControl.createResourceGroup("ignore", "Ignored");
         this.ignored.hideWhenEmpty = true;
-        this.disposable.push(this.ignored);
+        this.disposables.push(this.ignored);
 
         const watcher = workspace.createFileSystemWatcher("**");
-        this.disposable.push(watcher);
+        this.disposables.push(watcher);
 
-        this.disposable.push(watcher.onDidChange(this.refresh, this));
-        this.disposable.push(watcher.onDidCreate(this.refresh, this));
-        this.disposable.push(watcher.onDidDelete(this.refresh, this));
+        this.disposables.push(watcher.onDidChange(this.refresh, this));
+        this.disposables.push(watcher.onDidCreate(this.refresh, this));
+        this.disposables.push(watcher.onDidDelete(this.refresh, this));
     }
 
     public provideOriginalResource?(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
@@ -90,12 +95,21 @@ export class SvnSourceControl implements QuickDiffProvider {
     }
 
     public dispose(): void {
-        for (const item of this.disposable)
+        for (const item of this.disposables)
             item.dispose();
     }
 
+    public async update() {
+        try {
+            await client.update(this.root);
+            await this.refresh();
+        } catch (err) {
+            return;
+        }
+    }
+
     @throttle
-    private async refresh() {
+    public async refresh() {
         try {
             const states = await client.status(this.root);
             const ignored = (await client.status(this.root, { changelists: "ignore-on-commit" })).map((x) => x.path);
@@ -110,6 +124,7 @@ export class SvnSourceControl implements QuickDiffProvider {
                     ignoredStates.push(this.getResourceState(item));
                 } else {
                     switch (item.nodeStatus) {
+                        case Client.StatusKind.added:
                         case Client.StatusKind.modified:
                         case Client.StatusKind.obstructed:
                             this.stagedFiles.add(item.path);
@@ -158,11 +173,12 @@ export class SvnSourceControl implements QuickDiffProvider {
     private getResourceState(state: SvnStatus): SvnResourceState {
         const resourceUri = Uri.file(state.path);
         const filename: string = path.basename(state.path);
-        const icon = statusIcons[state.textStatus];
+        const icon = state.versioned ? statusIcons[state.nodeStatus] : statusIcons[Client.StatusKind.unversioned];
         const command: Command = state.textStatus === Client.StatusKind.modified ?
             { command: "vscode.diff", title: "Diff", arguments: [resourceUri.with({ scheme: "svn" }), resourceUri, filename] } :
             { command: "vscode.open", title: "Open", arguments: [resourceUri] };
         return {
+            control: this,
             ...state,
             resourceUri,
             command,

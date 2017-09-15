@@ -8,41 +8,95 @@
     "contributes": {
         "commands": [
             {
-                "category": "SVN",
+                "category": "Svn",
                 "command": "svn.update",
-                "title": "Update"
+                "title": "%command.update%"
             },
             {
-                "category": "SVN",
+                "category": "Svn",
                 "command": "svn.commit",
-                "title": "Commit"
+                "title": "%command.commit%",
+                "icon": {
+                    "light": "resources/icons/light/check.svg",
+                    "dark": "resources/icons/dark/check.svg"
+                }
             },
             {
-                "category": "SVN",
+                "category": "Svn",
                 "command": "svn.stage",
-                "title": "Stage"
+                "title": "%command.stage%",
+                "icon": {
+                    "light": "resources/icons/light/stage.svg",
+                    "dark": "resources/icons/dark/stage.svg"
+                }
             },
             {
-                "category": "SVN",
+                "category": "Svn",
+                "command": "svn.stageAll",
+                "title": "%command.stageAll%",
+                "icon": {
+                    "light": "resources/icons/light/stage.svg",
+                    "dark": "resources/icons/dark/stage.svg"
+                }
+            },
+            {
+                "category": "Svn",
                 "command": "svn.unstage",
-                "title": "Unstage"
+                "title": "%command.unstage%",
+                "icon": {
+                    "light": "resources/icons/light/unstage.svg",
+                    "dark": "resources/icons/dark/unstage.svg"
+                }
+            },
+            {
+                "category": "Svn",
+                "command": "svn.refresh",
+                "icon": {
+                    "dark": "resources/icons/dark/refresh.svg",
+                    "light": "resources/icons/light/refresh.svg"
+                },
+                "title": "%command.refresh%"
+            },
+            {
+                "category": "Svn",
+                "command": "svn.openFile",
+                "title": "%command.openFile%"
             }
         ],
         "menus": {
+            "scm/resourceGroup/context": [
+                {
+                    "command": "svn.stageAll",
+                    "group": "inline",
+                    "when": "scmProvider == svn && scmResourceGroup == changes"
+                },
+                {
+                    "command": "svn.stageAll",
+                    "group": "1_modification",
+                    "when": "scmProvider == svn && scmResourceGroup == changes"
+                }
+            ],
             "scm/resourceState/context": [
                 {
                     "command": "svn.stage",
-                    "when": "scmProvider == svn && svnState == running"
+                    "group": "1_modification",
+                    "when": "scmProvider == svn && scmResourceGroup == changes"
+                },
+                {
+                    "command": "svn.stage",
+                    "group": "inline",
+                    "when": "scmProvider == svn && scmResourceGroup == changes"
                 },
                 {
                     "command": "svn.unstage",
-                    "when": "scmProvider == svn && svnState == running"
+                    "when": "scmProvider == svn"
                 }
             ],
             "scm/title": [
                 {
                     "command": "svn.commit",
-                    "when": "scmProvider == svn && svnState == running"
+                    "when": "scmProvider == svn",
+                    "group": "navigation"
                 }
             ]
         }
@@ -61,7 +115,7 @@
         "typescript": "^2.5.2",
         "vscode": "^1.1.5"
     },
-    "displayName": "SVN",
+    "displayName": "Svn",
     "engines": {
         "vscode": "^1.16.0"
     },
@@ -73,6 +127,7 @@
         "compile": "tsc -watch -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test",
+        "vscode:build": "node-gyp -C svn build --target=1.7.7 --arch=x64 --dist-url=https://atom.io/download/electron --debug",
         "vscode:prepublish": "node-gyp -C svn rebuild --target=1.7.7 --arch=x64 --dist-url=https://atom.io/download/electron --debug && node svn/scripts/postinstall.js debug && tsc -p ./"
     },
     "version": "0.0.1"

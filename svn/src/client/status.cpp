@@ -93,8 +93,10 @@ Util_Method(Client::Status)
         Util_Set(item, "propStatus", Util_New(Integer, status->prop_status));
         Util_Set(item, "copied", Util_New(Boolean, status->copied));
         Util_Set(item, "switched", Util_New(Boolean, status->switched));
-        Util_Set(item, "repositoryUrl", Util_String(status->repos_root_url));
-        Util_Set(item, "relativePath", Util_String(status->repos_relpath));
+        if (status->repos_root_url != nullptr)
+            Util_Set(item, "repositoryUrl", Util_String(status->repos_root_url));
+        if (status->repos_relpath != nullptr)
+            Util_Set(item, "relativePath", Util_String(status->repos_relpath));
         result->Set(context, result->Length(), item);
 
         semaphore->post();

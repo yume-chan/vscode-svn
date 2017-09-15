@@ -1,0 +1,9 @@
+{
+    "command.update": "Update",
+    "command.commit": "Commit",
+    "command.stage": "Stage",
+    "command.stageAll": "Stage All",
+    "command.unstage": "Unstage",
+    "command.refresh": "Refresh",
+    "command.openFile": "Open File"
+}
