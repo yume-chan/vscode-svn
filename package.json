@@ -68,31 +68,36 @@
                 {
                     "command": "svn.stageAll",
                     "group": "inline",
-                    "when": "scmProvider == svn && scmResourceGroup == changes"
+                    "when": "scmProvider == svn && scmResourceGroup != staged"
                 },
                 {
                     "command": "svn.stageAll",
                     "group": "1_modification",
-                    "when": "scmProvider == svn && scmResourceGroup == changes"
+                    "when": "scmProvider == svn && scmResourceGroup != staged"
                 }
             ],
             "scm/resourceState/context": [
                 {
                     "command": "svn.stage",
                     "group": "1_modification",
-                    "when": "scmProvider == svn && scmResourceGroup == changes"
+                    "when": "scmProvider == svn && scmResourceGroup != staged"
                 },
                 {
                     "command": "svn.stage",
                     "group": "inline",
-                    "when": "scmProvider == svn && scmResourceGroup == changes"
+                    "when": "scmProvider == svn && scmResourceGroup != staged"
                 },
                 {
                     "command": "svn.unstage",
-                    "when": "scmProvider == svn"
+                    "when": "scmProvider == svn && scmResourceGroup == staged"
                 }
             ],
             "scm/title": [
+                {
+                    "command": "svn.refresh",
+                    "when": "scmProvider == svn",
+                    "group": "navigation"
+                },
                 {
                     "command": "svn.commit",
                     "when": "scmProvider == svn",

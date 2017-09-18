@@ -40,19 +40,19 @@ Util_Method(Client::Commit)
 
     auto _callback = make_shared<function<void(const svn_commit_info_t *)>>(move(callback));
     auto work = [path, _callback, client, pool]() -> svn_error_t * {
-        return svn_client_commit6(path,               // targets
-                                  svn_depth_infinity, // depth
-                                  true,               // keep_locks
-                                  false,              // keep_changelists
-                                  false,              // commit_as_operations
-                                  true,               // include_file_externals
-                                  true,               // include_dir_externals
-                                  nullptr,            // changelists
-                                  nullptr,            // revprop_table
-                                  invoke_callback,    // commit_callback
-                                  _callback.get(),    // commit_baton
-                                  client->context,    // ctx
-                                  pool.get());        // scratch_pool
+        SVN_ERR(svn_client_commit6(path,               // targets
+                                   svn_depth_infinity, // depth
+                                   true,               // keep_locks
+                                   false,              // keep_changelists
+                                   false,              // commit_as_operations
+                                   true,               // include_file_externals
+                                   true,               // include_dir_externals
+                                   nullptr,            // changelists
+                                   nullptr,            // revprop_table
+                                   invoke_callback,    // commit_callback
+                                   _callback.get(),    // commit_baton
+                                   client->context,    // ctx
+                                   pool.get()));       // scratch_pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

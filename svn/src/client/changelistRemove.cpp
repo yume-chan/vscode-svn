@@ -15,19 +15,14 @@ Util_Method(Client::ChangelistRemove)
     apr_array_header_t *path;
     Util_ToAprStringArray(args[0], path);
 
-    Util_RejectIf(args.Length() == 1, Util_Error(TypeError, "Argument \"changelist\" must be a string"));
+    auto work = [path, client, pool]() -> svn_error_t * {
+        SVN_ERR(svn_client_remove_from_changelists(path,               // paths
+                                                   svn_depth_infinity, // depth
+                                                   nullptr,            // changelists
+                                                   client->context,    // ctx
+                                                   pool.get()));       // scratch_pool
 
-    auto arg = args[1];
-    Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"changelist\" must be a string"));
-    auto changelist = Util_ToAprString(arg);
-    Util_RejectIf(changelist == nullptr, Util_Error(Error, "Argument \"changelist\" must be a string without null bytes"));
-
-    auto work = [path, changelist, client, pool]() -> svn_error_t * {
-        return svn_client_remove_from_changelists(path,               // paths
-                                                  svn_depth_infinity, // depth
-                                                  nullptr,            // changelists
-                                                  client->context,    // ctx
-                                                  pool.get());        // scratch_pool
+        return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

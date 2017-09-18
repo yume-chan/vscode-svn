@@ -20,8 +20,9 @@ Util_Method(Client::Checkout)
 
     arg = args[1];
     Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string"));
-    auto path = Util_ToAprString(arg);
+    const char *path = Util_ToAprString(arg);
     Util_RejectIf(path == nullptr, Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+    Util_CheckAbsolutePath(path);
 
     client->checkout_notify = [](const svn_wc_notify_t *notify) -> void {
 
@@ -30,16 +31,16 @@ Util_Method(Client::Checkout)
     auto _result_rev = make_shared<svn_revnum_t *>();
     auto work = [_result_rev, url, path, client, pool]() -> svn_error_t * {
         svn_opt_revision_t revision{svn_opt_revision_head};
-        return svn_client_checkout3(*_result_rev,      // result_rev
-                                    url,               // URL
-                                    path,              // path
-                                    &revision,         // peg_revision
-                                    &revision,         // revision
-                                    svn_depth_unknown, // depth
-                                    false,             // ignore_externals
-                                    false,             // allow_unver_obstructions
-                                    client->context,   // ctx
-                                    pool.get());       // pool
+        SVN_ERR(svn_client_checkout3(*_result_rev,      // result_rev
+                                     url,               // URL
+                                     path,              // path
+                                     &revision,         // peg_revision
+                                     &revision,         // revision
+                                     svn_depth_unknown, // depth
+                                     false,             // ignore_externals
+                                     false,             // allow_unver_obstructions
+                                     client->context,   // ctx
+                                     pool.get()));      // pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

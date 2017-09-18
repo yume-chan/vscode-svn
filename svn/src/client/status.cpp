@@ -40,12 +40,20 @@ Util_Method(Client::Status)
 
     auto arg = args[0];
     Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string"));
-    auto path = Util_ToAprString(arg);
+    const char *path = Util_ToAprString(arg);
     Util_RejectIf(path == nullptr, Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+    Util_CheckAbsolutePath(path);
 
-    auto options = make_shared<StatusOptions>();
+    auto options = Util_AprAllocType(StatusOptions);
     options->revision = svn_opt_revision_t{svn_opt_revision_working};
     options->depth = svn_depth_infinity;
+    options->getAll = false;
+    options->checkOutOfDate = false;
+    options->checkWorkingCopy = false;
+    options->noIgnore = false;
+    options->ignoreExternals = false;
+    options->depthAsSticky = true;
+    options->changelists = nullptr;
 
     arg = args[1];
     if (arg->IsObject())
@@ -56,12 +64,29 @@ Util_Method(Client::Status)
         if (depth->IsNumber())
             options->depth = static_cast<svn_depth_t>(depth->IntegerValue(context).ToChecked());
 
-        options->getAll = Util_GetProperty(object, "getAll")->BooleanValue();
-        options->checkOutOfDate = Util_GetProperty(object, "checkOutOfDate")->BooleanValue();
-        options->checkWorkingCopy = Util_GetProperty(object, "checkWorkingCopy")->BooleanValue();
-        options->noIgnore = Util_GetProperty(object, "noIgnore")->BooleanValue();
-        options->ignoreExternals = Util_GetProperty(object, "ignoreExternals")->BooleanValue();
-        options->depthAsSticky = Util_GetProperty(object, "depthAsSticky")->BooleanValue();
+        auto getAll = Util_GetProperty(object, "getAll");
+        if (getAll->IsBoolean())
+            options->getAll = getAll->BooleanValue();
+
+        auto checkOutOfDate = Util_GetProperty(object, "checkOutOfDate");
+        if (checkOutOfDate->IsBoolean())
+            options->checkOutOfDate = checkOutOfDate->BooleanValue();
+
+        auto checkWorkingCopy = Util_GetProperty(object, "checkWorkingCopy");
+        if (checkWorkingCopy->IsBoolean())
+            options->checkWorkingCopy = checkWorkingCopy->BooleanValue();
+
+        auto noIgnore = Util_GetProperty(object, "noIgnore");
+        if (noIgnore->IsBoolean())
+            options->noIgnore = noIgnore->BooleanValue();
+
+        auto ignoreExternals = Util_GetProperty(object, "ignoreExternals");
+        if (ignoreExternals->IsBoolean())
+            options->ignoreExternals = ignoreExternals->BooleanValue();
+
+        auto depthAsSticky = Util_GetProperty(object, "depthAsSticky");
+        if (depthAsSticky->IsBoolean())
+            options->depthAsSticky = depthAsSticky->BooleanValue();
 
         auto changelists = Util_GetProperty(object, "changelists");
         if (!changelists->IsUndefined())

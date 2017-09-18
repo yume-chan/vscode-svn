@@ -47,8 +47,6 @@ svn_error_t *log3(const char **log_msg, const char **tmp_file, const apr_array_h
     return SVN_NO_ERROR;
 }
 
-#define Util_AprAllocType(type) static_cast<type *>(apr_palloc(_pool, sizeof(type)))
-
 svn_error_t *ssl_server_trust_prompt_callback(svn_auth_cred_ssl_server_trust_t **cred, void *baton, const char *realm, apr_uint32_t failures, const svn_auth_ssl_server_cert_info_t *cert_info, svn_boolean_t may_save, apr_pool_t *_pool)
 {
     auto result = Util_AprAllocType(svn_auth_cred_ssl_server_trust_t);

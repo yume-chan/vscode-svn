@@ -23,12 +23,12 @@ Util_Method(Client::ChangelistAdd)
     Util_RejectIf(changelist == nullptr, Util_Error(Error, "Argument \"changelist\" must be a string without null bytes"));
 
     auto work = [path, changelist, client, pool]() -> svn_error_t * {
-        return svn_client_add_to_changelist(path,               // paths
-                                            changelist,         // changelist
-                                            svn_depth_infinity, // depth
-                                            nullptr,            // changelists
-                                            client->context,    // ctx
-                                            pool.get());        // scratch_pool
+        SVN_ERR(svn_client_add_to_changelist(path,               // paths
+                                             changelist,         // changelist
+                                             svn_depth_infinity, // depth
+                                             nullptr,            // changelists
+                                             client->context,    // ctx
+                                             pool.get()));       // scratch_pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

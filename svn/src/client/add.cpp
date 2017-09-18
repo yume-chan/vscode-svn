@@ -13,21 +13,22 @@ Util_Method(Client::Add)
 
     auto arg = args[0];
     Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string"));
-    auto path = Util_ToAprString(arg);
+    const char *path = Util_ToAprString(arg);
     Util_RejectIf(path == nullptr, Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+    Util_CheckAbsolutePath(path);
 
     client->add_notify = [](const svn_wc_notify_t *notify) -> void {
     };
 
     auto work = [path, client, pool]() -> svn_error_t * {
-        return svn_client_add5(path,               // path
-                               svn_depth_infinity, // depth
-                               true,               // force
-                               false,              // no_ignore
-                               false,              // no_autoprops
-                               true,               // add_parents
-                               client->context,    // ctx
-                               pool.get());        // scratch_pool
+        SVN_ERR(svn_client_add5(path,               // path
+                                svn_depth_infinity, // depth
+                                true,               // force
+                                false,              // no_ignore
+                                false,              // no_autoprops
+                                true,               // add_parents
+                                client->context,    // ctx
+                                pool.get()));       // scratch_pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

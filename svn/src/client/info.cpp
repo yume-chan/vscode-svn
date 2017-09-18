@@ -34,13 +34,18 @@ Util_Method(Client::Info)
 
     auto arg = args[0];
     Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string"));
-    auto path = Util_ToAprString(arg);
+    const char *path = Util_ToAprString(arg);
     Util_RejectIf(path == nullptr, Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+    Util_CheckAbsolutePath(path);
 
-    auto options = make_shared<InfoOptions>();
-    options->pegRevision = svn_opt_revision_t{svn_opt_revision_working};
-    options->revision = svn_opt_revision_t{svn_opt_revision_working};
-    options->depth = svn_depth_infinity;
+    auto options = Util_AprAllocType(InfoOptions);
+    options->pegRevision = svn_opt_revision_t{svn_opt_revision_unspecified};
+    options->revision = svn_opt_revision_t{svn_opt_revision_unspecified};
+    options->depth = svn_depth_empty;
+    options->fetchExcluded = true;
+    options->fetchActualOnly = true;
+    options->includeExternals = false;
+    options->changelists = nullptr;
 
     arg = args[1];
     if (arg->IsObject())
@@ -51,9 +56,17 @@ Util_Method(Client::Info)
         if (depth->IsNumber())
             options->depth = static_cast<svn_depth_t>(depth->IntegerValue(context).ToChecked());
 
-        options->fetchExcluded = Util_GetProperty(object, "fetchExcluded")->BooleanValue();
-        options->fetchActualOnly = Util_GetProperty(object, "fetchActualOnly")->BooleanValue();
-        options->includeExternals = Util_GetProperty(object, "includeExternals")->BooleanValue();
+        auto fetchExcluded = Util_GetProperty(object, "fetchExcluded");
+        if (fetchExcluded->IsBoolean())
+            options->fetchExcluded = fetchExcluded->BooleanValue();
+
+        auto fetchActualOnly = Util_GetProperty(object, "fetchActualOnly");
+        if (fetchActualOnly->IsBoolean())
+            options->fetchActualOnly = fetchActualOnly->BooleanValue();
+
+        auto includeExternals = Util_GetProperty(object, "includeExternals");
+        if (includeExternals->IsBoolean())
+            options->includeExternals = includeExternals->BooleanValue();
 
         auto changelists = Util_GetProperty(object, "changelists");
         if (!changelists->IsUndefined())
@@ -103,18 +116,20 @@ Util_Method(Client::Info)
     auto _result_rev = make_shared<svn_revnum_t *>();
     auto _send_callback = make_shared<function<void(const char *, const svn_client_info2_t *, apr_pool_t *)>>(move(send_callback));
     auto work = [_result_rev, client, path, options, _send_callback, pool]() -> svn_error_t * {
-        return svn_client_info4(path,                      // abspath_or_url
-                                &options->pegRevision,     // peg_revision
-                                &options->revision,        // revision
-                                options->depth,            // depth
-                                options->fetchExcluded,    // fetch_excluded
-                                options->fetchActualOnly,  // fetch_actual_only
-                                options->includeExternals, // include_externals
-                                options->changelists,      // changelists
-                                invoke_callback,           // receiver
-                                _send_callback.get(),      // receiver_baton
-                                client->context,           // ctx
-                                pool.get());               // scratch_pool
+        SVN_ERR(svn_client_info4(path,                      // abspath_or_url
+                                 &options->pegRevision,     // peg_revision
+                                 &options->revision,        // revision
+                                 options->depth,            // depth
+                                 options->fetchExcluded,    // fetch_excluded
+                                 options->fetchActualOnly,  // fetch_actual_only
+                                 options->includeExternals, // include_externals
+                                 options->changelists,      // changelists
+                                 invoke_callback,           // receiver
+                                 _send_callback.get(),      // receiver_baton
+                                 client->context,           // ctx
+                                 pool.get()));              // scratch_pool
+
+        return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

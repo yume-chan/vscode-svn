@@ -20,8 +20,9 @@ Util_Method(Client::Cat)
 
     auto arg = args[0];
     Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"path\" must be a string"));
-    auto path = Util_ToAprString(arg);
+    const char *path = Util_ToAprString(arg);
     Util_RejectIf(path == nullptr, Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
+    Util_CheckAbsolutePath(path);
 
     // Create a sub pool for `buffer`
     // To create node::Buffer without copy
@@ -39,15 +40,15 @@ Util_Method(Client::Cat)
         apr_pool_t *scratch_pool;
         apr_pool_create(&scratch_pool, pool.get());
 
-        return svn_client_cat3(&props,          // props
-                               stream,          // out
-                               path,            // path_or_url
-                               &revision,       // peg_revision
-                               &revision,       // revision
-                               false,           // expand_keywords
-                               client->context, // ctx
-                               pool.get(),      // result_pool
-                               scratch_pool);   // scratch_pool
+        SVN_ERR(svn_client_cat3(&props,          // props
+                                stream,          // out
+                                path,            // path_or_url
+                                &revision,       // peg_revision
+                                &revision,       // revision
+                                false,           // expand_keywords
+                                client->context, // ctx
+                                pool.get(),      // result_pool
+                                scratch_pool));  // scratch_pool
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

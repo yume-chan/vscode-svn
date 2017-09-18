@@ -9,10 +9,14 @@ class CommandCenter {
 
     constructor() {
         this.disposables.push(commands.registerCommand("svn.update", (control: SvnSourceControl) => control.update()));
+
+        this.disposables.push(commands.registerCommand("svn.refresh", () => {
+            // TODO: refresh
+        }));
+
         this.disposables.push(commands.registerCommand("svn.commit", this.commit));
 
         this.disposables.push(commands.registerCommand("svn.stage", this.stage));
-
         this.disposables.push(commands.registerCommand("svn.stageAll", (group: SourceControlResourceGroup) => {
             return this.stage(...group.resourceStates as SvnResourceState[]);
         }));

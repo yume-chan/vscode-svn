@@ -12,6 +12,12 @@
     Util::SetReadOnly(isolate, context, Depth, #name, Util_New(Integer, svn_depth_##name)); \
     Util::SetReadOnly(isolate, context, Depth, svn_depth_##name, Util_String(#name))
 
+static svn_error_t *return_error_handler(svn_boolean_t can_return, const char *file, int line, const char *expr)
+{
+    svn_error_t *err = svn_error_raise_on_malfunction(TRUE, file, line, expr);
+    return err;
+}
+
 namespace Svn
 {
 Persistent<Function> Client::constructor;
@@ -73,5 +79,7 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
 
     constructor.Reset(isolate, Client);
     Util_SetReadOnly2(exports, Client);
+
+    svn_error_set_malfunction_handler(return_error_handler);
 }
 }
