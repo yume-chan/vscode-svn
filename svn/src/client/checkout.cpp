@@ -41,6 +41,8 @@ Util_Method(Client::Checkout)
                                      false,             // allow_unver_obstructions
                                      client->context,   // ctx
                                      pool.get()));      // pool
+
+        return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

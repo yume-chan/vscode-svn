@@ -36,16 +36,16 @@ export interface SvnResourceState extends SvnStatus, SourceControlResourceState 
 }
 
 export class SvnSourceControl implements QuickDiffProvider {
-    public static async detect(folder: string) {
+    public static async detect(file: string) {
         try {
-            const workingCopy = (await client.info(folder, {
+            const workingCopy = (await client.info(file, {
                 depth: Client.Depth.empty,
             }))[0].workingCopy;
 
             if (workingCopy === undefined)
                 return;
 
-            const result = new SvnSourceControl(workingCopy.rootPath);
+            const result = new SvnSourceControl(workingCopy.rootPath, file);
             await result.refresh();
             return result;
         } catch (err) {
@@ -61,31 +61,31 @@ export class SvnSourceControl implements QuickDiffProvider {
     private changes: SourceControlResourceGroup;
     private ignored: SourceControlResourceGroup;
 
-    private disposables: Disposable[] = [];
+    private readonly disposable: Set<Disposable> = new Set();
 
-    private constructor(public root: string) {
+    private constructor(public root: string, public file: string) {
         this.sourceControl = scm.createSourceControl("svn", `${path.basename(root)} (Svn)`);
-        this.sourceControl.acceptInputCommand = { command: "svn.commit", title: "Commit", arguments: [root] };
+        this.sourceControl.acceptInputCommand = { command: "svn.commit", title: "Commit", arguments: [this.sourceControl] };
         this.sourceControl.quickDiffProvider = this;
-        this.disposables.push(this.sourceControl);
+        this.disposable.add(this.sourceControl);
 
         this.staged = this.sourceControl.createResourceGroup("staged", "Staged Changes");
         this.staged.hideWhenEmpty = true;
-        this.disposables.push(this.staged);
+        this.disposable.add(this.staged);
 
         this.changes = this.sourceControl.createResourceGroup("changes", "Changes");
-        this.disposables.push(this.changes);
+        this.disposable.add(this.changes);
 
         this.ignored = this.sourceControl.createResourceGroup("ignore", "Ignored");
         this.ignored.hideWhenEmpty = true;
-        this.disposables.push(this.ignored);
+        this.disposable.add(this.ignored);
 
         const watcher = workspace.createFileSystemWatcher("**");
-        this.disposables.push(watcher);
+        this.disposable.add(watcher);
 
-        this.disposables.push(watcher.onDidChange(this.refresh, this));
-        this.disposables.push(watcher.onDidCreate(this.refresh, this));
-        this.disposables.push(watcher.onDidDelete(this.refresh, this));
+        this.disposable.add(watcher.onDidChange(this.refresh, this));
+        this.disposable.add(watcher.onDidCreate(this.refresh, this));
+        this.disposable.add(watcher.onDidDelete(this.refresh, this));
     }
 
     public provideOriginalResource?(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
@@ -93,8 +93,10 @@ export class SvnSourceControl implements QuickDiffProvider {
     }
 
     public dispose(): void {
-        for (const item of this.disposables)
+        for (const item of this.disposable)
             item.dispose();
+
+        this.disposable.clear();
     }
 
     public async update() {
@@ -145,7 +147,7 @@ export class SvnSourceControl implements QuickDiffProvider {
         }
     }
 
-    private async commit(message?: string) {
+    public async commit(message?: string) {
         message = message || this.sourceControl.inputBox.value;
         if (message === undefined || message === "") {
             window.showErrorMessage("Please input commit message.");
@@ -186,6 +188,7 @@ export class SvnSourceControl implements QuickDiffProvider {
             decorations: {
                 dark: { iconPath: Uri.file(path.resolve(iconsRootPath, "dark", `status-${icon}.svg`)) },
                 light: { iconPath: Uri.file(path.resolve(iconsRootPath, "light", `status-${icon}.svg`)) },
+                tooltip: `Node: ${Client.StatusKind[state.nodeStatus]}\nText: ${Client.StatusKind[state.textStatus]}\nProp: ${Client.StatusKind[state.propStatus]}`,
             },
         };
     }

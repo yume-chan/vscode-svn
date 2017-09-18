@@ -1,54 +1,47 @@
-import { commands, Disposable, SourceControlResourceGroup } from "vscode";
+import { commands, Disposable, SourceControl, SourceControlResourceGroup } from "vscode";
 
 import { Client } from "../svn";
 import { client } from "./client";
 import { SvnResourceState, SvnSourceControl } from "./svn-source-control";
+import { workspaceManager } from "./workspace-manager";
 
 class CommandCenter {
-    private readonly disposables: Disposable[] = [];
+    private readonly disposable: Set<Disposable> = new Set();
 
     constructor() {
-        this.disposables.push(commands.registerCommand("svn.update", (control: SvnSourceControl) => control.update()));
+        this.disposable.add(commands.registerCommand("svn.update", (control: SvnSourceControl) => control.update()));
 
-        this.disposables.push(commands.registerCommand("svn.refresh", () => {
-            // TODO: refresh
-        }));
+        this.disposable.add(commands.registerCommand("svn.commit", this.commit));
+        this.disposable.add(commands.registerCommand("svn.refresh", this.refresh));
 
-        this.disposables.push(commands.registerCommand("svn.commit", this.commit));
-
-        this.disposables.push(commands.registerCommand("svn.stage", this.stage));
-        this.disposables.push(commands.registerCommand("svn.stageAll", (group: SourceControlResourceGroup) => {
+        this.disposable.add(commands.registerCommand("svn.stage", this.stage));
+        this.disposable.add(commands.registerCommand("svn.stageAll", (group: SourceControlResourceGroup) => {
             return this.stage(...group.resourceStates as SvnResourceState[]);
         }));
 
-        this.disposables.push(commands.registerCommand("svn.unstage", async (...resourceStates: SvnResourceState[]) => {
-            if (resourceStates.length === 0)
-                return;
-
-            const control = resourceStates[0].control;
-
-            for (const item of resourceStates) {
-                switch (item.nodeStatus) {
-                    case Client.StatusKind.added:
-                        await client.revert(item.path);
-                        break;
-                    default:
-                        await client.changelistAdd(item.path, "ignore-on-commit");
-                        break;
-                }
-            }
-
-            await control.refresh();
+        this.disposable.add(commands.registerCommand("svn.unstage", this.unstage));
+        this.disposable.add(commands.registerCommand("svn.unstageAll", (group: SourceControlResourceGroup) => {
+            return this.unstage(...group.resourceStates as SvnResourceState[]);
         }));
     }
 
     public dispose(): void {
-        for (const item of this.disposables)
+        for (const item of this.disposable)
             item.dispose();
+
+        this.disposable.clear();
     }
 
-    private commit(...args: any[]) {
-        return;
+    private async commit(e?: SourceControl) {
+        const control = await workspaceManager.find(e);
+        if (control !== undefined)
+            await control.commit();
+    }
+
+    private async refresh(e?: SourceControl) {
+        const control = await workspaceManager.find(e);
+        if (control !== undefined)
+            await control.refresh();
     }
 
     private async stage(...resourceStates: SvnResourceState[]) {
@@ -62,6 +55,26 @@ class CommandCenter {
                 await client.add(item.path);
             else
                 await client.changelistRemove(item.path);
+        }
+
+        await control.refresh();
+    }
+
+    private async unstage(...resourceStates: SvnResourceState[]) {
+        if (resourceStates.length === 0)
+            return;
+
+        const control = resourceStates[0].control;
+
+        for (const item of resourceStates) {
+            switch (item.nodeStatus) {
+                case Client.StatusKind.added:
+                    await client.revert(item.path);
+                    break;
+                default:
+                    await client.changelistAdd(item.path, "ignore-on-commit");
+                    break;
+            }
         }
 
         await control.refresh();

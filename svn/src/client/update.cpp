@@ -22,17 +22,19 @@ Util_Method(Client::Update)
     auto _result_rev = make_shared<apr_array_header_t *>();
     auto work = [_result_rev, path, client, pool]() -> svn_error_t * {
         svn_opt_revision_t revision{svn_opt_revision_working};
-        return svn_client_update4(_result_rev.get(),  // result_revs
-                                  path,               // paths
-                                  &revision,          // revision
-                                  svn_depth_infinity, // depth
-                                  false,              // depth_is_sticky
-                                  false,              // ignore_externals
-                                  false,              // allow_unver_obstructions
-                                  true,               // adds_as_modification
-                                  true,               // make_parents
-                                  client->context,    // ctx
-                                  pool.get());        // pool
+        SVN_ERR(svn_client_update4(_result_rev.get(),  // result_revs
+                                   path,               // paths
+                                   &revision,          // revision
+                                   svn_depth_infinity, // depth
+                                   false,              // depth_is_sticky
+                                   false,              // ignore_externals
+                                   false,              // allow_unver_obstructions
+                                   true,               // adds_as_modification
+                                   true,               // make_parents
+                                   client->context,    // ctx
+                                   pool.get()));       // pool
+
+        return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

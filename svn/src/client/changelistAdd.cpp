@@ -29,6 +29,8 @@ Util_Method(Client::ChangelistAdd)
                                              nullptr,            // changelists
                                              client->context,    // ctx
                                              pool.get()));       // scratch_pool
+
+        return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

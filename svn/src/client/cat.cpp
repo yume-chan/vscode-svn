@@ -49,6 +49,8 @@ Util_Method(Client::Cat)
                                 client->context, // ctx
                                 pool.get(),      // result_pool
                                 scratch_pool));  // scratch_pool
+
+        return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

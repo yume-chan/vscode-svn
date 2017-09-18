@@ -50,6 +50,15 @@
             },
             {
                 "category": "Svn",
+                "command": "svn.unstageAll",
+                "title": "%command.unstageAll%",
+                "icon": {
+                    "light": "resources/icons/light/unstage.svg",
+                    "dark": "resources/icons/dark/unstage.svg"
+                }
+            },
+            {
+                "category": "Svn",
                 "command": "svn.refresh",
                 "icon": {
                     "dark": "resources/icons/dark/refresh.svg",
@@ -74,6 +83,16 @@
                     "command": "svn.stageAll",
                     "group": "1_modification",
                     "when": "scmProvider == svn && scmResourceGroup != staged"
+                },
+                {
+                    "command": "svn.unstageAll",
+                    "group": "inline",
+                    "when": "scmProvider == svn && scmResourceGroup == staged"
+                },
+                {
+                    "command": "svn.unstageAll",
+                    "group": "1_modification",
+                    "when": "scmProvider == svn && scmResourceGroup == staged"
                 }
             ],
             "scm/resourceState/context": [
@@ -89,6 +108,12 @@
                 },
                 {
                     "command": "svn.unstage",
+                    "group": "1_modification",
+                    "when": "scmProvider == svn && scmResourceGroup == staged"
+                },
+                {
+                    "command": "svn.unstage",
+                    "group": "inline",
                     "when": "scmProvider == svn && scmResourceGroup == staged"
                 }
             ],

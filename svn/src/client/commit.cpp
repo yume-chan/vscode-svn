@@ -53,6 +53,8 @@ Util_Method(Client::Commit)
                                    _callback.get(),    // commit_baton
                                    client->context,    // ctx
                                    pool.get()));       // scratch_pool
+
+        return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

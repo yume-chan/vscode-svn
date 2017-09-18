@@ -136,21 +136,23 @@ Util_Method(Client::Status)
     auto _result_rev = make_shared<svn_revnum_t *>();
     auto _send_callback = make_shared<function<void(const char *, const svn_client_status_t *, apr_pool_t *)>>(move(send_callback));
     auto work = [_result_rev, client, path, options, _send_callback, pool]() -> svn_error_t * {
-        return svn_client_status6(*_result_rev,              // result_rev
-                                  client->context,           // ctx
-                                  path,                      // path
-                                  &options->revision,        // revision
-                                  options->depth,            // depth
-                                  options->getAll,           // get_all
-                                  options->checkOutOfDate,   // check_out_of_date
-                                  options->checkWorkingCopy, // check_working_copy
-                                  options->noIgnore,         // no_ignore
-                                  options->ignoreExternals,  // ignore_externals
-                                  options->depthAsSticky,    // depth_as_sticky,
-                                  options->changelists,      // changelists
-                                  invoke_callback,           // status_func
-                                  _send_callback.get(),      // status_baton
-                                  pool.get());               // scratch_pool
+        SVN_ERR(svn_client_status6(*_result_rev,              // result_rev
+                                   client->context,           // ctx
+                                   path,                      // path
+                                   &options->revision,        // revision
+                                   options->depth,            // depth
+                                   options->getAll,           // get_all
+                                   options->checkOutOfDate,   // check_out_of_date
+                                   options->checkWorkingCopy, // check_working_copy
+                                   options->noIgnore,         // no_ignore
+                                   options->ignoreExternals,  // ignore_externals
+                                   options->depthAsSticky,    // depth_as_sticky,
+                                   options->changelists,      // changelists
+                                   invoke_callback,           // status_func
+                                   _send_callback.get(),      // status_baton
+                                   pool.get()));              // scratch_pool
+
+        return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);

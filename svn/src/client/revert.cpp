@@ -20,13 +20,15 @@ Util_Method(Client::Revert)
     };
 
     auto work = [path, client, pool]() -> svn_error_t * {
-        return svn_client_revert3(path,              // paths
-                                  svn_depth_infinity, // depth
-                                  nullptr,            // changelists
-                                  true,               // clear_changelists
-                                  false,              // metadata_only
-                                  client->context,    // ctx
-                                  pool.get());        // pool
+        SVN_ERR(svn_client_revert3(path,               // paths
+                                   svn_depth_infinity, // depth
+                                   nullptr,            // changelists
+                                   true,               // clear_changelists
+                                   false,              // metadata_only
+                                   client->context,    // ctx
+                                   pool.get()));       // pool
+
+        return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
