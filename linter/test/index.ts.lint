@@ -1,5 +1,7 @@
 let test = true;
 
+//--------------
+
 if (test)
     true;
 
@@ -7,6 +9,8 @@ if (test)
     true;
 else
     false;
+
+//--------------
 
 if (test) {
           ~  [no % ("if")]
@@ -27,6 +31,40 @@ if (test) {
        ~  [no % ("else")]
     false;
 }
+
+//--------------
+
+if (test) {
+    true;
+    true;
+}
+
+if (test) {
+    true;
+    true;
+} else {
+    true;
+    true;
+}
+
+//--------------
+
+if (test) {
+    true;
+    true;
+} else
+  ~~~~         [yes % ("else")]
+    false;
+
+if (test)
+~~             [yes % ("if")]
+    true;
+else {
+    true;
+    true;
+}
+
+//--------------
 
 if (test)
     if (test)
@@ -49,12 +87,137 @@ else
 ~~~~       [yes % ("else")]
     false;
 
+//--------------
+
 if (test)
     true;
 else if (test)
     true;
 else
     false;
+
+if (test) {
+          ~ [no % ("if")]
+    true;
+} else if (test)
+    true;
+else
+    false;
+
+if (test) {
+          ~ [no % ("if")]
+    true;
+} else if (test)
+    true;
+else {
+     ~ [no % ("else")]
+    false;
+}
+
+//--------------
+
+if (test) {
+          ~ [no % ("if")]
+    true;
+} else if (test) {
+                 ~ [no % ("else if")]
+    true;
+} else
+    false;
+
+if (test) {
+          ~ [no % ("if")]
+    true;
+} else if (test) {
+                 ~ [no % ("else if")]
+    true;
+} else {
+       ~ [no % ("else")]
+    false;
+}
+
+//--------------
+
+if (test)
+    for (let i = 0; i < 1; i++)
+        true;
+
+if (test)
+    for (let i = 0; i < 1; i++)
+        true;
+else
+    false;
+
+if (test)
+    for (let i = 0; i < 1; i++)
+        true;
+else
+    for (let i = 0; i < 1; i++)
+        false;
+
+if (test)
+    true;
+else
+    for (let i = 0; i < 1; i++)
+        false;
+
+//--------------
+
+if (test)
+    for (let i = 0; i < 1; i++) {
+                                ~ [no % ("for")]
+        true;
+    }
+
+if (test)
+    for (let i = 0; i < 1; i++) {
+                                ~ [no % ("for")]
+        true;
+    }
+else
+    false;
+
+if (test)
+    for (let i = 0; i < 1; i++) {
+                                ~ [no % ("for")]
+        true;
+    }
+else
+    for (let i = 0; i < 1; i++)
+        false;
+
+if (test)
+    for (let i = 0; i < 1; i++) {
+                                ~ [no % ("for")]
+        true;
+    }
+else
+    for (let i = 0; i < 1; i++) {
+                                ~ [no % ("for")]
+        false;
+    }
+
+
+if (test) {
+          ~ [no % ("if")]
+    for (let i = 0; i < 1; i++) {
+                                ~ [no % ("for")]
+        true;
+    }
+}
+
+//--------------
+
+if (test) {
+    // true
+}
+
+if (test)
+~~         [yes % ("if")]
+    true;
+else {
+    // false
+}
 
 [yes]: This "%s" statement needs braces.
 [no]: This "%s" statement doesn't need braces.

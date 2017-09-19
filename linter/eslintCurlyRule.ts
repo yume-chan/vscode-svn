@@ -53,9 +53,10 @@ type NodeAnalyzeResult = StatementAnalyzeResult | BlockAnalyzeResult;
 interface Branch {
     keyword: string;
     keywordRange: ts.TextRange;
-    openBraceRange: ts.TextRange | undefined;
-    isBlock: boolean;
     shouldBeBlock: boolean;
+    isBlock: boolean;
+    openBraceRange: ts.TextRange | undefined;
+    nested: ts.Block[] | undefined;
 }
 
 class Walker extends Lint.AbstractWalker<void> {
@@ -84,6 +85,10 @@ class Walker extends Lint.AbstractWalker<void> {
         const start = this.sourceFile.getLineAndCharacterOfPosition(statement.getStart());
         const end = this.sourceFile.getLineAndCharacterOfPosition(statement.getEnd());
         return start.line === end.line;
+    }
+
+    analyzeBlock(block: ts.Block): BlockAnalyzeResult {
+        return this.analyzeNode(block) as BlockAnalyzeResult;
     }
 
     analyzeNode(node: ts.Node): NodeAnalyzeResult;
@@ -139,20 +144,23 @@ class Walker extends Lint.AbstractWalker<void> {
 
         const then = node.thenStatement;
         if (ts.isBlock(then)) {
+            const analyze = this.analyzeBlock(then);
             result.push({
                 keyword: "if",
                 keywordRange: this.getRange(node.getChildAt(0)),
-                openBraceRange: this.getRange(then.getChildAt(0)),
+                shouldBeBlock: analyze.shouldBeBlock,
                 isBlock: true,
-                shouldBeBlock: this.analyzeNode(then).shouldBeBlock
+                openBraceRange: this.getRange(then.getChildAt(0)),
+                nested: analyze.nested,
             });
         } else {
             result.push({
                 keyword: "if",
                 keywordRange: this.getRange(node.getChildAt(0)),
-                openBraceRange: undefined,
+                shouldBeBlock: this.analyzeNode(then).shouldBeBlock,
                 isBlock: false,
-                shouldBeBlock: this.analyzeNode(then).shouldBeBlock
+                openBraceRange: undefined,
+                nested: undefined,
             });
         }
 
@@ -169,9 +177,10 @@ class Walker extends Lint.AbstractWalker<void> {
                             pos: node.getChildAt(5).pos,
                             end: item.keywordRange.end,
                         },
-                        openBraceRange: item.openBraceRange,
                         isBlock: item.isBlock,
-                        shouldBeBlock: item.shouldBeBlock
+                        openBraceRange: item.openBraceRange,
+                        shouldBeBlock: item.shouldBeBlock,
+                        nested: item.nested,
                     });
                 }
                 else {
@@ -182,12 +191,14 @@ class Walker extends Lint.AbstractWalker<void> {
         }
 
         if (ts.isBlock(_else)) {
+            const analyze = this.analyzeBlock(_else);
             result.push({
                 keyword: "else",
                 keywordRange: this.getRange(node.getChildAt(5)),
-                openBraceRange: this.getRange(_else.getChildAt(0)),
+                shouldBeBlock: analyze.shouldBeBlock,
                 isBlock: true,
-                shouldBeBlock: this.analyzeNode(_else).shouldBeBlock,
+                openBraceRange: this.getRange(_else.getChildAt(0)),
+                nested: analyze.nested,
             });
             return result;
         }
@@ -195,9 +206,10 @@ class Walker extends Lint.AbstractWalker<void> {
         result.push({
             keyword: "else",
             keywordRange: this.getRange(node.getChildAt(5)),
-            openBraceRange: undefined,
-            isBlock: false,
             shouldBeBlock: this.analyzeNode(_else).shouldBeBlock,
+            isBlock: false,
+            openBraceRange: undefined,
+            nested: undefined,
         });
         return result;
     }
@@ -215,13 +227,19 @@ class Walker extends Lint.AbstractWalker<void> {
         }
 
         if (shouldBeBlock) {
-            for (const item of branches)
+            for (const item of branches) {
                 if (!item.isBlock)
                     super.addFailure(item.keywordRange.pos, item.keywordRange.end, `This "${item.keyword}" statement needs braces.`);
+            }
         } else {
-            for (const item of branches)
-                if (item.isBlock)
+            for (const item of branches) {
+                if (item.isBlock) {
                     super.addFailure(item.openBraceRange!.pos, item.openBraceRange!.end, `This "${item.keyword}" statement doesn't need braces.`);
+
+                    // for (const nest of item.nested!)
+                    //     this.addFailureAtNode(nest, "block", false);
+                }
+            }
         }
 
         if (result !== undefined && !result.ok)
