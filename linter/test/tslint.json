@@ -1,0 +1,8 @@
+{
+    "rulesDirectory": [
+        ".."
+    ],
+    "rules": {
+        "eslint-curly": true
+    }
+}

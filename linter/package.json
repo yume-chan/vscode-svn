@@ -1,0 +1,20 @@
+{
+  "name": "linter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "eslintCurlyRule.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "tsc -p .",
+    "test": "tslint --test test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "tslint": "^5.7.0",
+    "typescript": "^2.5.2"
+  }
+}

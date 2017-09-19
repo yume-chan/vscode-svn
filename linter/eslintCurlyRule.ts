@@ -45,10 +45,18 @@ class BlockAnalyzeResult {
         return this.ok;
     }
 
-    constructor(readonly isThen: boolean) { }
+    constructor() { }
 }
 
 type NodeAnalyzeResult = StatementAnalyzeResult | BlockAnalyzeResult;
+
+interface Branch {
+    keyword: string;
+    keywordRange: ts.TextRange;
+    openBraceRange: ts.TextRange | undefined;
+    isBlock: boolean;
+    shouldBeBlock: boolean;
+}
 
 class Walker extends Lint.AbstractWalker<void> {
     addFailureAtNode(node: ts.Node, failure: string, fix?: Lint.Fix): void;
@@ -65,33 +73,40 @@ class Walker extends Lint.AbstractWalker<void> {
         return ts.getLeadingCommentRanges(this.sourceFile.text, node.pos) !== undefined;
     }
 
+    getRange(statement: ts.Node): ts.TextRange {
+        return {
+            pos: statement.getStart(),
+            end: statement.getEnd(),
+        };
+    }
+
     isSingleLine(statement: ts.Node): boolean {
         const start = this.sourceFile.getLineAndCharacterOfPosition(statement.getStart());
         const end = this.sourceFile.getLineAndCharacterOfPosition(statement.getEnd());
         return start.line === end.line;
     }
 
-    analyzeNode(node: ts.Node, isThen: boolean): NodeAnalyzeResult;
-    analyzeNode(node: ts.Node | undefined, isThen: boolean): UndefinedAnalyzeResult | NodeAnalyzeResult;
-    analyzeNode(node: ts.Node | undefined, isThen: boolean): UndefinedAnalyzeResult | NodeAnalyzeResult {
+    analyzeNode(node: ts.Node): NodeAnalyzeResult;
+    analyzeNode(node: ts.Node | undefined): UndefinedAnalyzeResult | NodeAnalyzeResult;
+    analyzeNode(node: ts.Node | undefined): UndefinedAnalyzeResult | NodeAnalyzeResult {
         if (node === undefined)
             return { type: NodeType.Undefined };
 
         if (ts.isBlock(node)) {
-            const result = new BlockAnalyzeResult(isThen);
+            const result = new BlockAnalyzeResult();
             this.visitBlock(node, result);
             return result;
-        } else {
-            const result = new BlockAnalyzeResult(isThen);
-            if (this.visitSpecialNode(node, result))
-                return new StatementAnalyzeResult(!result.ok);
-
-            if (this.hasLeadingComments(node))
-                return new StatementAnalyzeResult(false);
-
-            const isSingleLine = this.isSingleLine(node);
-            return new StatementAnalyzeResult(isSingleLine);
         }
+
+        const result = new BlockAnalyzeResult();
+        if (this.visitSpecialNode(node, result))
+            return new StatementAnalyzeResult(!result.ok);
+
+        if (this.hasLeadingComments(node))
+            return new StatementAnalyzeResult(false);
+
+        const isSingleLine = this.isSingleLine(node);
+        return new StatementAnalyzeResult(isSingleLine);
     }
 
     visitBlock(node: ts.Block, result: BlockAnalyzeResult): void {
@@ -119,45 +134,99 @@ class Walker extends Lint.AbstractWalker<void> {
             result.ok = !this.isSingleLine(statement);
     }
 
-    visitIfStatement(node: ts.IfStatement, result?: BlockAnalyzeResult): void {
-        const elseStatement = node.elseStatement;
-        const elseStatementState = this.analyzeNode(elseStatement, false);
+    collectBranches(node: ts.IfStatement): Branch[] {
+        const result: Branch[] = [];
 
         const then = node.thenStatement;
-        const thenStatementState = this.analyzeNode(then, elseStatement !== undefined);
-
-        if (result !== undefined && !result.ok) {
-            if (result.isThen && elseStatement === undefined)
-                result.ok = true;
-            else
-                result.ok = elseStatement !== undefined || thenStatementState.shouldBeBlock;
-        }
-
-        if (thenStatementState.shouldBeBlock) {
-            if (thenStatementState.type != NodeType.Block)
-                this.addFailureAtNode(then.getFirstToken(), "if", true);
-
-            if (elseStatementState.type === NodeType.Statement)
-                this.addFailureAtNode(elseStatement!.getFirstToken(), "else", true);
-        } else if (elseStatementState.type !== NodeType.Undefined && elseStatementState.shouldBeBlock) {
-            if (thenStatementState.type != NodeType.Block)
-                this.addFailureAtNode(then.getFirstToken(), "if", true);
-
-            if (elseStatementState.type === NodeType.Statement)
-                this.addFailureAtNode(elseStatement!.getFirstToken(), "else", true);
+        if (ts.isBlock(then)) {
+            result.push({
+                keyword: "if",
+                keywordRange: this.getRange(node.getChildAt(0)),
+                openBraceRange: this.getRange(then.getChildAt(0)),
+                isBlock: true,
+                shouldBeBlock: this.analyzeNode(then).shouldBeBlock
+            });
         } else {
-            if (thenStatementState.type == NodeType.Block) {
-                this.addFailureAtNode(then.getFirstToken(), "if", false);
-                for (const item of thenStatementState.nested)
-                    this.addFailureAtNode(item.getFirstToken(), "block", false);
-            }
+            result.push({
+                keyword: "if",
+                keywordRange: this.getRange(node.getChildAt(0)),
+                openBraceRange: undefined,
+                isBlock: false,
+                shouldBeBlock: this.analyzeNode(then).shouldBeBlock
+            });
+        }
 
-            if (elseStatementState.type == NodeType.Block) {
-                this.addFailureAtNode(elseStatement!.getFirstToken(), "else", false);
-                for (const item of elseStatementState.nested)
-                    this.addFailureAtNode(item.getFirstToken(), "block", false);
+        const _else = node.elseStatement;
+        if (_else === undefined)
+            return result;
+
+        if (ts.isIfStatement(_else)) {
+            for (const item of this.collectBranches(_else)) {
+                if (item.keyword === "if") {
+                    result.push({
+                        keyword: "else if",
+                        keywordRange: {
+                            pos: node.getChildAt(5).pos,
+                            end: item.keywordRange.end,
+                        },
+                        openBraceRange: item.openBraceRange,
+                        isBlock: item.isBlock,
+                        shouldBeBlock: item.shouldBeBlock
+                    });
+                }
+                else {
+                    result.push(item);
+                }
+            }
+            return result;
+        }
+
+        if (ts.isBlock(_else)) {
+            result.push({
+                keyword: "else",
+                keywordRange: this.getRange(node.getChildAt(5)),
+                openBraceRange: this.getRange(_else.getChildAt(0)),
+                isBlock: true,
+                shouldBeBlock: this.analyzeNode(_else).shouldBeBlock,
+            });
+            return result;
+        }
+
+        result.push({
+            keyword: "else",
+            keywordRange: this.getRange(node.getChildAt(5)),
+            openBraceRange: undefined,
+            isBlock: false,
+            shouldBeBlock: this.analyzeNode(_else).shouldBeBlock,
+        });
+        return result;
+    }
+
+    visitIfStatement(node: ts.IfStatement, result?: BlockAnalyzeResult): void {
+        const SyntaxKind = ts.SyntaxKind;
+
+        const branches = this.collectBranches(node);
+        let shouldBeBlock = false;
+        for (const item of branches) {
+            if (item.shouldBeBlock) {
+                shouldBeBlock = true;
+                break;
             }
         }
+
+        if (shouldBeBlock) {
+            for (const item of branches)
+                if (!item.isBlock)
+                    super.addFailure(item.keywordRange.pos, item.keywordRange.end, `This "${item.keyword}" statement needs braces.`);
+        } else {
+            for (const item of branches)
+                if (item.isBlock)
+                    super.addFailure(item.openBraceRange!.pos, item.openBraceRange!.end, `This "${item.keyword}" statement doesn't need braces.`);
+        }
+
+        if (result !== undefined && !result.ok)
+            if (shouldBeBlock || branches.length != 1)
+                result.ok = true;
     }
 
     visitIterationStatement(node: ts.IterationStatement, result?: BlockAnalyzeResult): void {
@@ -184,7 +253,7 @@ class Walker extends Lint.AbstractWalker<void> {
         }
 
         const statement = node.statement;
-        const statementState = this.analyzeNode(statement, result !== undefined && result.isThen);
+        const statementState = this.analyzeNode(statement);
 
         if (result !== undefined && !result.ok)
             result.ok = statementState.shouldBeBlock;

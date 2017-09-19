@@ -1,0 +1,60 @@
+let test = true;
+
+if (test)
+    true;
+
+if (test)
+    true;
+else
+    false;
+
+if (test) {
+          ~  [no % ("if")]
+    true;
+}
+
+if (test)
+    true;
+else {
+     ~  [no % ("else")]
+    false;
+}
+
+if (test) {
+          ~  [no % ("if")]
+    true;
+} else {
+       ~  [no % ("else")]
+    false;
+}
+
+if (test)
+    if (test)
+        true;
+
+if (test)
+~~         [yes % ("if")]
+    if (test)
+        true;
+    else
+        false;
+
+if (test)
+~~         [yes % ("if")]
+    if (test)
+        true;
+    else
+        false;
+else
+~~~~       [yes % ("else")]
+    false;
+
+if (test)
+    true;
+else if (test)
+    true;
+else
+    false;
+
+[yes]: This "%s" statement needs braces.
+[no]: This "%s" statement doesn't need braces.
