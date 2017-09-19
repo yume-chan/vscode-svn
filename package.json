@@ -15,47 +15,47 @@
             {
                 "category": "Svn",
                 "command": "svn.commit",
-                "title": "%command.commit%",
                 "icon": {
-                    "light": "resources/icons/light/check.svg",
-                    "dark": "resources/icons/dark/check.svg"
-                }
+                    "dark": "resources/icons/dark/check.svg",
+                    "light": "resources/icons/light/check.svg"
+                },
+                "title": "%command.commit%"
             },
             {
                 "category": "Svn",
                 "command": "svn.stage",
-                "title": "%command.stage%",
                 "icon": {
-                    "light": "resources/icons/light/stage.svg",
-                    "dark": "resources/icons/dark/stage.svg"
-                }
+                    "dark": "resources/icons/dark/stage.svg",
+                    "light": "resources/icons/light/stage.svg"
+                },
+                "title": "%command.stage%"
             },
             {
                 "category": "Svn",
                 "command": "svn.stageAll",
-                "title": "%command.stageAll%",
                 "icon": {
-                    "light": "resources/icons/light/stage.svg",
-                    "dark": "resources/icons/dark/stage.svg"
-                }
+                    "dark": "resources/icons/dark/stage.svg",
+                    "light": "resources/icons/light/stage.svg"
+                },
+                "title": "%command.stageAll%"
             },
             {
                 "category": "Svn",
                 "command": "svn.unstage",
-                "title": "%command.unstage%",
                 "icon": {
-                    "light": "resources/icons/light/unstage.svg",
-                    "dark": "resources/icons/dark/unstage.svg"
-                }
+                    "dark": "resources/icons/dark/unstage.svg",
+                    "light": "resources/icons/light/unstage.svg"
+                },
+                "title": "%command.unstage%"
             },
             {
                 "category": "Svn",
                 "command": "svn.unstageAll",
-                "title": "%command.unstageAll%",
                 "icon": {
-                    "light": "resources/icons/light/unstage.svg",
-                    "dark": "resources/icons/dark/unstage.svg"
-                }
+                    "dark": "resources/icons/dark/unstage.svg",
+                    "light": "resources/icons/light/unstage.svg"
+                },
+                "title": "%command.unstageAll%"
             },
             {
                 "category": "Svn",
@@ -69,6 +69,10 @@
             {
                 "category": "Svn",
                 "command": "svn.openFile",
+                "icon": {
+                    "dark": "resources/icons/dark/open-file.svg",
+                    "light": "resources/icons/light/open-file.svg"
+                },
                 "title": "%command.openFile%"
             }
         ],
@@ -115,18 +119,23 @@
                     "command": "svn.unstage",
                     "group": "inline",
                     "when": "scmProvider == svn && scmResourceGroup == staged"
+                },
+                {
+                    "command": "git.openFile",
+                    "group": "navigation",
+                    "when": "scmProvider == svn"
                 }
             ],
             "scm/title": [
                 {
                     "command": "svn.refresh",
-                    "when": "scmProvider == svn",
-                    "group": "navigation"
+                    "group": "navigation",
+                    "when": "scmProvider == svn"
                 },
                 {
                     "command": "svn.commit",
-                    "when": "scmProvider == svn",
-                    "group": "navigation"
+                    "group": "navigation",
+                    "when": "scmProvider == svn"
                 }
             ]
         }

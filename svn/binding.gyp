@@ -29,6 +29,7 @@
                 "src/client/changelistRemove.cpp",
                 "src/client/checkout.cpp",
                 "src/client/commit.cpp",
+                "src/client/delete.cpp",
                 "src/client/status.cpp",
                 "src/client/revert.cpp",
                 "src/client/update.cpp"

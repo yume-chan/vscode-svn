@@ -2,13 +2,14 @@
 #include "../uv/semaphore.hpp"
 
 #include "client.hpp"
+#include "revision.hpp"
 
 namespace Svn
 {
 inline svn_error_t *invoke_callback(void *baton, const char *path, const svn_client_info2_t *info, apr_pool_t *scratch_pool)
 {
-    auto method = *static_cast<function<void(const char *, const svn_client_info2_t *, apr_pool_t *)> *>(baton);
-    method(path, info, scratch_pool);
+    auto method = *static_cast<function<void(const char *, const svn_client_info2_t *)> *>(baton);
+    method(path, info);
     return SVN_NO_ERROR;
 }
 
@@ -51,6 +52,9 @@ Util_Method(Client::Info)
     if (arg->IsObject())
     {
         auto object = arg.As<Object>();
+
+        options->pegRevision = ParseRevision(isolate, context, Util_GetProperty(object, "pegRevision"), svn_opt_revision_unspecified);
+        options->revision = ParseRevision(isolate, context, Util_GetProperty(object, "revision"), svn_opt_revision_unspecified);
 
         auto depth = Util_GetProperty(object, "depth");
         if (depth->IsNumber())
@@ -108,13 +112,13 @@ Util_Method(Client::Info)
     };
 
     auto async = make_shared<Uv::Async<const char *, const svn_client_info2_t *>>(uv_default_loop());
-    auto send_callback = [async, async_callback, semaphore](const char *path, const svn_client_info2_t *info, apr_pool_t *) -> void {
+    auto send_callback = [async, async_callback, semaphore](const char *path, const svn_client_info2_t *info) -> void {
         async->send(async_callback, path, info);
         semaphore->wait();
     };
 
     auto _result_rev = make_shared<svn_revnum_t *>();
-    auto _send_callback = make_shared<function<void(const char *, const svn_client_info2_t *, apr_pool_t *)>>(move(send_callback));
+    auto _send_callback = make_shared<function<void(const char *, const svn_client_info2_t *)>>(move(send_callback));
     auto work = [_result_rev, client, path, options, _send_callback, pool]() -> svn_error_t * {
         SVN_ERR(svn_client_info4(path,                      // abspath_or_url
                                  &options->pegRevision,     // peg_revision

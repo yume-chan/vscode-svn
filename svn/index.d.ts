@@ -40,6 +40,15 @@ export namespace Client {
         immediates,
         infinity,
     }
+
+    enum RevisionKind {
+        unspecified,
+        committed,
+        previous,
+        base,
+        working,
+        head,
+    }
 }
 
 export interface SvnStatusOptions {
@@ -93,7 +102,17 @@ export interface SvnInfo {
     workingCopy: SvnWorkingCopyInfo | undefined;
 }
 
+export type SvnRevision = Client.RevisionKind | { date: number } | { number: number };
+
+export interface SvnCatOptions {
+    pegRevision: SvnRevision;
+    revision: SvnRevision;
+    expandKeywords: boolean;
+}
+
 export interface SvnInfoOptions {
+    pegRevision: SvnRevision;
+    revision: SvnRevision;
     depth: Client.Depth;
     fetchExcluded: boolean;
     fetchActualOnly: boolean;
@@ -105,11 +124,12 @@ export class Client {
     public constructor(options?: Partial<ClientOptions>);
 
     public add(path: string): Promise<void>;
-    public cat(path: string): Promise<Buffer>;
+    public cat(path: string, options?: Partial<SvnCatOptions>): Promise<Buffer>;
     public changelistAdd(path: string | string[], changelist: string): Promise<void>;
     public changelistRemove(path: string | string[]): Promise<void>;
     public checkout(url: string, path: string): Promise<void>;
     public commit(path: string | string[], message: string): Promise<void>;
+    public delete(path: string | string[]): Promise<void>;
     public info(path: string | string[], options?: Partial<SvnInfoOptions>): Promise<SvnInfo[]>;
     public status(path: string, options?: Partial<SvnStatusOptions>): Promise<SvnStatusResult>;
     public revert(path: string | string[]): Promise<void>;

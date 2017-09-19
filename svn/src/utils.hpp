@@ -166,20 +166,20 @@ inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> 
                               value,
                               ReadOnlyDontDelete);
 }
-}
-}
 
-#define Util_ToAprString(value) _to_apr_string(value, _pool)
+#define Util_ToAprString(value) Util::_to_apr_string(value, _pool)
 
 static inline char *_to_apr_string(Local<Value> &arg, apr_pool_t *pool)
 {
     String::Utf8Value string(arg);
     auto length = string.length();
 
-    if (Svn::Util::ContainsNull(*string, length))
+    if (ContainsNull(*string, length))
         return nullptr;
 
     return static_cast<char *>(apr_pmemdup(pool, *string, length + 1));
+}
+}
 }
 
 #endif

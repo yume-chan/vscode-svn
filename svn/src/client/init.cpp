@@ -12,6 +12,10 @@
     Util::SetReadOnly(isolate, context, Depth, #name, Util_New(Integer, svn_depth_##name)); \
     Util::SetReadOnly(isolate, context, Depth, svn_depth_##name, Util_String(#name))
 
+#define SetRevisionKind(name)                                                                             \
+    Util::SetReadOnly(isolate, context, RevisionKind, #name, Util_New(Integer, svn_opt_revision_##name)); \
+    Util::SetReadOnly(isolate, context, RevisionKind, svn_opt_revision_##name, Util_String(#name))
+
 static svn_error_t *return_error_handler(svn_boolean_t can_return, const char *file, int line, const char *expr)
 {
     svn_error_t *err = svn_error_raise_on_malfunction(TRUE, file, line, expr);
@@ -38,8 +42,9 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     SetPrototypeMethod(ClientTemplate, prototype, "changelistRemove", ChangelistRemove, 1);
     SetPrototypeMethod(ClientTemplate, prototype, "checkout", Checkout, 2);
     SetPrototypeMethod(ClientTemplate, prototype, "commit", Commit, 2);
-    SetPrototypeMethod(ClientTemplate, prototype, "info", Info, 2);
-    SetPrototypeMethod(ClientTemplate, prototype, "status", Status, 2);
+    SetPrototypeMethod(ClientTemplate, prototype, "delete", Delete, 1);
+    SetPrototypeMethod(ClientTemplate, prototype, "info", Info, 1);
+    SetPrototypeMethod(ClientTemplate, prototype, "status", Status, 1);
     SetPrototypeMethod(ClientTemplate, prototype, "revert", Revert, 1);
     SetPrototypeMethod(ClientTemplate, prototype, "update", Update, 1);
 
@@ -76,6 +81,15 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     SetDepth(immediates);
     SetDepth(infinity);
     Util_SetReadOnly2(Client, Depth);
+
+    auto RevisionKind = Object::New(isolate);
+    SetRevisionKind(unspecified);
+    SetRevisionKind(committed);
+    SetRevisionKind(previous);
+    SetRevisionKind(base);
+    SetRevisionKind(working);
+    SetRevisionKind(head);
+    Util_SetReadOnly2(Client, RevisionKind);
 
     constructor.Reset(isolate, Client);
     Util_SetReadOnly2(exports, Client);

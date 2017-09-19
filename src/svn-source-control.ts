@@ -29,6 +29,8 @@ const statusIcons = {
     [Client.StatusKind.unversioned]: "untracked",
     [Client.StatusKind.added]: "added",
     [Client.StatusKind.obstructed]: "conflict",
+    [Client.StatusKind.missing]: "deleted",
+    [Client.StatusKind.deleted]: "deleted",
 };
 
 export interface SvnResourceState extends SvnStatus, SourceControlResourceState {

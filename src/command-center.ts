@@ -1,4 +1,4 @@
-import { commands, Disposable, SourceControl, SourceControlResourceGroup } from "vscode";
+import { commands, Disposable, SourceControl, SourceControlResourceGroup, window, workspace } from "vscode";
 
 import { Client } from "../svn";
 import { client } from "./client";
@@ -9,7 +9,9 @@ class CommandCenter {
     private readonly disposable: Set<Disposable> = new Set();
 
     constructor() {
-        this.disposable.add(commands.registerCommand("svn.update", (control: SvnSourceControl) => control.update()));
+        this.disposable.add(commands.registerCommand("svn.update", async () => {
+            return;
+        }));
 
         this.disposable.add(commands.registerCommand("svn.commit", this.commit));
         this.disposable.add(commands.registerCommand("svn.refresh", this.refresh));
@@ -22,6 +24,13 @@ class CommandCenter {
         this.disposable.add(commands.registerCommand("svn.unstage", this.unstage));
         this.disposable.add(commands.registerCommand("svn.unstageAll", (group: SourceControlResourceGroup) => {
             return this.unstage(...group.resourceStates as SvnResourceState[]);
+        }));
+
+        this.disposable.add(commands.registerCommand("svn.openFile", async (...resourceStates: SvnResourceState[]) => {
+            for (const item of resourceStates) {
+                const document = await workspace.openTextDocument(item.resourceUri);
+                await window.showTextDocument(document);
+            }
         }));
     }
 
@@ -53,6 +62,8 @@ class CommandCenter {
         for (const item of resourceStates) {
             if (!item.versioned)
                 await client.add(item.path);
+            else if (item.nodeStatus === Client.StatusKind.missing)
+                await client.delete(item.path);
             else
                 await client.changelistRemove(item.path);
         }
