@@ -3,7 +3,7 @@
         "tslint:recommended"
     ],
     "rulesDirectory": [
-        "linter"
+        "linter/out"
     ],
     "rules": {
         "comment-format": [

@@ -1,16 +1,10 @@
 {
-    "name": "svn",
-    "version": "0.0.1",
-    "description": "",
-    "main": "index.js",
-    "typings": "index.d.ts",
-    "scripts": {
-        "test": "mocha",
-        "postinstall": "node scripts/postinstall.js"
+    "author": {
+        "name": "Simon Chan",
+        "url": "https://github.com/yume-chan"
     },
-    "keywords": [],
-    "author": "Simon Chan",
-    "license": "MIT",
+    "dependencies": {},
+    "description": "",
     "devDependencies": {
         "@types/chai": "^4.0.4",
         "@types/chai-as-promised": "0.0.31",
@@ -20,7 +14,14 @@
         "fs-extra": "^4.0.2",
         "mocha": "^3.5.3"
     },
-    "dependencies": {
-        "bindings": "^1.3.0"
-    }
+    "keywords": [],
+    "license": "MIT",
+    "main": "index.js",
+    "name": "svn",
+    "scripts": {
+        "postinstall": "node scripts/postinstall.js",
+        "test": "mocha"
+    },
+    "typings": "index.d.ts",
+    "version": "0.0.1"
 }

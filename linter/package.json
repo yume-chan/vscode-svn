@@ -1,20 +1,23 @@
 {
-  "name": "linter",
-  "version": "1.0.0",
-  "description": "",
-  "main": "eslintCurlyRule.js",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "start": "tsc -p .",
-    "test": "tslint --test test"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "tslint": "^5.7.0",
-    "typescript": "^2.5.2"
-  }
+    "author": {
+        "name": "Simon Chan",
+        "url": "https://github.com/yume-chan"
+    },
+    "dependencies": {
+        "tslint": "^5.7.0",
+        "typescript": "^2.5.2"
+    },
+    "description": "",
+    "directories": {
+        "test": "test"
+    },
+    "keywords": [],
+    "license": "MIT",
+    "main": "out/eslintCurlyRule.js",
+    "name": "linter",
+    "scripts": {
+        "start": "tsc -p .",
+        "test": "tslint --test test"
+    },
+    "version": "1.0.0"
 }

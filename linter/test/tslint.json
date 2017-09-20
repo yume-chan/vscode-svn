@@ -1,6 +1,6 @@
 {
     "rulesDirectory": [
-        ".."
+        "../out"
     ],
     "rules": {
         "eslint-curly": true

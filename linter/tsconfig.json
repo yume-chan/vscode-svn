@@ -4,6 +4,8 @@
         "moduleResolution": "node",
         "strict": true,
         "target": "es2017",
-        "sourceMap": true
+        "sourceMap": true,
+        "outDir": "out",
+        "rootDir": "src"
     }
 }
