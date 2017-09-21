@@ -11,7 +11,7 @@ cache:
 install:
   - ps: Install-Product node $env:nodejs_version x64
   - npm install -g npm@5
-  - npm install -g greenkeeper-lockfile@1
+  - npm install -g yume-chan/greenkeeper-lockfile
   - npm install
   - cd svn
   - npm install
