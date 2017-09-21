@@ -3,14 +3,11 @@ image: Visual Studio 2017
 environment:
   nodejs_version: "Stable"
 
-platform:
-  - x64
-
 cache:
   - node_modules
 
 install:
-  - ps: Install-Product node $env:nodejs_version
+  - ps: Install-Product node $env:nodejs_version x64
   - npm install
   - cd svn
   - npm install
