@@ -94,12 +94,12 @@ export interface ClientOptions {
 }
 
 export interface SvnWorkingCopyInfo {
-    rootPath: string;
+    readonly rootPath: string;
 }
 
 export interface SvnInfo {
-    path: string;
-    workingCopy: SvnWorkingCopyInfo | undefined;
+    readonly path: string;
+    readonly workingCopy: SvnWorkingCopyInfo | undefined;
 }
 
 export type SvnRevision = Client.RevisionKind | { date: number } | { number: number };
@@ -139,6 +139,7 @@ export class Client {
 export class SvnError extends Error {
     code: number;
     message: string;
+    child: SvnError | undefined;
 
-    constructor(code: number, message: string);
+    constructor(code: number, message: string, child?: SvnError);
 }

@@ -17,7 +17,7 @@
     "keywords": [],
     "license": "MIT",
     "main": "index.js",
-    "name": "svn",
+    "name": "node-svn",
     "scripts": {
         "postinstall": "node scripts/postinstall.js",
         "test": "mocha"
