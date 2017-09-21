@@ -2,17 +2,25 @@ image: Visual Studio 2017
 
 environment:
   nodejs_version: "Stable"
+  GH_TOKEN:
+    secure: zHm517HtzQikntPP4AF80e9uBxmq5jzW3/vPfQjDRcVG3V1ZXrLKdIHHeaVD7k28
 
 cache:
   - node_modules
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
+  - npm install -g npm@5
+  - npm install -g greenkeeper-lockfile@1
   - npm install
   - cd svn
   - npm install
   - cd ..
 
+before_build: greenkeeper-lockfile-update
+
 build_script: npm run vscode:prepublish
+
+after_build: greenkeeper-lockfile-upload
 
 test: off
