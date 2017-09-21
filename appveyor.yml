@@ -12,6 +12,9 @@ cache:
 install:
   - ps: Install-Product node $env:nodejs_version
   - npm install
+  - cd svn
+  - npm install
+  - cd ..
 
 build_script: npm run vscode:prepublish
 
