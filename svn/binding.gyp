@@ -17,6 +17,7 @@
                 "src/svn_error.hpp",
                 "src/svn_error.cpp",
                 "src/utils.hpp",
+                "src/v8.hpp",
                 "src/client.hpp",
                 "src/client/auth/simple.hpp",
                 "src/client/client.hpp",

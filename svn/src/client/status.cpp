@@ -5,6 +5,10 @@
 
 #include "client.hpp"
 
+#define InternalizedString(value) v8::New<String>(isolate, value, NewStringType::kInternalized, sizeof(value) - 1)
+
+#define SetProperty(target, name, value) target->Set(context, InternalizedString(name), value)
+
 namespace Svn
 {
 using std::to_string;
@@ -103,25 +107,25 @@ Util_Method(Client::Status)
         auto result = _result->Get(isolate);
 
         auto item = Object::New(isolate);
-        Util_Set(item, "kind", Util_New(Integer, status->kind));
-        Util_Set(item, "path", Util_String(status->local_abspath));
+        SetProperty(item, "kind", Util_New(Integer, status->kind));
+        SetProperty(item, "path", v8::New<String>(isolate, status->local_abspath));
 
         if (status->filesize <= INT32_MAX)
-            Util_Set(item, "filesize", Util_New(Integer, static_cast<int32_t>(status->filesize)));
+            SetProperty(item, "filesize", Util_New(Integer, static_cast<int32_t>(status->filesize)));
         else
-            Util_Set(item, "filesize", Util_String(to_string(status->filesize).c_str()));
+            SetProperty(item, "filesize", v8::New<String>(isolate, to_string(status->filesize).c_str()));
 
-        Util_Set(item, "versioned", Util_New(Boolean, status->versioned));
-        Util_Set(item, "conflicted", Util_New(Boolean, status->conflicted));
-        Util_Set(item, "nodeStatus", Util_New(Integer, status->node_status));
-        Util_Set(item, "textStatus", Util_New(Integer, status->text_status));
-        Util_Set(item, "propStatus", Util_New(Integer, status->prop_status));
-        Util_Set(item, "copied", Util_New(Boolean, status->copied));
-        Util_Set(item, "switched", Util_New(Boolean, status->switched));
+        SetProperty(item, "versioned", Util_New(Boolean, status->versioned));
+        SetProperty(item, "conflicted", Util_New(Boolean, status->conflicted));
+        SetProperty(item, "nodeStatus", Util_New(Integer, status->node_status));
+        SetProperty(item, "textStatus", Util_New(Integer, status->text_status));
+        SetProperty(item, "propStatus", Util_New(Integer, status->prop_status));
+        SetProperty(item, "copied", Util_New(Boolean, status->copied));
+        SetProperty(item, "switched", Util_New(Boolean, status->switched));
         if (status->repos_root_url != nullptr)
-            Util_Set(item, "repositoryUrl", Util_String(status->repos_root_url));
+            SetProperty(item, "repositoryUrl", v8::New<String>(isolate, status->repos_root_url));
         if (status->repos_relpath != nullptr)
-            Util_Set(item, "relativePath", Util_String(status->repos_relpath));
+            SetProperty(item, "relativePath", v8::New<String>(isolate, status->repos_relpath));
         result->Set(context, result->Length(), item);
 
         semaphore->post();
@@ -167,7 +171,7 @@ Util_Method(Client::Status)
 
         auto result_rev = *_result_rev;
         if (result_rev != nullptr)
-            Util_Set(result, "revision", Util_New(Integer, *result_rev));
+            SetProperty(result, "revision", v8::New<Integer>(isolate, *result_rev));
 
         resolver->Resolve(context, result);
     };

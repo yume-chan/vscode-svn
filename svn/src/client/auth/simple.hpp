@@ -25,7 +25,7 @@ using std::make_unique;
 
 using v8::External;
 
-#define StringOrUndefined(value) value != nullptr ? Util_String(value).As<Value>() : Undefined(isolate).As<Value>()
+#define StringOrUndefined(value) value != nullptr ? v8::New<String>(isolate, value).As<Value>() : Undefined(isolate).As<Value>()
 
 #define Util_AprAllocType(type) static_cast<type *>(apr_palloc(_pool, sizeof(type)))
 
@@ -135,7 +135,7 @@ class Simple
 
         auto promise = value.As<Promise>();
         auto state = new SimpleState{semaphore, pool, result};
-        auto then = Util_NewMaybe(Function, promise_then, Util_New(External, state), 1);
+        auto then = Util_NewMaybe(Function, promise_then, v8::New<External>(isolate, state), 1);
         promise->Then(context, then);
     }
 

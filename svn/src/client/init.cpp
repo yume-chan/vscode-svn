@@ -1,20 +1,41 @@
 #include "client.hpp"
 
-#define SetKind(name)                                                                     \
-    Util::SetReadOnly(isolate, context, Kind, #name, Util_New(Integer, svn_node_##name)); \
-    Util::SetReadOnly(isolate, context, Kind, svn_node_##name, Util_String(#name))
+#define InternalizedString(value) v8::New<String>(isolate, #value, NewStringType::kInternalized, sizeof(#value) - 1)
 
-#define SetStatusKind(name)                                                                          \
-    Util::SetReadOnly(isolate, context, StatusKind, #name, Util_New(Integer, svn_wc_status_##name)); \
-    Util::SetReadOnly(isolate, context, StatusKind, svn_wc_status_##name, Util_String(#name))
+#define SetReadOnly(object, name)                         \
+    (object)->DefineOwnProperty(context,                  \
+                                InternalizedString(name), \
+                                name,                     \
+                                ReadOnlyDontDelete)
 
-#define SetDepth(name)                                                                      \
-    Util::SetReadOnly(isolate, context, Depth, #name, Util_New(Integer, svn_depth_##name)); \
-    Util::SetReadOnly(isolate, context, Depth, svn_depth_##name, Util_String(#name))
+#define SetConst(target, prefix, name)                                                                             \
+    {                                                                                                              \
+        auto key = InternalizedString(name);                                                                       \
+        target->DefineOwnProperty(context,                                                                         \
+                                  key,                                                                             \
+                                  v8::New<Integer>(isolate, prefix##name),                                         \
+                                  ReadOnlyDontDelete);                                                             \
+        target->DefineOwnProperty(context,                                                                         \
+                                  v8::New<String>(isolate, to_string(prefix##name), NewStringType::kInternalized), \
+                                  key,                                                                             \
+                                  ReadOnlyDontDelete);                                                             \
+    }
 
-#define SetRevisionKind(name)                                                                             \
-    Util::SetReadOnly(isolate, context, RevisionKind, #name, Util_New(Integer, svn_opt_revision_##name)); \
-    Util::SetReadOnly(isolate, context, RevisionKind, svn_opt_revision_##name, Util_String(#name))
+#define SetKind(name) SetConst(Kind, svn_node_, name)
+#define SetStatusKind(name) SetConst(StatusKind, svn_wc_status_, name)
+#define SetDepth(name) SetConst(Depth, svn_depth_, name)
+#define SetRevisionKind(name) SetConst(RevisionKind, svn_opt_revision_, name)
+
+#define SetPrototypeMethod(signature, prototype, name, callback, length)                  \
+    /* Add a scope to hide extra variables */                                             \
+    {                                                                                     \
+        auto function = v8::FunctionTemplate::New(isolate,                /* isolate */   \
+                                                  callback,               /* callback */  \
+                                                  v8::Local<v8::Value>(), /* data */      \
+                                                  signature,              /* signature */ \
+                                                  length);                /* length */    \
+        prototype->Set(InternalizedString(name), function, PropertyAttribute::DontEnum);  \
+    }
 
 static svn_error_t *return_error_handler(svn_boolean_t can_return, const char *file, int line, const char *expr)
 {
@@ -28,34 +49,38 @@ Persistent<Function> Client::constructor;
 
 void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> context)
 {
-    auto ClientTemplate = Util_FunctionTemplate(New, 0);
-    ClientTemplate->SetClassName(String::NewFromUtf8(isolate, "Client"));
+    auto client_template = Util_FunctionTemplate(New, 0);
+    auto client_signature = v8::Signature::New(isolate, client_template);
+
+    client_template->SetClassName(InternalizedString(Client));
+    client_template->ReadOnlyPrototype();
+
     // This internal field is used for saving the pointer to a Client instance.
     // Client.wrap will set its pointer to the internal field
     // And ObjectWrap::Unwrap will read the internal field and cast it to Client.
-    ClientTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+    client_template->InstanceTemplate()->SetInternalFieldCount(1);
 
-    auto prototype = ClientTemplate->PrototypeTemplate();
-    SetPrototypeMethod(ClientTemplate, prototype, "add", Add, 1);
-    SetPrototypeMethod(ClientTemplate, prototype, "cat", Cat, 1);
-    SetPrototypeMethod(ClientTemplate, prototype, "changelistAdd", ChangelistAdd, 2);
-    SetPrototypeMethod(ClientTemplate, prototype, "changelistRemove", ChangelistRemove, 1);
-    SetPrototypeMethod(ClientTemplate, prototype, "checkout", Checkout, 2);
-    SetPrototypeMethod(ClientTemplate, prototype, "commit", Commit, 2);
-    SetPrototypeMethod(ClientTemplate, prototype, "delete", Delete, 1);
-    SetPrototypeMethod(ClientTemplate, prototype, "info", Info, 1);
-    SetPrototypeMethod(ClientTemplate, prototype, "status", Status, 1);
-    SetPrototypeMethod(ClientTemplate, prototype, "revert", Revert, 1);
-    SetPrototypeMethod(ClientTemplate, prototype, "update", Update, 1);
+    auto client_prototype = client_template->PrototypeTemplate();
+    SetPrototypeMethod(client_signature, client_prototype, add, Add, 1);
+    SetPrototypeMethod(client_signature, client_prototype, cat, Cat, 1);
+    SetPrototypeMethod(client_signature, client_prototype, changelistAdd, ChangelistAdd, 2);
+    SetPrototypeMethod(client_signature, client_prototype, changelistRemove, ChangelistRemove, 1);
+    SetPrototypeMethod(client_signature, client_prototype, checkout, Checkout, 2);
+    SetPrototypeMethod(client_signature, client_prototype, commit, Commit, 2);
+    SetPrototypeMethod(client_signature, client_prototype, delete, Delete, 1);
+    SetPrototypeMethod(client_signature, client_prototype, info, Info, 1);
+    SetPrototypeMethod(client_signature, client_prototype, status, Status, 1);
+    SetPrototypeMethod(client_signature, client_prototype, revert, Revert, 1);
+    SetPrototypeMethod(client_signature, client_prototype, update, Update, 1);
 
-    auto Client = ClientTemplate->GetFunction();
+    auto Client = client_template->GetFunction();
 
     auto Kind = Object::New(isolate);
     SetKind(none);
     SetKind(file);
     SetKind(dir);
     SetKind(unknown);
-    Util_SetReadOnly2(Client, Kind);
+    SetReadOnly(Client, Kind);
 
     auto StatusKind = Object::New(isolate);
     SetStatusKind(none);
@@ -71,7 +96,7 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     SetStatusKind(obstructed);
     SetStatusKind(external);
     SetStatusKind(incomplete);
-    Util_SetReadOnly2(Client, StatusKind);
+    SetReadOnly(Client, StatusKind);
 
     auto Depth = Object::New(isolate);
     SetDepth(unknown);
@@ -80,7 +105,7 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     SetDepth(files);
     SetDepth(immediates);
     SetDepth(infinity);
-    Util_SetReadOnly2(Client, Depth);
+    SetReadOnly(Client, Depth);
 
     auto RevisionKind = Object::New(isolate);
     SetRevisionKind(unspecified);
@@ -89,10 +114,10 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     SetRevisionKind(base);
     SetRevisionKind(working);
     SetRevisionKind(head);
-    Util_SetReadOnly2(Client, RevisionKind);
+    SetReadOnly(Client, RevisionKind);
 
     constructor.Reset(isolate, Client);
-    Util_SetReadOnly2(exports, Client);
+    SetReadOnly(exports, Client);
 
     svn_error_set_malfunction_handler(return_error_handler);
 }

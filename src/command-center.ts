@@ -80,6 +80,7 @@ class CommandCenter {
         for (const item of resourceStates) {
             switch (item.nodeStatus) {
                 case Client.StatusKind.added:
+                case Client.StatusKind.deleted:
                     await client.revert(item.path);
                     break;
                 default:

@@ -4,6 +4,9 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+let svn;
+let client;
+
 function describeProperty(object, key, type) {
     it("should exist", function() {
         expect(eval(object)).to.have.property(key);
@@ -23,7 +26,13 @@ function describeProperty(object, key, type) {
 }
 
 function describeFunction(object, key, length) {
-    describeProperty(object, key, "function");
+    it("should exist", function() {
+        expect(eval(object)).to.have.property(key);
+    });
+
+    it("should be a function", function() {
+        expect(eval(object)).to.have.property(key).that.is.a("function");
+    });
 
     it("should have length equals to " + length, function() {
         expect(eval(object)).to.have.property(key).that.has.property("length", length);
@@ -38,7 +47,35 @@ function describeConstrcutor(object, key, length) {
     });
 }
 
-let svn;
+const values = {
+    "string": ["", "test"],
+    "number": [-1, 0, 1, Infinity, NaN],
+    "boolean": [false, true],
+    "array": [[], ["test"]],
+    "object": [{}, { test: "test" }],
+    "other": [undefined, null],
+}
+
+/**
+ * @param {string} object
+ * @param {string} name
+ * @param {string | string[]} types
+ * @param {any[]} args
+ */
+function describeArgument(object, name, types, ...args) {
+    if (typeof types === "string")
+        types = [types];
+
+    it(`should have argument ${args.length} as a ${types.join(" or ")}`, function() {
+        for (const key in values) {
+            if (!types.includes(key))
+                continue;
+
+            for (const value of values[key])
+                expect(eval(`${object}.${name}`).call(eval(object), ...args, value)).to.be.rejected;
+        }
+    });
+}
 
 describe("svn", function() {
     it("should load", function() {
@@ -128,7 +165,6 @@ describe("svn", function() {
             });
         });
 
-        let client;
 
         it("should be a constructor", function() {
             expect(client = new svn.Client()).to.be.an.instanceof(svn.Client);
@@ -141,14 +177,7 @@ describe("svn", function() {
                 expect(client).to.have.property("add", svn.Client.prototype.add);
             });
 
-            it("should take a string", function() {
-                expect(client.add()).to.be.rejected;
-                expect(client.add(undefined)).to.be.rejected;
-                expect(client.add(1)).to.be.rejected;
-                expect(client.add(true)).to.be.rejected;
-                expect(client.add(["path"])).to.be.rejected;
-                expect(client.add({ "path": "" })).to.be.rejected;
-            });
+            describeArgument("client", "add", "string");
         });
 
         describe("#cat", function() {
@@ -158,14 +187,28 @@ describe("svn", function() {
                 expect(client).to.have.property("cat", svn.Client.prototype.cat);
             });
 
-            it("should take a string", function() {
-                expect(client.cat()).to.be.rejected;
-                expect(client.cat(undefined)).to.be.rejected;
-                expect(client.cat(1)).to.be.rejected;
-                expect(client.cat(true)).to.be.rejected;
-                expect(client.cat(["path"])).to.be.rejected;
-                expect(client.cat({ "path": "" })).to.be.rejected;
+            describeArgument("client", "cat", "string");
+        });
+
+        describe("#changelistAdd", function() {
+            describeFunction("svn.Client.prototype", "changelistAdd", 2);
+
+            it("should exist on instance", function() {
+                expect(client).to.have.property("changelistAdd", svn.Client.prototype.changelistAdd);
             });
+
+            describeArgument("client", "changelistAdd", "string | array");
+            describeArgument("client", "changelistAdd", "string", "test");
+        });
+
+        describe("#changelistRemove", function() {
+            describeFunction("svn.Client.prototype", "changelistRemove", 1);
+
+            it("should exist on instance", function() {
+                expect(client).to.have.property("changelistRemove", svn.Client.prototype.changelistRemove);
+            });
+
+            describeArgument("client", "changelistRemove", "string | array");
         });
 
         describe("#checkout", function() {
@@ -174,23 +217,50 @@ describe("svn", function() {
             it("should exist on instance", function() {
                 expect(client).to.have.property("checkout", svn.Client.prototype.checkout);
             });
+
+            describeArgument("client", "checkout", "string");
+            describeArgument("client", "checkout", "string", "test");
+        });
+
+        describe("#commit", function() {
+            describeFunction("svn.Client.prototype", "commit", 2);
+
+            it("should exist on instance", function() {
+                expect(client).to.have.property("commit", svn.Client.prototype.commit);
+            });
+
+            describeArgument("client", "commit", "string | array");
+            describeArgument("client", "commit", "string", "test");
+        });
+
+        describe("#delete", function() {
+            describeFunction("svn.Client.prototype", "delete", 1);
+
+            it("should exist on instance", function() {
+                expect(client).to.have.property("delete", svn.Client.prototype.delete);
+            });
+
+            describeArgument("client", "delete", "string | array");
+        });
+
+        describe("#info", function() {
+            describeFunction("svn.Client.prototype", "info", 1);
+
+            it("should exist on instance", function() {
+                expect(client).to.have.property("info", svn.Client.prototype.info);
+            });
+
+            describeArgument("client", "info", "string | array");
         });
 
         describe("#status", function() {
-            describeFunction("svn.Client.prototype", "status", 2);
+            describeFunction("svn.Client.prototype", "status", 1);
 
             it("should exist on instance", function() {
                 expect(client).to.have.property("status", svn.Client.prototype.status);
             });
 
-            it("should take a string", function() {
-                expect(client.status()).to.be.rejected;
-                expect(client.status(undefined)).to.be.rejected;
-                expect(client.status(1)).to.be.rejected;
-                expect(client.status(true)).to.be.rejected;
-                expect(client.status(["path"])).to.be.rejected;
-                expect(client.status({ "path": "" })).to.be.rejected;
-            });
+            describeArgument("client", "status", "string");
         });
     });
 });

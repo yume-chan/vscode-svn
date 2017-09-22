@@ -16,9 +16,6 @@ using std::shared_ptr;
 using std::string;
 using std::vector;
 
-#define Util_String(value) String::NewFromUtf8(isolate, value, NewStringType::kNormal).ToLocalChecked()
-#define Util_StringFromStd(value) String::NewFromUtf8(isolate, value.c_str(), NewStringType::kNormal, value.length()).ToLocalChecked()
-
 #define Util_New(type, value) type::New(isolate, (value))
 #define Util_NewMaybe(type, ...) type::New(context, __VA_ARGS__).ToLocalChecked()
 
@@ -37,12 +34,7 @@ using std::vector;
 #define Util_MethodEnd }
 #define Util_Return(value) args.GetReturnValue().Set(value);
 
-#define Util_Set(object, name, value) Util::Set(isolate, context, object, name, value)
-
-#define Util_SetReadOnly2(object, name) Util_SetReadOnly3(object, #name, name)
-#define Util_SetReadOnly3(object, name, value) Util::SetReadOnly(isolate, context, object, name, value)
-
-#define Util_Error(type, message) Exception::type(Util_String(message))
+#define Util_Error(type, message) Exception::type(v8::New<String>(isolate, message))
 
 #define Util_ThrowIf(expression, error, ...) \
     if (expression)                          \
@@ -65,22 +57,7 @@ using std::vector;
                               Local<v8::Signature>(), /* signature */ \
                               length);                /* length */
 
-#define Util_GetProperty(object, name) (object)->Get(context, Util_String(name)).ToLocalChecked()
-
-#define SetPrototypeMethod(receiver, prototype, name, callback, length)                   \
-    { /* Add a scope to hide extra variables */                                           \
-        auto signature = v8::Signature::New(isolate, receiver);                           \
-        auto function = v8::FunctionTemplate::New(isolate,                /* isolate */   \
-                                                  callback,               /* callback */  \
-                                                  v8::Local<v8::Value>(), /* data */      \
-                                                  signature,              /* signature */ \
-                                                  length);                /* length */    \
-        auto key = Util_String(name);                                                     \
-        function->SetClassName(key);                                                      \
-        prototype->Set(key,                                                               \
-                       function,                                                          \
-                       ReadOnlyDontDelete);                                               \
-    }
+#define Util_GetProperty(object, name) (object)->Get(context, v8::New<String>(isolate, name)).ToLocalChecked()
 
 namespace Svn
 {
@@ -142,29 +119,6 @@ inline bool ContainsNull(const char *value, size_t length)
 inline bool ContainsNull(string value)
 {
     return ContainsNull(value.c_str(), value.length());
-}
-
-inline void Set(Isolate *isolate, Local<Context> context, Local<Object> object, char *name, Local<Value> value)
-{
-    object->Set(context,
-                Util_String(name),
-                value);
-}
-
-inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> object, char *name, Local<Value> value)
-{
-    object->DefineOwnProperty(context,
-                              Util_String(name),
-                              value,
-                              ReadOnlyDontDelete);
-}
-
-inline void SetReadOnly(Isolate *isolate, Local<Context> context, Local<Object> object, uint32_t index, Local<Value> value)
-{
-    object->DefineOwnProperty(context,
-                              Local<String>::Cast(Integer::New(isolate, index)),
-                              value,
-                              ReadOnlyDontDelete);
 }
 
 #define Util_ToAprString(value) Util::_to_apr_string(value, _pool)

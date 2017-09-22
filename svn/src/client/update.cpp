@@ -5,8 +5,7 @@ namespace Svn
 Util_Method(Client::Update)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
-    auto promise = resolver->GetPromise();
-    Util_Return(promise);
+    Util_Return(resolver->GetPromise());
 
     Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or an array of string"));
 

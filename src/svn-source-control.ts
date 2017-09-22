@@ -132,6 +132,7 @@ export class SvnSourceControl implements QuickDiffProvider {
                         case Client.StatusKind.added:
                         case Client.StatusKind.modified:
                         case Client.StatusKind.obstructed:
+                        case Client.StatusKind.deleted:
                             this.stagedFiles.add(item.path);
                             stagedStates.push(this.getResourceState(item));
                             break;

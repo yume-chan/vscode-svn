@@ -42,7 +42,7 @@
     }                                                                                                                                              \
     else                                                                                                                                           \
     {                                                                                                                                              \
-        Util_RejectIf(true, Util_Error(TypeError, "Argument \"path\" must be a string or an array of string"));                                    \
+        Util_RejectIf(true, Util_Error(TypeError, "Argument \"##name##\" must be a string or an array of string"));                                \
     }
 
 #define Util_CheckAbsolutePath(path)                                             \

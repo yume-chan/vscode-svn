@@ -4,6 +4,10 @@
 #include "client.hpp"
 #include "revision.hpp"
 
+#define InternalizedString(value) v8::New<String>(isolate, value, NewStringType::kInternalized, sizeof(value) - 1)
+
+#define SetProperty(target, name, value) target->Set(context, InternalizedString(name), value)
+
 namespace Svn
 {
 inline svn_error_t *invoke_callback(void *baton, const char *path, const svn_client_info2_t *info, apr_pool_t *scratch_pool)
@@ -88,24 +92,24 @@ Util_Method(Client::Info)
 
         auto item = Object::New(isolate);
 
-        Util_Set(item, "path", Util_String(path));
+        SetProperty(item, "path", v8::New<String>(isolate, path));
 
         auto wc_info = info->wc_info;
         if (wc_info != nullptr)
         {
             auto workingCopy = Object::New(isolate);
-            Util_Set(workingCopy, "rootPath", Util_String(wc_info->wcroot_abspath));
-            Util_Set(item, "workingCopy", workingCopy);
+            SetProperty(workingCopy, "rootPath", v8::New<String>(isolate, wc_info->wcroot_abspath));
+            SetProperty(item, "workingCopy", workingCopy);
         }
 
-        // Util_Set(item, "kind", Util_New(Integer, status->kind));
-        // Util_Set(item, "textStatus", Util_New(Integer, status->text_status));
-        // Util_Set(item, "nodeStatus", Util_New(Integer, status->node_status));
-        // Util_Set(item, "propStatus", Util_New(Integer, status->prop_status));
-        // Util_Set(item, "versioned", Util_New(Boolean, status->versioned));
-        // Util_Set(item, "conflicted", Util_New(Boolean, status->conflicted));
-        // Util_Set(item, "copied", Util_New(Boolean, status->copied));
-        // Util_Set(item, "switched", Util_New(Boolean, status->switched));
+        // SetProperty(item, "kind", Util_New(Integer, status->kind));
+        // SetProperty(item, "textStatus", Util_New(Integer, status->text_status));
+        // SetProperty(item, "nodeStatus", Util_New(Integer, status->node_status));
+        // SetProperty(item, "propStatus", Util_New(Integer, status->prop_status));
+        // SetProperty(item, "versioned", Util_New(Boolean, status->versioned));
+        // SetProperty(item, "conflicted", Util_New(Boolean, status->conflicted));
+        // SetProperty(item, "copied", Util_New(Boolean, status->copied));
+        // SetProperty(item, "switched", Util_New(Boolean, status->switched));
         result->Set(context, result->Length(), item);
 
         semaphore->post();
@@ -148,7 +152,7 @@ Util_Method(Client::Info)
 
         auto result_rev = *_result_rev;
         if (result_rev != nullptr)
-            Util_Set(result, "revision", Util_New(Integer, *result_rev));
+            SetProperty(result, "revision", Util_New(Integer, *result_rev));
 
         resolver->Resolve(context, result);
     };
