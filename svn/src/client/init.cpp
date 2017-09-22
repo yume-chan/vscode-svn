@@ -34,6 +34,7 @@
                                                   v8::Local<v8::Value>(), /* data */      \
                                                   signature,              /* signature */ \
                                                   length);                /* length */    \
+        function->RemovePrototype();                                                      \
         prototype->Set(InternalizedString(name), function, PropertyAttribute::DontEnum);  \
     }
 
