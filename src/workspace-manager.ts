@@ -46,8 +46,8 @@ class WorkspaceManager {
                 if (control.file === item.uri.fsPath) {
                     control.dispose();
                     this.controls.delete(control);
+                    break;
                 }
-                break;
             }
         }
     }
