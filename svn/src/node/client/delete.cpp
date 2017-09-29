@@ -9,7 +9,7 @@ inline svn_error_t *invoke_callback(const svn_commit_info_t *commit_info, void *
     return SVN_NO_ERROR;
 }
 
-Util_Method(Client::Delete)
+V8_METHOD_BEGIN(Client::Delete)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
     Util_Return(resolver->GetPromise());
@@ -52,5 +52,5 @@ Util_Method(Client::Delete)
 
     RunAsync();
 }
-Util_MethodEnd;
+V8_METHOD_END;
 }

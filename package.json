@@ -66,6 +66,11 @@
             },
             {
                 "category": "Svn",
+                "command": "svn.update",
+                "title": "%command.update%"
+            },
+            {
+                "category": "Svn",
                 "command": "svn.refresh",
                 "icon": {
                     "dark": "resources/icons/dark/refresh.svg",

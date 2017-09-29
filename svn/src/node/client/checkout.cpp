@@ -2,7 +2,7 @@
 
 namespace Svn
 {
-Util_Method(Client::Checkout)
+V8_METHOD_BEGIN(Client::Checkout)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
     Util_Return(resolver->GetPromise());
@@ -58,5 +58,5 @@ Util_Method(Client::Checkout)
 
     RunAsync();
 }
-Util_MethodEnd;
+V8_METHOD_END;
 }

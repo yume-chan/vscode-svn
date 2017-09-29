@@ -120,17 +120,25 @@ export interface SvnInfoOptions {
     changelists: string | string[];
 }
 
+interface ChangelistInfo {
+    path: string;
+    changelist: string;
+}
+
 export class Client {
     public constructor(options?: Partial<ClientOptions>);
 
     public add(path: string): Promise<void>;
     public cat(path: string, options?: Partial<SvnCatOptions>): Promise<Buffer>;
     public changelistAdd(path: string | string[], changelist: string): Promise<void>;
+    public changelistGet(path: string, changelist: string): Promise<string[]>;
+    public changelistGet(path: string, changelist: string[]): Promise<ChangelistInfo[]>;
     public changelistRemove(path: string | string[]): Promise<void>;
     public checkout(url: string, path: string): Promise<void>;
     public commit(path: string | string[], message: string): Promise<void>;
     public delete(path: string | string[]): Promise<void>;
-    public info(path: string | string[], options?: Partial<SvnInfoOptions>): Promise<SvnInfo[]>;
+    public info(path: string): Promise<SvnInfo>;
+    public info(path: string, options: Partial<SvnInfoOptions>): Promise<SvnInfo[]>;
     public status(path: string, options?: Partial<SvnStatusOptions>): Promise<SvnStatusResult>;
     public revert(path: string | string[]): Promise<void>;
     public update(path: string | string[]): Promise<void>;

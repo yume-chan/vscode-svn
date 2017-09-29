@@ -29,7 +29,7 @@ void Version(Local<Name> property, const PropertyCallbackInfo<Value> &args)
 	args.GetReturnValue().Set(object);
 }
 
-// Util_Method(Test)
+// V8_METHOD_BEGIN(Test)
 // {
 // 	const char *c;
 // 	vector<string> strings;
@@ -42,7 +42,7 @@ void Version(Local<Name> property, const PropertyCallbackInfo<Value> &args)
 
 // 	auto len = strlen(c);
 // }
-// Util_MethodEnd;
+// V8_METHOD_END;
 
 void Init(Local<Object> exports)
 {

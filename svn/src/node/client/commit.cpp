@@ -9,7 +9,7 @@ inline svn_error_t *invoke_callback(const svn_commit_info_t *commit_info, void *
     return SVN_NO_ERROR;
 }
 
-Util_Method(Client::Commit)
+V8_METHOD_BEGIN(Client::Commit)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
     auto promise = resolver->GetPromise();
@@ -70,5 +70,5 @@ Util_Method(Client::Commit)
 
     RunAsync();
 }
-Util_MethodEnd;
+V8_METHOD_END;
 }

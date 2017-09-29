@@ -2,10 +2,11 @@
 
 namespace Svn
 {
-Util_Method(Client::Update)
+V8_METHOD_BEGIN(Client::Revert)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
-    Util_Return(resolver->GetPromise());
+    auto promise = resolver->GetPromise();
+    Util_Return(promise);
 
     Util_RejectIf(args.Length() == 0, Util_Error(TypeError, "Argument \"path\" must be a string or an array of string"));
 
@@ -14,22 +15,16 @@ Util_Method(Client::Update)
     apr_array_header_t *path;
     Util_ToAprStringArray(args[0], path);
 
-    client->update_notify = [](const svn_wc_notify_t *notify) -> void {
+    client->revert_notify = [](const svn_wc_notify_t *notify) -> void {
 
     };
 
-    auto _result_rev = make_shared<apr_array_header_t *>();
-    auto work = [_result_rev, path, client, pool]() -> svn_error_t * {
-        svn_opt_revision_t revision{svn_opt_revision_working};
-        SVN_ERR(svn_client_update4(_result_rev.get(),  // result_revs
-                                   path,               // paths
-                                   &revision,          // revision
+    auto work = [path, client, pool]() -> svn_error_t * {
+        SVN_ERR(svn_client_revert3(path,               // paths
                                    svn_depth_infinity, // depth
-                                   false,              // depth_is_sticky
-                                   false,              // ignore_externals
-                                   false,              // allow_unver_obstructions
-                                   true,               // adds_as_modification
-                                   true,               // make_parents
+                                   nullptr,            // changelists
+                                   true,               // clear_changelists
+                                   false,              // metadata_only
                                    client->context,    // ctx
                                    pool.get()));       // pool
 
@@ -49,5 +44,5 @@ Util_Method(Client::Update)
 
     RunAsync();
 }
-Util_MethodEnd;
+V8_METHOD_END;
 }

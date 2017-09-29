@@ -40,6 +40,15 @@ template <typename T>
 struct Factory;
 
 template <>
+struct Factory<Object>
+{
+    static inline Local<Object> New(Isolate *isolate)
+    {
+        return Object::New(isolate);
+    }
+};
+
+template <>
 struct Factory<String>
 {
     static inline Local<String> New(Isolate *isolate, const char *value, NewStringType type = NewStringType::kNormal, size_t length = -1)
@@ -98,5 +107,13 @@ inline Local<T> New(A0 a0, A1 a1, A2 a2, A3 a3)
     return Factory<T>::New(a0, a1, a2, a3);
 }
 }
+
+#define V8_METHOD_DECLARE(name) void name(const FunctionCallbackInfo<Value> &args)
+#define V8_METHOD_BEGIN(name)             \
+    V8_METHOD_DECLARE(name)               \
+    {                                     \
+        auto isolate = args.GetIsolate(); \
+        auto context = isolate->GetCurrentContext();
+#define V8_METHOD_END }
 
 #endif

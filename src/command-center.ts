@@ -9,9 +9,7 @@ class CommandCenter {
     private readonly disposable: Set<Disposable> = new Set();
 
     constructor() {
-        this.disposable.add(commands.registerCommand("svn.update", async () => {
-            return;
-        }));
+        this.disposable.add(commands.registerCommand("svn.update", this.update));
 
         this.disposable.add(commands.registerCommand("svn.commit", this.commit));
         this.disposable.add(commands.registerCommand("svn.refresh", this.refresh));
@@ -39,6 +37,12 @@ class CommandCenter {
             item.dispose();
 
         this.disposable.clear();
+    }
+
+    private async update(e?: SourceControl) {
+        const control = await workspaceManager.find(e);
+        if ((control !== undefined))
+            await control.update();
     }
 
     private async commit(e?: SourceControl) {

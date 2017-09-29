@@ -51,9 +51,10 @@
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.15063.0/shared",
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.15063.0/winrt",
                 "C:/Users/Simon/.node-gyp/8.4.0/include/node",
-                "${workspaceRoot}/svn/include/apr",
-                "${workspaceRoot}/svn/include/svn",
-                "${workspaceRoot}/svn/src"
+                "${workspaceRoot}",
+                "${workspaceRoot}/include/apr",
+                "${workspaceRoot}/include/svn",
+                "${workspaceRoot}/src"
             ],
             "defines": [
                 "_DEBUG",

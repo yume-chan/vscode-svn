@@ -2,7 +2,7 @@
 
 namespace Svn
 {
-Util_Method(Client::ChangelistRemove)
+V8_METHOD_BEGIN(Client::ChangelistAdd)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
     auto promise = resolver->GetPromise();
@@ -15,14 +15,15 @@ Util_Method(Client::ChangelistRemove)
     apr_array_header_t *path;
     Util_ToAprStringArray(args[0], path);
 
-    auto work = [path, client, pool]() -> svn_error_t * {
-        SVN_ERR(svn_client_remove_from_changelists(path,               // paths
-                                                   svn_depth_infinity, // depth
-                                                   nullptr,            // changelists
-                                                   client->context,    // ctx
-                                                   pool.get()));       // scratch_pool
+    Util_RejectIf(args.Length() == 1, Util_Error(TypeError, "Argument \"changelist\" must be a string"));
 
-        return nullptr;
+    auto arg = args[1];
+    Util_RejectIf(!arg->IsString(), Util_Error(TypeError, "Argument \"changelist\" must be a string"));
+    auto changelist = Util::to_apr_string(arg);
+    Util_RejectIf(changelist == nullptr, Util_Error(Error, "Argument \"changelist\" must be a string without null bytes"));
+
+    auto work = [path, changelist, client, pool]() -> svn_error_t * {
+        return client->add_to_changelist(path, *changelist);
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
@@ -38,5 +39,5 @@ Util_Method(Client::ChangelistRemove)
 
     RunAsync();
 }
-Util_MethodEnd;
+V8_METHOD_END;
 }

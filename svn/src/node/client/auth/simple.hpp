@@ -16,6 +16,9 @@
 #include "../../v8.hpp"
 #include "../../utils.hpp"
 
+#include "../../apr/pool.hpp"
+#include "../../apr/string.hpp"
+
 namespace Svn
 {
 namespace Auth
@@ -27,8 +30,6 @@ using v8::External;
 
 #define StringOrUndefined(value) value != nullptr ? v8::New<String>(isolate, value).As<Value>() : Undefined(isolate).As<Value>()
 
-#define Util_AprAllocType(type) static_cast<type *>(apr_palloc(_pool, sizeof(type)))
-
 class Simple
 {
   public:
@@ -37,15 +38,16 @@ class Simple
     Simple(Isolate *isolate,
            Local<Function> &callback,
            int32_t retry_count,
-           apr_pool_t *pool,
+           shared_ptr<apr::pool> pool,
            apr_array_header_t *providers)
-        : isolate(isolate),
+        : pool(pool),
+          isolate(isolate),
           async(SimpleAsync(uv_default_loop()))
     {
         _callback.Reset(isolate, callback);
 
         auto handle = new svn_auth_provider_object_t;
-        svn_auth_get_simple_prompt_provider(&handle, send_callback, this, retry_count, pool);
+        svn_auth_get_simple_prompt_provider(&handle, send_callback, this, retry_count, pool->get());
         APR_ARRAY_PUSH(providers, svn_auth_provider_object_t *) = handle;
     }
 
@@ -55,6 +57,7 @@ class Simple
     }
 
   private:
+    shared_ptr<apr::pool> pool;
     Isolate *isolate;
     Persistent<Function> _callback;
     SimpleAsync async;
@@ -66,7 +69,7 @@ class Simple
         svn_auth_cred_simple_t **result;
     };
 
-    static Util_Method(promise_then)
+    static V8_METHOD_BEGIN(promise_then)
     {
         auto state = static_cast<SimpleState *>(args.Data().As<External>()->Value());
 
@@ -84,6 +87,7 @@ class Simple
             state->semaphore->post();
             return;
         }
+        String::Utf8Value _username(username);
 
         auto password = Util_GetProperty(object, "password");
         if (!password->IsString())
@@ -91,19 +95,20 @@ class Simple
             state->semaphore->post();
             return;
         }
+        String::Utf8Value _password(password);
 
         auto save = Util_GetProperty(object, "save")->BooleanValue();
 
-        auto _pool = state->pool;
-        auto result = Util_AprAllocType(svn_auth_cred_simple_t);
+        auto pool = state->pool;
+        auto result = apr::pool::alloc<svn_auth_cred_simple_t>(pool);
         result->may_save = save;
-        result->username = Util_ToAprString(username);
-        result->password = Util_ToAprString(password);
+        result->username = apr::string::strdup(pool, *_username, _username.length());
+        result->password = apr::string::strdup(pool, *_password, _password.length());
         *state->result = result;
 
         state->semaphore->post();
     }
-    Util_MethodEnd;
+    V8_METHOD_END;
 
     static void invoke_callback(Simple *simple,
                                 Uv::Semaphore *semaphore,

@@ -6,6 +6,8 @@
 
 #include <svn_client.h>
 
+#include <apr/apr.hpp>
+
 #include "v8.hpp"
 
 using std::function;
@@ -26,12 +28,6 @@ using std::vector;
 
 #define ReadOnlyDontDelete (PropertyAttribute)(PropertyAttribute::ReadOnly | PropertyAttribute::DontDelete)
 
-#define Util_Method(name)                              \
-    void name(const FunctionCallbackInfo<Value> &args) \
-    {                                                  \
-        auto isolate = args.GetIsolate();              \
-        auto context = isolate->GetCurrentContext();
-#define Util_MethodEnd }
 #define Util_Return(value) args.GetReturnValue().Set(value);
 
 #define Util_Error(type, message) Exception::type(v8::New<String>(isolate, message))
@@ -108,30 +104,11 @@ inline int32_t QueueWork(uv_loop_t *loop, const function<T()> work, const functi
     return uv_queue_work(loop, req, invoke_uv_work<T>, invoke_after_uv_work<T>);
 }
 
-inline bool ContainsNull(const char *value, size_t length)
-{
-    for (auto i = 0; i < length; i++)
-        if (!value[i])
-            return true;
-    return false;
-}
-
-inline bool ContainsNull(string value)
-{
-    return ContainsNull(value.c_str(), value.length());
-}
-
-#define Util_ToAprString(value) Util::_to_apr_string(value, _pool)
-
-static inline char *_to_apr_string(Local<Value> &arg, apr_pool_t *pool)
+static inline std::string to_string(Local<Value> &arg)
 {
     String::Utf8Value string(arg);
     auto length = string.length();
-
-    if (ContainsNull(*string, length))
-        return nullptr;
-
-    return static_cast<char *>(apr_pmemdup(pool, *string, length + 1));
+    return std::string(*string, length);
 }
 }
 }

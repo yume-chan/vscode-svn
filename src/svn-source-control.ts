@@ -19,8 +19,8 @@ import {
 import { Client, SvnError, SvnStatus, SvnStatusResult } from "../svn";
 
 import { client } from "./client";
-import { throttle } from "./git/decorators";
-import { svnTextDocumentContentProvider } from "./svn-text-document-content-provider";
+import { svnTextDocumentContentProvider } from "./content-provider";
+import { Throttler } from "./throttler";
 
 const iconsRootPath = path.join(__dirname, "..", "resources", "icons");
 
@@ -40,9 +40,7 @@ export interface SvnResourceState extends SvnStatus, SourceControlResourceState 
 export class SvnSourceControl implements QuickDiffProvider {
     public static async detect(file: string) {
         try {
-            const workingCopy = (await client.info(file, {
-                depth: Client.Depth.empty,
-            }))[0].workingCopy;
+            const { workingCopy } = await client.info(file);
 
             if (workingCopy === undefined)
                 return;
@@ -63,12 +61,24 @@ export class SvnSourceControl implements QuickDiffProvider {
     private changes: SourceControlResourceGroup;
     private ignored: SourceControlResourceGroup;
 
+    private refreshThrottler: Throttler;
+
     private readonly disposable: Set<Disposable> = new Set();
 
     private constructor(public root: string, public file: string) {
+        this.refreshThrottler = new Throttler(this._refresh.bind(this), 500);
+
         this.sourceControl = scm.createSourceControl("svn", `${path.basename(root)} (Svn)`);
         this.sourceControl.acceptInputCommand = { command: "svn.commit", title: "Commit", arguments: [this.sourceControl] };
         this.sourceControl.quickDiffProvider = this;
+        this.sourceControl.statusBarCommands = [
+            {
+                arguments: [this.sourceControl],
+                command: "svn.update",
+                title: "$(sync) Update",
+                tooltip: "Update",
+            },
+        ];
         this.disposable.add(this.sourceControl);
 
         this.staged = this.sourceControl.createResourceGroup("staged", "Staged Changes");
@@ -85,9 +95,9 @@ export class SvnSourceControl implements QuickDiffProvider {
         const watcher = workspace.createFileSystemWatcher("**");
         this.disposable.add(watcher);
 
-        this.disposable.add(watcher.onDidChange(this.refresh, this));
-        this.disposable.add(watcher.onDidCreate(this.refresh, this));
-        this.disposable.add(watcher.onDidDelete(this.refresh, this));
+        this.disposable.add(watcher.onDidChange(this.onDidChange, this));
+        this.disposable.add(watcher.onDidCreate(this.onDidChange, this));
+        this.disposable.add(watcher.onDidDelete(this.onDidChange, this));
     }
 
     public provideOriginalResource?(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
@@ -103,21 +113,73 @@ export class SvnSourceControl implements QuickDiffProvider {
 
     public async update() {
         try {
+            this.sourceControl.statusBarCommands = [
+                {
+                    arguments: [this.sourceControl],
+                    command: "",
+                    title: "$(sync~spin) Updating",
+                    tooltip: "Updating",
+                },
+            ];
+
             await client.update(this.root);
+
+            this.sourceControl.statusBarCommands = [
+                {
+                    arguments: [this.sourceControl],
+                    command: "svn.update",
+                    title: "$(sync) Update",
+                    tooltip: "Update",
+                },
+            ];
+
             await this.refresh();
         } catch (err) {
             return;
         }
     }
 
-    @throttle
-    public async refresh(e?: Uri) {
-        if (e !== undefined && e.fsPath.includes("/.svn/"))
+    public refresh(): Promise<void> {
+        return this.refreshThrottler.run();
+    }
+
+    public async commit(message?: string) {
+        message = message || this.sourceControl.inputBox.value;
+        if (message === undefined || message === "") {
+            window.showErrorMessage("Please input commit message.");
+            return;
+        }
+
+        if (this.stagedFiles.size === 0)
             return;
 
+        window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
+            try {
+                await client.commit(Array.from(this.stagedFiles), message!);
+                svnTextDocumentContentProvider.onCommit(this.stagedFiles);
+            } catch (err) {
+                if (err instanceof SvnError)
+                    window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
+                else
+                    window.showErrorMessage(`Commit failed: ${err.message}`);
+            } finally {
+                this.sourceControl.inputBox.value = "";
+                this.refresh();
+            }
+        });
+    }
+
+    private onDidChange(e: Uri) {
+        if (e.path.includes("/.svn/"))
+            return;
+
+        this.refresh();
+    }
+
+    private async _refresh() {
         try {
             const states = await client.status(this.root);
-            const ignored = (await client.status(this.root, { changelists: "ignore-on-commit" })).map((x) => x.path);
+            const ignored = await client.changelistGet(this.root, "ignore-on-commit");
 
             this.stagedFiles.clear();
 
@@ -148,32 +210,6 @@ export class SvnSourceControl implements QuickDiffProvider {
         } catch (err) {
             return;
         }
-    }
-
-    public async commit(message?: string) {
-        message = message || this.sourceControl.inputBox.value;
-        if (message === undefined || message === "") {
-            window.showErrorMessage("Please input commit message.");
-            return;
-        }
-
-        if (this.stagedFiles.size === 0)
-            return;
-
-        window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
-            try {
-                await client.commit(Array.from(this.stagedFiles), message!);
-                svnTextDocumentContentProvider.onCommit(this.stagedFiles);
-            } catch (err) {
-                if (err instanceof SvnError)
-                    window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
-                else
-                    window.showErrorMessage(`Commit failed: ${err.message}`);
-            } finally {
-                this.sourceControl.inputBox.value = "";
-                this.refresh();
-            }
-        });
     }
 
     private getResourceState(state: SvnStatus): SvnResourceState {

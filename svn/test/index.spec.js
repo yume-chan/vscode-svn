@@ -250,7 +250,7 @@ describe("svn", function() {
                 expect(client).to.have.property("info", svn.Client.prototype.info);
             });
 
-            describeArgument("client", "info", "string | array");
+            describeArgument("client", "info", "string");
         });
 
         describe("#status", function() {

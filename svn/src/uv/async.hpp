@@ -7,7 +7,9 @@
 
 namespace Uv
 {
+using std::forward;
 using std::function;
+using std::get;
 using std::make_tuple;
 using std::tuple;
 
@@ -48,7 +50,7 @@ class Async
     int32_t send(function<void(Args...)> callback, Args... args)
     {
         this->callback = callback;
-        this->args = make_tuple(std::forward<Args>(args)...);
+        this->args = make_tuple(forward<Args>(args)...);
         return uv_async_send(handle);
     }
 
@@ -64,15 +66,15 @@ class Async
     }
 
     template <typename... Args, int... Is>
-    static void expend(function<void(Args...)> callback, std::tuple<Args...> &tup, Helper::indices<Is...>)
+    static void expend(function<void(Args...)> callback, tuple<Args...> &args, Helper::indices<Is...>)
     {
-        callback(std::get<Is>(tup)...);
+        callback(get<Is>(args)...);
     }
 
     template <typename... Args>
-    static void expend(function<void(Args...)> callback, std::tuple<Args...> &tup)
+    static void expend(function<void(Args...)> callback, tuple<Args...> &args)
     {
-        expend(callback, tup, Helper::build_indices<sizeof...(Args)>{});
+        expend(callback, args, Helper::build_indices<sizeof...(Args)>{});
     }
 
     static void invoke_callback(uv_async_t *handle)

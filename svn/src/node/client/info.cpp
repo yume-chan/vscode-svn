@@ -3,6 +3,7 @@
 
 #include "client.hpp"
 #include "revision.hpp"
+#include "pool_ptr.hpp"
 
 #define InternalizedString(value) v8::New<String>(isolate, value, NewStringType::kInternalized, sizeof(value) - 1)
 
@@ -28,7 +29,7 @@ struct InfoOptions
     apr_array_header_t *changelists;
 };
 
-Util_Method(Client::Info)
+V8_METHOD_BEGIN(Client::Info)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
     Util_Return(resolver->GetPromise());
@@ -43,7 +44,7 @@ Util_Method(Client::Info)
     Util_RejectIf(path == nullptr, Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
     Util_CheckAbsolutePath(path);
 
-    auto options = Util_AprAllocType(InfoOptions);
+    auto options = make_pool_ptr<InfoOptions>(pool);
     options->pegRevision = svn_opt_revision_t{svn_opt_revision_unspecified};
     options->revision = svn_opt_revision_t{svn_opt_revision_unspecified};
     options->depth = svn_depth_empty;
@@ -88,8 +89,6 @@ Util_Method(Client::Info)
         HandleScope scope(isolate);
         auto context = isolate->GetCallingContext();
 
-        auto result = _result->Get(isolate);
-
         auto item = Object::New(isolate);
 
         SetProperty(item, "path", v8::New<String>(isolate, path));
@@ -110,6 +109,8 @@ Util_Method(Client::Info)
         // SetProperty(item, "conflicted", Util_New(Boolean, status->conflicted));
         // SetProperty(item, "copied", Util_New(Boolean, status->copied));
         // SetProperty(item, "switched", Util_New(Boolean, status->switched));
+
+        auto result = _result->Get(isolate);
         result->Set(context, result->Length(), item);
 
         semaphore->post();
@@ -121,9 +122,8 @@ Util_Method(Client::Info)
         semaphore->wait();
     };
 
-    auto _result_rev = make_shared<svn_revnum_t *>();
     auto _send_callback = make_shared<function<void(const char *, const svn_client_info2_t *)>>(move(send_callback));
-    auto work = [_result_rev, client, path, options, _send_callback, pool]() -> svn_error_t * {
+    auto work = [client, path, options, _send_callback, _pool]() -> svn_error_t * {
         SVN_ERR(svn_client_info4(path,                      // abspath_or_url
                                  &options->pegRevision,     // peg_revision
                                  &options->revision,        // revision
@@ -135,13 +135,13 @@ Util_Method(Client::Info)
                                  invoke_callback,           // receiver
                                  _send_callback.get(),      // receiver_baton
                                  client->context,           // ctx
-                                 pool.get()));              // scratch_pool
+                                 _pool));                   // scratch_pool
 
         return nullptr;
     };
 
     auto _resolver = Util_SharedPersistent(Promise::Resolver, resolver);
-    auto after_work = [isolate, _resolver, _result, _result_rev](svn_error_t *error) -> void {
+    auto after_work = [isolate, _resolver, _result, options](svn_error_t *error) -> void {
         HandleScope scope(isolate);
         auto context = isolate->GetCallingContext();
 
@@ -149,15 +149,13 @@ Util_Method(Client::Info)
         Util_RejectIf(error != SVN_NO_ERROR, SvnError::New(isolate, context, error));
 
         auto result = _result->Get(isolate);
-
-        auto result_rev = *_result_rev;
-        if (result_rev != nullptr)
-            SetProperty(result, "revision", Util_New(Integer, *result_rev));
-
-        resolver->Resolve(context, result);
+        if (options->depth == svn_depth_empty && result->Length() == 1)
+            resolver->Resolve(context, result->Get(context, 0).ToLocalChecked());
+        else
+            resolver->Resolve(context, result);
     };
 
     RunAsync();
 }
-Util_MethodEnd;
+V8_METHOD_END;
 }

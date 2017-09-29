@@ -65,6 +65,7 @@ void Client::Init(Local<Object> exports, Isolate *isolate, Local<Context> contex
     SetPrototypeMethod(client_signature, client_prototype, add, Add, 1);
     SetPrototypeMethod(client_signature, client_prototype, cat, Cat, 1);
     SetPrototypeMethod(client_signature, client_prototype, changelistAdd, ChangelistAdd, 2);
+    SetPrototypeMethod(client_signature, client_prototype, changelistGet, ChangelistGet, 2);
     SetPrototypeMethod(client_signature, client_prototype, changelistRemove, ChangelistRemove, 1);
     SetPrototypeMethod(client_signature, client_prototype, checkout, Checkout, 2);
     SetPrototypeMethod(client_signature, client_prototype, commit, Commit, 2);

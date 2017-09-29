@@ -1,7 +1,7 @@
 #include <string>
 
-#include "../uv/async.hpp"
-#include "../uv/semaphore.hpp"
+#include <uv/async.hpp>
+#include <uv/semaphore.hpp>
 
 #include "client.hpp"
 
@@ -33,7 +33,7 @@ struct StatusOptions
     apr_array_header_t *changelists;
 };
 
-Util_Method(Client::Status)
+V8_METHOD_BEGIN(Client::Status)
 {
     auto resolver = Util_NewMaybe(Promise::Resolver);
     Util_Return(resolver->GetPromise());
@@ -48,7 +48,7 @@ Util_Method(Client::Status)
     Util_RejectIf(path == nullptr, Util_Error(Error, "Argument \"path\" must be a string without null bytes"));
     Util_CheckAbsolutePath(path);
 
-    auto options = Util_AprAllocType(StatusOptions);
+    auto options = pool->alloc<StatusOptions>();
     options->revision = svn_opt_revision_t{svn_opt_revision_working};
     options->depth = svn_depth_infinity;
     options->getAll = false;
@@ -139,7 +139,7 @@ Util_Method(Client::Status)
 
     auto _result_rev = make_shared<svn_revnum_t *>();
     auto _send_callback = make_shared<function<void(const char *, const svn_client_status_t *, apr_pool_t *)>>(move(send_callback));
-    auto work = [_result_rev, client, path, options, _send_callback, pool]() -> svn_error_t * {
+    auto work = [_result_rev, client, path, options, _send_callback, _pool]() -> svn_error_t * {
         SVN_ERR(svn_client_status6(*_result_rev,              // result_rev
                                    client->context,           // ctx
                                    path,                      // path
@@ -154,7 +154,7 @@ Util_Method(Client::Status)
                                    options->changelists,      // changelists
                                    invoke_callback,           // status_func
                                    _send_callback.get(),      // status_baton
-                                   pool.get()));              // scratch_pool
+                                   _pool));                   // scratch_pool
 
         return nullptr;
     };
@@ -178,5 +178,5 @@ Util_Method(Client::Status)
 
     RunAsync();
 }
-Util_MethodEnd;
+V8_METHOD_END;
 }
