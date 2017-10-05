@@ -8,25 +8,23 @@
 #define InternalizedString(value) v8::New<String>(isolate, value, NewStringType::kInternalized, sizeof(value) - 1)
 
 #define SetReadOnly(object, name, value)                   \
-	(object)->DefineOwnProperty(context,                   \
-								InternalizedString(#name), \
-								(value),                   \
-								ReadOnlyDontDelete)
+    (object)->DefineOwnProperty(context,                   \
+                                InternalizedString(#name), \
+                                (value),                   \
+                                ReadOnlyDontDelete)
 
-namespace Svn
-{
-void Version(Local<Name> property, const PropertyCallbackInfo<Value> &args)
-{
-	auto isolate = args.GetIsolate();
-	auto context = isolate->GetCurrentContext();
+namespace node_svn {
+void Version(Local<Name> property, const PropertyCallbackInfo<Value>& args) {
+    auto isolate = args.GetIsolate();
+    auto context = isolate->GetCurrentContext();
 
-	auto version = svn_client_version();
+    auto version = svn_client_version();
 
-	auto object = Object::New(isolate);
-	SetReadOnly(object, major, v8::New<Integer>(isolate, version->major));
-	SetReadOnly(object, minor, v8::New<Integer>(isolate, version->minor));
-	SetReadOnly(object, patch, v8::New<Integer>(isolate, version->patch));
-	args.GetReturnValue().Set(object);
+    auto object = Object::New(isolate);
+    SetReadOnly(object, major, v8::New<Integer>(isolate, version->major));
+    SetReadOnly(object, minor, v8::New<Integer>(isolate, version->minor));
+    SetReadOnly(object, patch, v8::New<Integer>(isolate, version->patch));
+    args.GetReturnValue().Set(object);
 }
 
 // V8_METHOD_BEGIN(Test)
@@ -44,24 +42,23 @@ void Version(Local<Name> property, const PropertyCallbackInfo<Value> &args)
 // }
 // V8_METHOD_END;
 
-void Init(Local<Object> exports)
-{
-	auto isolate = exports->GetIsolate();
-	auto context = isolate->GetCurrentContext();
+void Init(Local<Object> exports) {
+    auto isolate = exports->GetIsolate();
+    auto context = isolate->GetCurrentContext();
 
-	exports->SetAccessor(context,						// context
-						 InternalizedString("version"), // name
-						 Version,						// getter
-						 nullptr,						// setter
-						 MaybeLocal<Value>(),			// data
-						 AccessControl::ALL_CAN_READ,   // settings
-						 ReadOnlyDontDelete);			// attribute
+    exports->SetAccessor(context,                       // context
+                         InternalizedString("version"), // name
+                         Version,                       // getter
+                         nullptr,                       // setter
+                         MaybeLocal<Value>(),           // data
+                         AccessControl::ALL_CAN_READ,   // settings
+                         ReadOnlyDontDelete);           // attribute
 
-	// NODE_SET_METHOD(exports, "test", Test);
+    // NODE_SET_METHOD(exports, "test", Test);
 
-	Client::Init(exports, isolate, context);
-	SvnError::Init(exports, isolate, context);
+    Client::Init(exports, isolate, context);
+    SvnError::Init(exports, isolate, context);
 }
 
 NODE_MODULE(svn, Init)
-}
+} // namespace node_svn

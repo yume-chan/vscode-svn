@@ -60,5 +60,7 @@
         "ratio": "cpp",
         "thread": "cpp"
     },
-    "git.enableSmartCommit": true
+    "git.enableSmartCommit": true,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4
 }

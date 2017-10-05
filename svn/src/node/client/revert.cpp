@@ -1,6 +1,6 @@
 #include "client.hpp"
 
-namespace Svn
+namespace node_svn
 {
 V8_METHOD_BEGIN(Client::Revert)
 {

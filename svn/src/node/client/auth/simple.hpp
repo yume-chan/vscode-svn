@@ -17,9 +17,8 @@
 #include "../../utils.hpp"
 
 #include "../../apr/pool.hpp"
-#include "../../apr/string.hpp"
 
-namespace Svn
+namespace node_svn
 {
 namespace Auth
 {

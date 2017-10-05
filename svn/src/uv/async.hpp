@@ -1,5 +1,5 @@
-#ifndef NODE_SVN_UV_ASYNC_H
-#define NODE_SVN_UV_ASYNC_H
+#ifndef UV_CPP_ASYNC_H
+#define UV_CPP_ASYNC_H
 
 #include <functional>
 

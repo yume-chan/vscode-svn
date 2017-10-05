@@ -8,18 +8,20 @@
 
 #include <svn/client.hpp>
 
+#include <uv/future.hpp>
+
 #include "../utils.hpp"
 #include "../svn_error.hpp"
 #include "../client.hpp"
 
-#define Util_PreparePool()                                      \
-    auto client = ObjectWrap::Unwrap<Client>(args.Holder());    \
-    auto pool = client->_parent->create(); \
+#define Util_PreparePool()                                   \
+    auto client = ObjectWrap::Unwrap<Client>(args.Holder()); \
+    auto pool = client->_parent->create();
 
 #define Util_ToAprStringArray(arg, name)                                                                                                           \
     if (arg->IsString())                                                                                                                           \
     {                                                                                                                                              \
-        auto value = to_string(arg);                                                                                                        \
+        auto value = to_string(arg);                                                                                                               \
                                                                                                                                                    \
         name = apr_array_make(_pool, 1, sizeof(char *));                                                                                           \
         APR_ARRAY_PUSH(name, const char *) = value;                                                                                                \
@@ -45,14 +47,5 @@
     }
 
 #define RunAsync() Util_RejectIf(Util::QueueWork<svn_error_t *>(uv_default_loop(), move(work), move(after_work)) != 0, Util_Error(Error, "Failed starting async work"))
-
-namespace Svn
-{
-    static inline string to_string(Local<Value> value)
-    {
-        String::Utf8Value utf8(value);
-        return string(*utf8, utf8.length());
-    }
-}
 
 #endif

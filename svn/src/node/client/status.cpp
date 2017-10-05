@@ -9,7 +9,7 @@
 
 #define SetProperty(target, name, value) target->Set(context, InternalizedString(name), value)
 
-namespace Svn
+namespace node_svn
 {
 using std::to_string;
 

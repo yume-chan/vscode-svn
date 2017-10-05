@@ -6,8 +6,8 @@
 using std::string;
 using std::to_string;
 
-#include <v8.h>
 #include <uv.h>
+#include <v8.h>
 
 using v8::AccessControl;
 using v8::Array;
@@ -34,84 +34,75 @@ using v8::String;
 using v8::Undefined;
 using v8::Value;
 
-namespace
-{
+namespace {
 template <typename T>
 struct Factory;
 
 template <>
-struct Factory<Object>
-{
-    static inline Local<Object> New(Isolate *isolate)
-    {
+struct Factory<Object> {
+    static inline Local<Object> New(Isolate* isolate) {
         return Object::New(isolate);
     }
 };
 
 template <>
-struct Factory<String>
-{
-    static inline Local<String> New(Isolate *isolate, const char *value, NewStringType type = NewStringType::kNormal, size_t length = -1)
-    {
+struct Factory<String> {
+    static inline Local<String> New(Isolate* isolate, const char* value, NewStringType type = NewStringType::kNormal, size_t length = -1) {
         return String::NewFromUtf8(isolate, value, type, static_cast<int>(length)).ToLocalChecked();
     }
 
-    static inline Local<String> New(Isolate *isolate, string value, NewStringType type = NewStringType::kNormal)
-    {
+    static inline Local<String> New(Isolate* isolate, string value, NewStringType type = NewStringType::kNormal) {
         return String::NewFromUtf8(isolate, value.c_str(), type, static_cast<int>(value.length())).ToLocalChecked();
     }
 };
 
 template <>
-struct Factory<Integer>
-{
-    static inline Local<Integer> New(Isolate *isolate, int32_t value)
-    {
+struct Factory<Integer> {
+    static inline Local<Integer> New(Isolate* isolate, int32_t value) {
         return Integer::New(isolate, value);
     }
 };
 
 template <>
-struct Factory<External>
-{
-    static inline Local<External> New(Isolate *isolate, void *value)
-    {
+struct Factory<External> {
+    static inline Local<External> New(Isolate* isolate, void* value) {
         return External::New(isolate, value);
     }
 };
-};
 
-namespace v8
-{
+template <>
+struct Factory<Promise::Resolver> {
+    static inline Local<Promise::Resolver> New(Local<Context>& context) {
+        return Promise::Resolver::New(context).ToLocalChecked();
+    }
+};
+}; // namespace
+
+namespace v8 {
 template <typename T, typename A0>
-inline Local<T> New(A0 a0)
-{
+inline Local<T> New(A0 a0) {
     return Factory<T>::New(a0);
 }
 
 template <typename T, typename A0, typename A1>
-inline Local<T> New(A0 a0, A1 a1)
-{
+inline Local<T> New(A0 a0, A1 a1) {
     return Factory<T>::New(a0, a1);
 }
 
 template <typename T, typename A0, typename A1, typename A2>
-inline Local<T> New(A0 a0, A1 a1, A2 a2)
-{
+inline Local<T> New(A0 a0, A1 a1, A2 a2) {
     return Factory<T>::New(a0, a1, a2);
 }
 
 template <typename T, typename A0, typename A1, typename A2, typename A3>
-inline Local<T> New(A0 a0, A1 a1, A2 a2, A3 a3)
-{
+inline Local<T> New(A0 a0, A1 a1, A2 a2, A3 a3) {
     return Factory<T>::New(a0, a1, a2, a3);
 }
-}
+} // namespace v8
 
-#define V8_METHOD_DECLARE(name) void name(const FunctionCallbackInfo<Value> &args)
+#define V8_METHOD_DECLARE(name) void name(const FunctionCallbackInfo<Value>& args)
 #define V8_METHOD_BEGIN(name)             \
-    V8_METHOD_DECLARE(name)               \
-    {                                     \
+    V8_METHOD_DECLARE(name) {             \
         auto isolate = args.GetIsolate(); \
         auto context = isolate->GetCurrentContext();
 #define V8_METHOD_END }

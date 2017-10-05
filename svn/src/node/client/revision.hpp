@@ -3,7 +3,7 @@
 
 #include "client.hpp"
 
-namespace Svn
+namespace node_svn
 {
 inline svn_opt_revision_t ParseRevision(Isolate *isolate, Local<Context> &context, Local<Value> &value, enum svn_opt_revision_kind default)
 {

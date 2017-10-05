@@ -8,96 +8,104 @@
 
 struct apr_array_header_t;
 
-namespace apr
-{
+namespace apr {
 template <typename T>
-class array
-{
+class array {
   public:
-    class iterator : public std::iterator<std::random_access_iterator_tag, T, T>
-    {
+    class iterator
+        : public std::iterator<std::random_access_iterator_tag, T, T> {
         template <typename U>
         friend class array;
 
       public:
-        T operator*() const { return _value; }
-        T &operator->() const { return &_value; }
+        T operator*() const {
+            return _value;
+        }
+        T& operator->() const {
+            return &_value;
+        }
 
-        const iterator &operator++()
-        {
+        const iterator& operator++() {
             _value++;
             return *this;
         }
 
-        const iterator &operator--()
-        {
+        const iterator& operator--() {
             _value--;
             return *this;
         }
 
-        iterator operator++(int)
-        {
+        iterator operator++(int) {
             iterator copy(*this);
             _value++;
             return copy;
         }
 
-        iterator operator--(int)
-        {
+        iterator operator--(int) {
             iterator copy(*this);
             _value--;
             return copy;
         }
 
-        iterator &operator=(const iterator &other)
-        {
+        iterator& operator=(const iterator& other) {
             this->_value = other._value;
             return *this;
         }
 
-        bool operator==(const iterator &other) const { return _value == other._value; }
-        bool operator!=(const iterator &other) const { return _value != other._value; }
-        bool operator<(const iterator &other) const { return _value < other._value; }
-        bool operator>(const iterator &other) const { return _value > other._value; }
-        bool operator<=(const iterator &other) const { return _value != other._value; }
-        bool operator>=(const iterator &other) const { return _value != other._value; }
+        bool operator==(const iterator& other) const {
+            return _value == other._value;
+        }
+        bool operator!=(const iterator& other) const {
+            return _value != other._value;
+        }
+        bool operator<(const iterator& other) const {
+            return _value < other._value;
+        }
+        bool operator>(const iterator& other) const {
+            return _value > other._value;
+        }
+        bool operator<=(const iterator& other) const {
+            return _value != other._value;
+        }
+        bool operator>=(const iterator& other) const {
+            return _value != other._value;
+        }
 
       protected:
-        iterator(T &value) : _value(value){};
+        iterator(T& value)
+            : _value(value){};
 
       private:
         T _value;
     };
 
-    explicit array(const pool &pool, int size = 0);
-    explicit array(apr_array_header_t *raw);
+    explicit array(const pool& pool, int size = 0);
+    explicit array(apr_array_header_t* raw);
 
-    T &operator[](int pos);
-    const T &operator[](int pos) const;
+    T&       operator[](int pos);
+    const T& operator[](int pos) const;
 
     bool empty() const;
-    int size() const;
-    int capacity() const;
+    int  size() const;
+    int  capacity() const;
 
     void clear();
-    void push_back(const T &value);
-    void push_back(T &&value);
+    void push_back(const T& value);
+    void push_back(T&& value);
 
-    const apr_array_header_t *get() const;
+    const apr_array_header_t* get() const;
 
-    iterator begin()
-    {
+    iterator begin() {
         return iterator(this[0]);
     }
 
-    iterator end()
-    {
+    iterator end() {
         return iterator(this[size()]);
     }
 
   private:
-    apr_array_header_t *_value;
+    apr_array_header_t* _value;
 };
-}
+} // namespace apr
 
 #endif

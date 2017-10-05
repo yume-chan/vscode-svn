@@ -9,7 +9,7 @@
 
 #define SetProperty(target, name, value) target->Set(context, InternalizedString(name), value)
 
-namespace Svn
+namespace node_svn
 {
 inline svn_error_t *invoke_callback(void *baton, const char *path, const svn_client_info2_t *info, apr_pool_t *scratch_pool)
 {

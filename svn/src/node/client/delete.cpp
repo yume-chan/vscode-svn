@@ -1,6 +1,6 @@
 #include "client.hpp"
 
-namespace Svn
+namespace node_svn
 {
 inline svn_error_t *invoke_callback(const svn_commit_info_t *commit_info, void *baton, apr_pool_t *pool)
 {

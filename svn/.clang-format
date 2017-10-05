@@ -1,0 +1,33 @@
+---
+IndentWidth: 4
+---
+Language: Cpp
+
+PointerAlignment: Left
+
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+AlwaysBreakTemplateDeclarations: true
+
+BinPackArguments: false
+BinPackParameters: false
+
+BreakBeforeInheritanceComma: true
+BreakConstructorInitializers: BeforeComma
+
+ColumnLimit: 0
+
+SortUsingDeclarations: true
+
+Standard: Cpp11
+
+MacroBlockBegin: "V8_METHOD_BEGIN|SVN_CLIENT_METHOD_BEGIN"
+MacroBlockEnd: "V8_METHOD_END|SVN_CLIENT_METHOD_END"
+---

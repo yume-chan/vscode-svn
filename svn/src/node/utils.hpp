@@ -55,55 +55,10 @@ using std::vector;
 
 #define Util_GetProperty(object, name) (object)->Get(context, v8::New<String>(isolate, name)).ToLocalChecked()
 
-namespace Svn
+namespace node_svn
 {
-namespace Util
+namespace util
 {
-template <class T>
-class WorkData
-{
-  public:
-    WorkData(function<T()> work, function<void(T)> after_work)
-        : work(move(work)),
-          after_work(move(after_work)) {}
-
-    WorkData(const WorkData &other) = delete;
-
-    const function<T()> work;
-    const function<void(T)> after_work;
-
-    T result;
-};
-
-template <class T>
-static void invoke_uv_work(uv_work_t *req)
-{
-    auto data = static_cast<WorkData<T> *>(req->data);
-    data->result = data->work();
-}
-
-template <class T>
-static void invoke_after_uv_work(uv_work_t *req, int status)
-{
-    auto data = static_cast<WorkData<T> *>(req->data);
-    data->after_work(data->result);
-
-    delete data;
-    delete req;
-}
-
-// @return 0 if success.
-template <class T>
-inline int32_t QueueWork(uv_loop_t *loop, const function<T()> work, const function<void(T)> after_work)
-{
-    if (work == nullptr || after_work == nullptr)
-        return -1;
-
-    auto req = new uv_work_t;
-    req->data = new WorkData<T>(move(work), move(after_work));
-    return uv_queue_work(loop, req, invoke_uv_work<T>, invoke_after_uv_work<T>);
-}
-
 static inline std::string to_string(Local<Value> &arg)
 {
     String::Utf8Value string(arg);

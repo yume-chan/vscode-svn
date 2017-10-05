@@ -7,13 +7,13 @@
 
 #include "v8.hpp"
 
-namespace Svn
+namespace node_svn
 {
 namespace SvnError
 {
 void Init(Local<Object> exports, Isolate *isolate, Local<Context> context);
 Local<Value> New(Isolate *isolate, Local<Context> context, int code, const char *message, Local<Value> &child);
-Local<Value> New(Isolate *isolate, Local<Context> context, svn_error_t *error);
+Local<Value> New(Isolate *isolate, Local<Context> context, svn_error_t &error);
 }
 }
 

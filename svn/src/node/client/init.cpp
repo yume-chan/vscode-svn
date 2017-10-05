@@ -44,7 +44,7 @@ static svn_error_t *return_error_handler(svn_boolean_t can_return, const char *f
     return err;
 }
 
-namespace Svn
+namespace node_svn
 {
 Persistent<Function> Client::constructor;
 

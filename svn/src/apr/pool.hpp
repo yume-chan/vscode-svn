@@ -3,32 +3,32 @@
 
 struct apr_pool_t;
 
-namespace apr
-{
-class pool
-{
+namespace apr {
+class pool {
   public:
-    static pool unmanaged(apr_pool_t *raw);
+    static pool unmanaged(apr_pool_t* raw);
 
     explicit pool();
+    pool(const pool&) = delete;
+    pool(pool&&);
 
     ~pool();
 
-    apr_pool_t *get() const;
+    apr_pool_t* get() const;
 
     pool create() const;
 
     template <typename T>
-    T *alloc() const;
+    T* alloc() const;
 
-    void *memcpy(void *source, size_t count) const;
+    void* memcpy(void* source, size_t count) const;
 
   private:
-    explicit pool(apr_pool_t *raw, bool managed);
+    explicit pool(apr_pool_t* raw, bool managed);
 
-    bool _managed;
-    apr_pool_t *_value;
+    bool        _managed;
+    apr_pool_t* _value;
 };
-}
+} // namespace apr
 
 #endif
