@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 
-import { Client } from "../svn";
+import { AsyncClient, NodeStatus } from "node-svn";
 
-export const client = new Client({
-    async getSimpleCredential(realm, username) {
+const config = {
+    async getSimpleCredential(realm: string, username?: string) {
         username = await vscode.window.showInputBox({
             ignoreFocusOut: true,
             prompt: `Username for ${realm}:`,
@@ -39,4 +39,6 @@ export const client = new Client({
             save,
         };
     },
-});
+};
+
+export const client = new AsyncClient();

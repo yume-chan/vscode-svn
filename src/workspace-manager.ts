@@ -1,6 +1,8 @@
-import { Disposable, SourceControl, workspace, WorkspaceFoldersChangeEvent } from "vscode";
+import { Disposable, SourceControl, workspace, WorkspaceFoldersChangeEvent, window } from "vscode";
 
 import { SvnSourceControl } from "./svn-source-control";
+
+import { client } from "./client";
 
 class WorkspaceManager {
     public readonly controls: Set<SvnSourceControl> = new Set();
@@ -22,6 +24,26 @@ class WorkspaceManager {
         // TODO: Show Workspace Picker
     }
 
+    private async detect(file: string): Promise<void> {
+        try {
+            const root = await client.get_working_copy_root(file);
+
+            for (const control of this.controls) {
+                if (control.root === root) {
+                    control.workspaces.add(file);
+                    return;
+                }
+            }
+
+            const control = new SvnSourceControl(root);
+            control.workspaces.add(file);
+            await control.refresh();
+            this.controls.add(control);
+        } catch (err) {
+            return;
+        }
+    }
+
     public dispose(): void {
         for (const item of this.controls)
             item.dispose();
@@ -35,17 +57,20 @@ class WorkspaceManager {
     }
 
     private async onDidChangeWorkspaceFolders(e: WorkspaceFoldersChangeEvent) {
-        for (const item of e.added) {
-            const control = await SvnSourceControl.detect(item.uri.fsPath);
-            if (control !== undefined)
-                this.controls.add(control);
-        }
+        for (const item of e.added)
+            await this.detect(item.uri.fsPath);
 
         for (const item of e.removed) {
+            const file = item.uri.fsPath;
+
             for (const control of this.controls) {
-                if (control.file === item.uri.fsPath) {
-                    control.dispose();
-                    this.controls.delete(control);
+                if (control.workspaces.has(file)) {
+                    control.workspaces.delete(file);
+
+                    if (control.workspaces.size === 0) {
+                        control.dispose();
+                        this.controls.delete(control);
+                    }
                     break;
                 }
             }

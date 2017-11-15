@@ -1,6 +1,6 @@
 import { CancellationToken, Disposable, EventEmitter, TextDocumentContentProvider, Uri, workspace } from "vscode";
 
-import { Client, SvnError } from "../svn";
+import { Client, RevisionKind } from "node-svn";
 
 import { client } from "./client";
 
@@ -23,7 +23,8 @@ class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
 
     public async provideTextDocumentContent(uri: Uri, token: CancellationToken): Promise<string> {
         try {
-            const buffer = await client.cat(uri.fsPath, { pegRevision: Client.RevisionKind.base, revision: Client.RevisionKind.base });
+            const config = { pegRevision: RevisionKind.base, revision: RevisionKind.base };
+            const buffer = await client.cat(uri.fsPath);
             const content = buffer.toString("utf8");
             return content;
         } catch (err) {

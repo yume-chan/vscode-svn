@@ -152,35 +152,39 @@
             ]
         }
     },
-    "dependencies": {},
+    "dependencies": {
+        "node-svn": "github:yume-chan/node-svn"
+    },
     "description": "",
     "devDependencies": {
-        "@types/mocha": "^2.2.43",
-        "@types/node": "^8.0.28",
+        "@types/mocha": "^2.2.44",
+        "@types/node": "^8.0.52",
+        "electron-rebuild": "^1.6.0",
         "mocha": "^3.5.3",
-        "tslint": "^5.7.0",
+        "tslint": "^5.8.0",
         "tslint-language-service": "^0.9.6",
-        "typescript": "^2.5.2",
-        "vscode": "^1.1.5"
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6"
     },
     "displayName": "Svn",
     "engines": {
-        "vscode": "^1.16.0"
+        "vscode": "^1.18.0"
     },
     "license": "MIT",
     "main": "./out/extension",
     "name": "vscode-svn",
+    "preview": true,
     "publisher": "cnsimonchan",
     "repository": {
         "type": "git",
         "url": "https://github.com/yume-chan/vscode-svn"
     },
     "scripts": {
-        "compile": "tsc -watch -p ./",
+        "compile": "electron-rebuild --arch x64 --version 1.7.9 && tsc -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "node ./node_modules/vscode/bin/test",
-        "vscode:build": "node-gyp -C svn build --target=1.7.7 --arch=x64 --dist-url=https://atom.io/download/electron --debug",
-        "vscode:prepublish": "node-gyp -C svn rebuild --target=1.7.7 --arch=x64 --dist-url=https://atom.io/download/electron --debug && node svn/scripts/postinstall.js debug && tsc -p ./"
+        "test": "npm run compile && node ./node_modules/vscode/bin/test",
+        "watch": "tsc -watch -p ./",
+        "vscode:prepublish": "npm run compile"
     },
     "version": "0.0.1"
 }

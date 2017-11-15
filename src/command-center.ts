@@ -1,6 +1,7 @@
 import { commands, Disposable, SourceControl, SourceControlResourceGroup, window, workspace } from "vscode";
 
-import { Client } from "../svn";
+import { StatusKind } from "node-svn";
+
 import { client } from "./client";
 import { SvnResourceState, SvnSourceControl } from "./svn-source-control";
 import { workspaceManager } from "./workspace-manager";
@@ -66,10 +67,10 @@ class CommandCenter {
         for (const item of resourceStates) {
             if (!item.versioned)
                 await client.add(item.path);
-            else if (item.nodeStatus === Client.StatusKind.missing)
-                await client.delete(item.path);
+            else if (item.node_status === StatusKind.missing)
+                await client.remove(item.path, (info) => { });
             else
-                await client.changelistRemove(item.path);
+                await client.remove_from_changelists(item.path);
         }
 
         await control.refresh();
@@ -82,13 +83,13 @@ class CommandCenter {
         const control = resourceStates[0].control;
 
         for (const item of resourceStates) {
-            switch (item.nodeStatus) {
-                case Client.StatusKind.added:
-                case Client.StatusKind.deleted:
+            switch (item.node_status) {
+                case StatusKind.added:
+                case StatusKind.deleted:
                     await client.revert(item.path);
                     break;
                 default:
-                    await client.changelistAdd(item.path, "ignore-on-commit");
+                    await client.add_to_changelist(item.path, "ignore-on-commit");
                     break;
             }
         }
