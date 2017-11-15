@@ -12,9 +12,6 @@ install:
   - ps: Install-Product node $env:nodejs_version x64
   - npm install -g yume-chan/greenkeeper-lockfile
   - npm install
-  - cd svn
-  - npm install
-  - cd ..
 
 before_build: greenkeeper-lockfile-update
 
