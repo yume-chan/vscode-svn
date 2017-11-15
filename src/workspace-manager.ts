@@ -1,4 +1,4 @@
-import { Disposable, SourceControl, workspace, WorkspaceFoldersChangeEvent, window } from "vscode";
+import { Disposable, SourceControl, window, workspace, WorkspaceFoldersChangeEvent } from "vscode";
 
 import { SvnSourceControl } from "./svn-source-control";
 
@@ -24,10 +24,23 @@ class WorkspaceManager {
         // TODO: Show Workspace Picker
     }
 
+    public dispose(): void {
+        for (const item of this.controls)
+            item.dispose();
+
+        this.controls.clear();
+
+        for (const item of this.disposable)
+            item.dispose();
+
+        this.disposable.clear();
+    }
+
     private async detect(file: string): Promise<void> {
         try {
             const root = await client.get_working_copy_root(file);
 
+            // tslint:disable-next-line:no-shadowed-variable
             for (const control of this.controls) {
                 if (control.root === root) {
                     control.workspaces.add(file);
@@ -42,18 +55,6 @@ class WorkspaceManager {
         } catch (err) {
             return;
         }
-    }
-
-    public dispose(): void {
-        for (const item of this.controls)
-            item.dispose();
-
-        this.controls.clear();
-
-        for (const item of this.disposable)
-            item.dispose();
-
-        this.disposable.clear();
     }
 
     private async onDidChangeWorkspaceFolders(e: WorkspaceFoldersChangeEvent) {
