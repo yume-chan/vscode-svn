@@ -160,7 +160,7 @@
         "@types/mocha": "^2.2.44",
         "@types/node": "^8.0.52",
         "electron-rebuild": "^1.6.0",
-        "mocha": "^3.5.3",
+        "mocha": "^4.0.1",
         "tslint": "^5.8.0",
         "tslint-language-service": "^0.9.6",
         "typescript": "^2.6.1",
