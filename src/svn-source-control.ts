@@ -16,7 +16,7 @@ import {
     workspace,
 } from "vscode";
 
-import { StatusKind, NodeStatus } from "node-svn";
+import { NodeStatus, StatusKind } from "node-svn";
 
 import { client } from "./client";
 import { svnTextDocumentContentProvider } from "./content-provider";
@@ -142,12 +142,12 @@ export class SvnSourceControl implements QuickDiffProvider {
 
         window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
             try {
-                await client.commit(Array.from(this.stagedFiles), message!, (info) => { });
+                await client.commit(Array.from(this.stagedFiles), message!, (info) => { return; });
                 svnTextDocumentContentProvider.onCommit(this.stagedFiles);
             } catch (err) {
-                // if (err instanceof SvnError)
-                //     window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
-                // else
+                // X if (err instanceof SvnError)
+                // X     window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
+                // X else
                 window.showErrorMessage(`Commit failed: ${err.message}`);
             } finally {
                 this.sourceControl.inputBox.value = "";
@@ -171,8 +171,8 @@ export class SvnSourceControl implements QuickDiffProvider {
             const changedStates: SvnResourceState[] = [];
             const ignoredStates: SvnResourceState[] = [];
 
-            await client.status(this.root, (path, info) => {
-                if (info.changelist === "ignore-on-submit") {
+            await client.status(this.root, (info) => {
+                if (info.changelist === "ignore-on-commit") {
                     ignoredStates.push(this.getResourceState(info));
                 } else {
                     switch (info.node_status) {
@@ -180,7 +180,7 @@ export class SvnSourceControl implements QuickDiffProvider {
                         case StatusKind.modified:
                         case StatusKind.obstructed:
                         case StatusKind.deleted:
-                            this.stagedFiles.add(path);
+                            this.stagedFiles.add(info.path);
                             stagedStates.push(this.getResourceState(info));
                             break;
                         default:

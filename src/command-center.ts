@@ -68,7 +68,7 @@ class CommandCenter {
             if (!item.versioned)
                 await client.add(item.path);
             else if (item.node_status === StatusKind.missing)
-                await client.remove(item.path, (info) => { });
+                await client.remove(item.path, (info) => { return; });
             else
                 await client.remove_from_changelists(item.path);
         }
