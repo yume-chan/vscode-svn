@@ -174,7 +174,7 @@
     "main": "./out/extension",
     "name": "vscode-svn",
     "preview": true,
-    "publisher": "cnsimonchan",
+    "publisher": "simonchan",
     "repository": {
         "type": "git",
         "url": "https://github.com/yume-chan/vscode-svn"

@@ -5,6 +5,7 @@ test/**
 src/**
 **/*.map
 .gitignore
+.npmrc
 tsconfig.json
 
 linter/**
