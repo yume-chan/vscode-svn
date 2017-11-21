@@ -20,27 +20,12 @@ import { NodeStatus, StatusKind } from "node-svn";
 
 import { client } from "./client";
 import { svnTextDocumentContentProvider } from "./content-provider";
+import { svnDecorationProvider } from "./svn-decoration-provider";
+import { SvnResourceState } from "./svn-resource-state";
 import { Throttler } from "./throttler";
 
-const iconsRootPath = path.join(__dirname, "..", "resources", "icons");
-
-const statusIcons = {
-    [StatusKind.modified]: "modified",
-    [StatusKind.unversioned]: "untracked",
-    [StatusKind.added]: "added",
-    [StatusKind.obstructed]: "conflict",
-    [StatusKind.missing]: "deleted",
-    [StatusKind.deleted]: "deleted",
-};
-
-export interface SvnResourceState extends NodeStatus, SourceControlResourceState {
-    control: SvnSourceControl;
-}
-
 export class SvnSourceControl implements QuickDiffProvider {
-    public readonly workspaces: Set<string> = new Set<string>();
-
-    public stagedFiles: Set<string> = new Set<string>();
+    public static readonly cache: Map<string, NodeStatus> = new Map<string, NodeStatus>();
 
     private sourceControl: SourceControl;
 
@@ -50,7 +35,11 @@ export class SvnSourceControl implements QuickDiffProvider {
 
     private refreshThrottler: Throttler;
 
+    private stagedFiles: Set<string> = new Set<string>();
+
     private readonly disposable: Set<Disposable> = new Set();
+
+    public readonly workspaces: Set<string> = new Set<string>();
 
     public constructor(public root: string) {
         this.refreshThrottler = new Throttler(this._refresh.bind(this), 500);
@@ -82,9 +71,62 @@ export class SvnSourceControl implements QuickDiffProvider {
         const watcher = workspace.createFileSystemWatcher("**");
         this.disposable.add(watcher);
 
-        this.disposable.add(watcher.onDidChange(this.onDidChange, this));
-        this.disposable.add(watcher.onDidCreate(this.onDidChange, this));
-        this.disposable.add(watcher.onDidDelete(this.onDidChange, this));
+        for (const event of [watcher.onDidChange, watcher.onDidCreate, watcher.onDidDelete])
+            this.disposable.add(event(this.onDidChange, this));
+    }
+
+    private onDidChange(e: Uri) {
+        if (e.path.includes("/.svn/"))
+            return;
+
+        this.refresh();
+    }
+
+    private async _refresh() {
+        try {
+            this.stagedFiles.clear();
+
+            const stagedStates: SvnResourceState[] = [];
+            const changedStates: SvnResourceState[] = [];
+            const ignoredStates: SvnResourceState[] = [];
+
+            const files: Uri[] = [];
+
+            await client.status(this.root, (info) => {
+                const uri = Uri.file(info.path);
+                files.push(uri);
+                SvnSourceControl.cache.set(uri.fsPath, info);
+
+                if (info.changelist === "ignore-on-commit") {
+                    ignoredStates.push(this.getResourceState(info));
+                } else {
+                    switch (info.node_status) {
+                        case StatusKind.added:
+                        case StatusKind.modified:
+                        case StatusKind.obstructed:
+                        case StatusKind.deleted:
+                            this.stagedFiles.add(info.path);
+                            stagedStates.push(this.getResourceState(info));
+                            break;
+                        default:
+                            changedStates.push(this.getResourceState(info));
+                            break;
+                    }
+                }
+            });
+
+            this.staged.resourceStates = stagedStates;
+            this.changes.resourceStates = changedStates;
+            this.ignored.resourceStates = ignoredStates;
+
+            svnDecorationProvider.onDidChangeFiles(files);
+        } catch (err) {
+            return;
+        }
+    }
+
+    private getResourceState(status: NodeStatus): SvnResourceState {
+        return new SvnResourceState(this, status);
     }
 
     public provideOriginalResource?(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
@@ -154,67 +196,5 @@ export class SvnSourceControl implements QuickDiffProvider {
                 this.refresh();
             }
         });
-    }
-
-    private onDidChange(e: Uri) {
-        if (e.path.includes("/.svn/"))
-            return;
-
-        this.refresh();
-    }
-
-    private async _refresh() {
-        try {
-            this.stagedFiles.clear();
-
-            const stagedStates: SvnResourceState[] = [];
-            const changedStates: SvnResourceState[] = [];
-            const ignoredStates: SvnResourceState[] = [];
-
-            await client.status(this.root, (info) => {
-                if (info.changelist === "ignore-on-commit") {
-                    ignoredStates.push(this.getResourceState(info));
-                } else {
-                    switch (info.node_status) {
-                        case StatusKind.added:
-                        case StatusKind.modified:
-                        case StatusKind.obstructed:
-                        case StatusKind.deleted:
-                            this.stagedFiles.add(info.path);
-                            stagedStates.push(this.getResourceState(info));
-                            break;
-                        default:
-                            changedStates.push(this.getResourceState(info));
-                            break;
-                    }
-                }
-            });
-
-            this.staged.resourceStates = stagedStates;
-            this.changes.resourceStates = changedStates;
-            this.ignored.resourceStates = ignoredStates;
-        } catch (err) {
-            return;
-        }
-    }
-
-    private getResourceState(state: NodeStatus): SvnResourceState {
-        const resourceUri = Uri.file(state.path);
-        const filename: string = path.basename(state.path);
-        const icon = state.versioned ? statusIcons[state.node_status] : statusIcons[StatusKind.unversioned];
-        const command: Command = state.text_status === StatusKind.modified ?
-            { command: "vscode.diff", title: "Diff", arguments: [resourceUri.with({ scheme: "svn" }), resourceUri, filename] } :
-            { command: "vscode.open", title: "Open", arguments: [resourceUri] };
-        return {
-            control: this,
-            ...state,
-            resourceUri,
-            command,
-            decorations: {
-                dark: { iconPath: Uri.file(path.resolve(iconsRootPath, "dark", `status-${icon}.svg`)) },
-                light: { iconPath: Uri.file(path.resolve(iconsRootPath, "light", `status-${icon}.svg`)) },
-                tooltip: `Node: ${StatusKind[state.node_status]}\nText: ${StatusKind[state.text_status]}\nProp: ${StatusKind[state.prop_status]}`,
-            },
-        };
     }
 }

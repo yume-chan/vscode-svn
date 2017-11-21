@@ -3,7 +3,8 @@ import { commands, Disposable, SourceControl, SourceControlResourceGroup, window
 import { StatusKind } from "node-svn";
 
 import { client } from "./client";
-import { SvnResourceState, SvnSourceControl } from "./svn-source-control";
+import { SvnResourceState } from "./svn-resource-state";
+import { SvnSourceControl } from "./svn-source-control";
 import { workspaceManager } from "./workspace-manager";
 
 class CommandCenter {
@@ -31,13 +32,6 @@ class CommandCenter {
                 await window.showTextDocument(document);
             }
         }));
-    }
-
-    public dispose(): void {
-        for (const item of this.disposable)
-            item.dispose();
-
-        this.disposable.clear();
     }
 
     private async update(e?: SourceControl) {
@@ -95,6 +89,13 @@ class CommandCenter {
         }
 
         await control.refresh();
+    }
+
+    public dispose(): void {
+        for (const item of this.disposable)
+            item.dispose();
+
+        this.disposable.clear();
     }
 }
 

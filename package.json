@@ -155,7 +155,7 @@
     "dependencies": {
         "node-svn": "github:yume-chan/node-svn"
     },
-    "description": "",
+    "description": "An experimental extension to provide SVN support for Visual Studio Code.",
     "devDependencies": {
         "@types/mocha": "^2.2.44",
         "@types/node": "^8.0.53",
@@ -186,5 +186,5 @@
         "watch": "tsc -watch -p ./",
         "vscode:prepublish": "npm run compile"
     },
-    "version": "0.0.1"
+    "version": "0.0.2"
 }

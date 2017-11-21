@@ -2,6 +2,7 @@ import { ExtensionContext } from "vscode";
 
 import { commandCenter } from "./command-center";
 import { svnTextDocumentContentProvider } from "./content-provider";
+import { svnDecorationProvider } from "./svn-decoration-provider";
 import { workspaceManager } from "./workspace-manager";
 
 export function activate(context: ExtensionContext) {
@@ -10,4 +11,5 @@ export function activate(context: ExtensionContext) {
     context.subscriptions.push(commandCenter);
     context.subscriptions.push(svnTextDocumentContentProvider);
     context.subscriptions.push(workspaceManager);
+    context.subscriptions.push(svnDecorationProvider);
 }
