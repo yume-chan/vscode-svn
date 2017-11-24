@@ -25,7 +25,7 @@ import { SvnResourceState } from "./svn-resource-state";
 import { Throttler } from "./throttler";
 
 export class SvnSourceControl implements QuickDiffProvider {
-    public static readonly cache: Map<string, NodeStatus> = new Map<string, NodeStatus>();
+    public static readonly cache: Map<string, SvnResourceState> = new Map<string, SvnResourceState>();
 
     private sourceControl: SourceControl;
 
@@ -95,21 +95,25 @@ export class SvnSourceControl implements QuickDiffProvider {
             await client.status(this.root, (info) => {
                 const uri = Uri.file(info.path);
                 files.push(uri);
-                SvnSourceControl.cache.set(uri.fsPath, info);
 
-                if (info.changelist === "ignore-on-commit") {
-                    ignoredStates.push(this.getResourceState(info));
+                const state = new SvnResourceState(this, info);
+                SvnSourceControl.cache.set(uri.fsPath, state);
+
+                if (state.changelist === "ignore-on-commit") {
+                    ignoredStates.push(state);
                 } else {
-                    switch (info.node_status) {
+                    switch (state.node_status) {
+                        case StatusKind.external:
+                            break;
                         case StatusKind.added:
                         case StatusKind.modified:
                         case StatusKind.obstructed:
                         case StatusKind.deleted:
-                            this.stagedFiles.add(info.path);
-                            stagedStates.push(this.getResourceState(info));
+                            this.stagedFiles.add(state.path);
+                            stagedStates.push(state);
                             break;
                         default:
-                            changedStates.push(this.getResourceState(info));
+                            changedStates.push(state);
                             break;
                     }
                 }
@@ -123,10 +127,6 @@ export class SvnSourceControl implements QuickDiffProvider {
         } catch (err) {
             return;
         }
-    }
-
-    private getResourceState(status: NodeStatus): SvnResourceState {
-        return new SvnResourceState(this, status);
     }
 
     public provideOriginalResource?(uri: Uri, token: CancellationToken): ProviderResult<Uri> {

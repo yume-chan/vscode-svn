@@ -16,6 +16,8 @@ import { StatusKind } from "node-svn";
 import { client } from "./client";
 import { SvnSourceControl } from "./svn-source-control";
 
+const enableProposedApi = false;
+
 export class SvnDecorationProvider implements DecorationProvider, Disposable {
     private readonly onDidChangeDecorationsEvent: EventEmitter<Uri[]> = new EventEmitter<Uri[]>();
 
@@ -26,20 +28,15 @@ export class SvnDecorationProvider implements DecorationProvider, Disposable {
     public readonly onDidChangeDecorations: Event<Uri[]> = this.onDidChangeDecorationsEvent.event;
 
     public constructor() {
-        this.disposable.add(window.registerDecorationProvider(this));
+        if (enableProposedApi)
+            this.disposable.add(window.registerDecorationProvider(this));
     }
 
     public provideDecoration(uri: Uri, token: CancellationToken): DecorationData | undefined {
-        const info = SvnSourceControl.cache.get(uri.fsPath);
-        if (info === undefined)
+        const state = SvnSourceControl.cache.get(uri.fsPath);
+        if (state === undefined)
             return undefined;
-
-        return {
-            abbreviation: StatusKind[info.node_status][0].toUpperCase(),
-            bubble: true,
-            color: new ThemeColor("gitDecoration.modifiedResourceForeground"),
-            priority: 1,
-        };
+        return state.decorations;
     }
 
     public onDidChangeFiles(files: Uri[]): void {
