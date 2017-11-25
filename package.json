@@ -185,5 +185,5 @@
         "watch": "tsc -watch -p ./",
         "vscode:prepublish": "npm run compile"
     },
-    "version": "0.0.2"
+    "version": "0.0.4"
 }

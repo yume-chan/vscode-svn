@@ -179,8 +179,10 @@ export class SvnSourceControl implements QuickDiffProvider {
             return;
         }
 
-        if (this.stagedFiles.size === 0)
+        if (this.stagedFiles.size === 0) {
+            window.showErrorMessage(`There is nothing to commit. (Did you forget to stage changes?)`);
             return;
+        }
 
         window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
             try {

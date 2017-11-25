@@ -34,9 +34,7 @@ like the Git extension?
 
 ## Building
 
-1. Install a node-gyp compatible compiler.
-1. Clone
-1. Build
+See [node-svn README](https://github.com/yume-chan/node-svn#readme) for more information.
 
 ## Issues
 
