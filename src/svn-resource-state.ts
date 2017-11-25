@@ -14,28 +14,6 @@ import { Depth, NodeKind, NodeStatus, StatusKind } from "node-svn";
 
 import { SvnSourceControl } from "./svn-source-control";
 
-const iconsRootPath = path.join(path.dirname(__dirname), "resources", "icons");
-
-function getIconUri(iconName: string, theme: string): Uri {
-    return Uri.file(path.join(iconsRootPath, theme, `${iconName}.svg`));
-}
-
-const status_to_icon_name = {
-    [StatusKind.modified]: "status-modified",
-    [StatusKind.added]: "status-added",
-    [StatusKind.deleted]: "status-deleted",
-    [StatusKind.replaced]: "status-renamed",
-    [StatusKind.unversioned]: "status-untracked",
-    [StatusKind.ignored]: "status-ignored",
-    [StatusKind.conflicted]: "status-conflict",
-};
-
-const icons = { light: {}, dark: {} };
-for (const key in status_to_icon_name) {
-    icons.light[key] = getIconUri(status_to_icon_name[key], "light");
-    icons.dark[key] = getIconUri(status_to_icon_name[key], "dark");
-}
-
 export class SvnResourceState implements SourceControlResourceState, NodeStatus {
     public readonly resourceUri: Uri;
 
@@ -46,6 +24,7 @@ export class SvnResourceState implements SourceControlResourceState, NodeStatus 
     public conflicted: boolean;
     public copied: boolean;
     public depth: Depth;
+    public file_external: boolean;
     public kind: NodeKind;
     public node_status: StatusKind;
     public prop_status: StatusKind;
@@ -67,18 +46,12 @@ export class SvnResourceState implements SourceControlResourceState, NodeStatus 
         const abbreviation = StatusKind[this.node_status][0].toUpperCase();
         const bubble = true;
         const color = new ThemeColor("gitDecoration.modifiedResourceForeground");
-        const dark: SourceControlResourceThemableDecorations = {
-            iconPath: icons.dark[this.node_status],
-        };
         const letter = abbreviation;
-        const light: SourceControlResourceThemableDecorations = {
-            iconPath: icons.light[this.node_status],
-        };
         const priority = 1;
         const strikeThrough = this.node_status === StatusKind.deleted;
         const tooltip = `\nNode: ${StatusKind[this.node_status]}\nText: ${StatusKind[this.text_status]}\nProps: ${StatusKind[this.prop_status]}`;
 
-        return { abbreviation, bubble, color, dark, letter, light, priority, strikeThrough, tooltip };
+        return { abbreviation, bubble, color, letter, priority, strikeThrough, tooltip };
     }
 
     public constructor(public readonly control: SvnSourceControl, status: Readonly<NodeStatus>) {

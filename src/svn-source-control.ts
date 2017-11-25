@@ -99,12 +99,14 @@ export class SvnSourceControl implements QuickDiffProvider {
                 const state = new SvnResourceState(this, info);
                 SvnSourceControl.cache.set(uri.fsPath, state);
 
+                if (state.node_status == StatusKind.external ||
+                    state.file_external)
+                    return;
+
                 if (state.changelist === "ignore-on-commit") {
                     ignoredStates.push(state);
                 } else {
                     switch (state.node_status) {
-                        case StatusKind.external:
-                            break;
                         case StatusKind.added:
                         case StatusKind.modified:
                         case StatusKind.obstructed:
