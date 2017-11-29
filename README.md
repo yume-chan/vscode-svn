@@ -1,7 +1,9 @@
 # vscode-svn
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/yume-chan/vscode-svn.svg)](https://greenkeeper.io/)
+[![Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/simonchan.vscode-svn.svg)](https://marketplace.visualstudio.com/items?itemName=simonchan.vscode-svn)
 [![Build status](https://ci.appveyor.com/api/projects/status/2i0hcx8jhr74d7t5/branch/master?svg=true)](https://ci.appveyor.com/project/yume-chan/vscode-svn/branch/master)
+[![GitHub issues](https://img.shields.io/github/issues/yume-chan/vscode-svn.svg)](https://github.com/yume-chan/vscode-svn/issues)
+[![Greenkeeper badge](https://badges.greenkeeper.io/yume-chan/vscode-svn.svg)](https://greenkeeper.io/)
 
 **Work In Progress**
 
