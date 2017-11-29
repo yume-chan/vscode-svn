@@ -88,6 +88,21 @@
                 "title": "%command.openFile%"
             }
         ],
+        "configuration": {
+            "properties": {
+                "svn.show_changes_from": {
+                    "default": "working_copy",
+                    "description": "%config.show_changes_from%",
+                    "enum": [
+                        "current_folder",
+                        "working_copy"
+                    ],
+                    "scope": "window",
+                    "type": "string"
+                }
+            },
+            "title": "Svn"
+        },
         "menus": {
             "scm/resourceGroup/context": [
                 {
@@ -150,20 +165,6 @@
                     "when": "scmProvider == svn"
                 }
             ]
-        },
-        "configuration": {
-            "title": "Svn",
-            "properties": {
-                "svn.show_changes_from": {
-                    "type": "string",
-                    "enum": [
-                        "current_folder",
-                        "working_copy"
-                    ],
-                    "default": "working_copy",
-                    "scope": "window"
-                }
-            }
         }
     },
     "dependencies": {
@@ -196,8 +197,8 @@
         "compile": "tsc -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "npm run compile && node ./node_modules/vscode/bin/test",
-        "watch": "tsc -watch -p ./",
-        "vscode:prepublish": "npm run compile"
+        "vscode:prepublish": "npm run compile",
+        "watch": "tsc -watch -p ./"
     },
     "version": "0.0.6"
 }
