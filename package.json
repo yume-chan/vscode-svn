@@ -150,6 +150,20 @@
                     "when": "scmProvider == svn"
                 }
             ]
+        },
+        "configuration": {
+            "title": "Svn",
+            "properties": {
+                "svn.show_changes_from": {
+                    "type": "string",
+                    "enum": [
+                        "current_folder",
+                        "working_copy"
+                    ],
+                    "default": "working_copy",
+                    "scope": "window"
+                }
+            }
         }
     },
     "dependencies": {
@@ -185,5 +199,5 @@
         "watch": "tsc -watch -p ./",
         "vscode:prepublish": "npm run compile"
     },
-    "version": "0.0.5"
+    "version": "0.0.6"
 }

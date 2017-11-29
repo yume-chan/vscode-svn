@@ -44,7 +44,7 @@ export class SvnSourceControl implements QuickDiffProvider {
     public constructor(public root: string) {
         this.refreshThrottler = new Throttler(this._refresh.bind(this), 500);
 
-        this.sourceControl = scm.createSourceControl("svn", `${path.basename(root)} (Svn)`);
+        this.sourceControl = scm.createSourceControl("svn", "Svn", Uri.file(root));
         this.sourceControl.acceptInputCommand = { command: "svn.commit", title: "Commit", arguments: [this.sourceControl] };
         this.sourceControl.quickDiffProvider = this;
         this.sourceControl.statusBarCommands = [
@@ -99,8 +99,8 @@ export class SvnSourceControl implements QuickDiffProvider {
                 const state = new SvnResourceState(this, info);
                 SvnSourceControl.cache.set(uri.fsPath, state);
 
-                if (state.node_status == StatusKind.external ||
-                    state.file_external)
+                if (state.node_status === StatusKind.external ||
+                    (state.node_status === StatusKind.normal && state.file_external))
                     return;
 
                 if (state.changelist === "ignore-on-commit") {

@@ -7,26 +7,33 @@ import { client } from "./client";
 class WorkspaceManager {
     private readonly disposable: Set<Disposable> = new Set();
 
+    private show_changes_from: "current_folder" | "working_copy";
+
     public readonly controls: Set<SvnSourceControl> = new Set();
 
     public constructor() {
         this.disposable.add(workspace.onDidChangeWorkspaceFolders(this.onDidChangeWorkspaceFolders));
         this.onDidChangeWorkspaceFolders({ added: workspace.workspaceFolders || [], removed: [] });
+
+        const configuration = workspace.getConfiguration("svn");
+        this.show_changes_from = configuration.get<"current_folder" | "working_copy">("show_changes_from", "working_copy");
     }
 
     private async detect(workspaceRoot: string): Promise<void> {
         try {
             const root = await client.get_working_copy_root(workspaceRoot);
 
+            const controlRoot = this.show_changes_from === "working_copy" ? root : workspaceRoot;
+
             // tslint:disable-next-line:no-shadowed-variable
             for (const control of this.controls) {
-                if (control.root === root) {
+                if (control.root === controlRoot) {
                     control.workspaces.add(workspaceRoot);
                     return;
                 }
             }
 
-            const control = new SvnSourceControl(root);
+            const control = new SvnSourceControl(controlRoot);
             control.workspaces.add(workspaceRoot);
             await control.refresh();
             this.controls.add(control);
