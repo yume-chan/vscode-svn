@@ -48,7 +48,7 @@ export class SvnResourceState implements SourceControlResourceState, NodeStatus 
         const color = new ThemeColor("gitDecoration.modifiedResourceForeground");
         const letter = abbreviation;
         const priority = 1;
-        const strikeThrough = this.node_status === StatusKind.deleted;
+        const strikeThrough = this.node_status === StatusKind.deleted || this.node_status === StatusKind.missing;
         const tooltip = `\nNode: ${StatusKind[this.node_status]}\nText: ${StatusKind[this.text_status]}\nProps: ${StatusKind[this.prop_status]}`;
 
         return { abbreviation, bubble, color, letter, priority, strikeThrough, tooltip };

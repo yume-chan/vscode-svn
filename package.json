@@ -90,6 +90,12 @@
         ],
         "configuration": {
             "properties": {
+                "svn.enabled": {
+                    "default": true,
+                    "description": "%config.enabled%",
+                    "scope": "resource",
+                    "type": "boolean"
+                },
                 "svn.show_changes_from": {
                     "default": "working_copy",
                     "description": "%config.show_changes_from%",
@@ -97,13 +103,51 @@
                         "current_folder",
                         "working_copy"
                     ],
-                    "scope": "window",
+                    "scope": "resource",
                     "type": "string"
                 }
             },
             "title": "Svn"
         },
         "menus": {
+            "commandPalette": [
+                {
+                    "command": "svn.update",
+                    "when": "config.svn.enabled"
+                },
+                {
+                    "command": "svn.commit",
+                    "when": "config.svn.enabled"
+                },
+                {
+                    "command": "svn.stage",
+                    "when": "config.svn.enabled"
+                },
+                {
+                    "command": "svn.stageAll",
+                    "when": "config.svn.enabled"
+                },
+                {
+                    "command": "svn.unstage",
+                    "when": "config.svn.enabled"
+                },
+                {
+                    "command": "svn.unstageAll",
+                    "when": "config.svn.enabled"
+                },
+                {
+                    "command": "svn.update",
+                    "when": "config.svn.enabled"
+                },
+                {
+                    "command": "svn.refresh",
+                    "when": "config.svn.enabled"
+                },
+                {
+                    "command": "svn.openFile",
+                    "when": "config.svn.enabled"
+                }
+            ],
             "scm/resourceGroup/context": [
                 {
                     "command": "svn.stageAll",
@@ -148,7 +192,7 @@
                     "when": "scmProvider == svn && scmResourceGroup == staged"
                 },
                 {
-                    "command": "git.openFile",
+                    "command": "svn.openFile",
                     "group": "navigation",
                     "when": "scmProvider == svn"
                 }

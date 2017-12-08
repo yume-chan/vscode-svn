@@ -7,5 +7,6 @@
     "command.update": "Update",
     "command.refresh": "Refresh",
     "command.openFile": "Open File",
-    "config.show_changes_from": "When you opened a subfolder, should Svn show changes from only the opened folder or the whole repository."
+    "config.enabled": "Whether svn is enabled",
+    "config.show_changes_from": "When you opened a subfolder, should svn show changes from only the opened folder or the whole repository."
 }
