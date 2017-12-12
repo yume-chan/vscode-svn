@@ -36,6 +36,13 @@ like the Git extension?
 
 ## Building
 
+```` shell
+git clone https://github.com/yume-chan/vscode-svn.git
+cd vscode-svn
+
+yarn
+````
+
 See [node-svn README](https://github.com/yume-chan/node-svn#readme) for more information.
 
 ## Issues

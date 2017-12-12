@@ -1,10 +1,10 @@
-import * as vscode from "vscode";
+import { window } from "vscode";
 
-import { AsyncClient, NodeStatus } from "node-svn";
+import { AsyncClient } from "node-svn";
 
-const config = {
+export const config = {
     async getSimpleCredential(realm: string, username?: string) {
-        username = await vscode.window.showInputBox({
+        username = await window.showInputBox({
             ignoreFocusOut: true,
             prompt: `Username for ${realm}:`,
             value: username,
@@ -12,7 +12,7 @@ const config = {
         if (username === undefined)
             return undefined;
 
-        const password = await vscode.window.showInputBox({
+        const password = await window.showInputBox({
             ignoreFocusOut: true,
             password: true,
             prompt: `Password for ${realm}:`,
@@ -28,7 +28,7 @@ const config = {
             description: "Don't save password",
             label: "No",
         };
-        const save = (await vscode.window.showQuickPick([yes, no], {
+        const save = (await window.showQuickPick([yes, no], {
             ignoreFocusOut: true,
             placeHolder: "Save password (unencrypted)?",
         })) === yes;
@@ -41,4 +41,10 @@ const config = {
     },
 };
 
-export const client = new AsyncClient();
+export let client: AsyncClient;
+
+export async function initialize() {
+    // tslint:disable-next-line:no-shadowed-variable
+    const { AsyncClient } = await import("node-svn");
+    client = new AsyncClient();
+}

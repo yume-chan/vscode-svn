@@ -3,9 +3,9 @@ import { commands, Disposable, SourceControl, SourceControlResourceGroup, window
 import { StatusKind } from "node-svn";
 
 import { client } from "./client";
+import subscriptions from "./subscriptions";
 import { SvnResourceState } from "./svn-resource-state";
-import { SvnSourceControl } from "./svn-source-control";
-import { workspaceManager } from "./workspace-manager";
+import workspaceManager from "./workspace-manager";
 
 class CommandCenter {
     private readonly disposable: Set<Disposable> = new Set();
@@ -99,4 +99,4 @@ class CommandCenter {
     }
 }
 
-export const commandCenter = new CommandCenter();
+export default subscriptions.add(new CommandCenter());

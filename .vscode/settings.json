@@ -60,5 +60,6 @@
         "ratio": "cpp",
         "thread": "cpp"
     },
-    "git.enableSmartCommit": true
+    "git.enableSmartCommit": true,
+    "eslint.enable": false
 }

@@ -1,15 +1,21 @@
 import { ExtensionContext } from "vscode";
 
-import { commandCenter } from "./command-center";
-import { svnTextDocumentContentProvider } from "./content-provider";
-import { svnDecorationProvider } from "./svn-decoration-provider";
-import { workspaceManager } from "./workspace-manager";
+import { initialize } from "./client";
+import { writeOutput } from "./output";
+import subscriptions from "./subscriptions";
 
-export function activate(context: ExtensionContext) {
-    console.log(`Svn activated, process id: ${process.pid}`);
+export async function activate(context: ExtensionContext) {
+    context.subscriptions.push(subscriptions);
+    try {
+        await initialize();
 
-    context.subscriptions.push(commandCenter);
-    context.subscriptions.push(svnTextDocumentContentProvider);
-    context.subscriptions.push(workspaceManager);
-    context.subscriptions.push(svnDecorationProvider);
+        await import("./workspace-manager");
+        await import("./content-provider");
+        await import("./svn-decoration-provider");
+        await import("./command-center");
+
+        writeOutput(`initialize()\n\t${process.pid}`);
+    } catch (err) {
+        writeOutput(`initialize()\n\t${err}`);
+    }
 }

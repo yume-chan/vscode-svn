@@ -10,6 +10,8 @@ import {
 import { CatOptions, RevisionKind } from "node-svn";
 
 import { client } from "./client";
+import { writeOutput } from "./output";
+import subscriptions from "./subscriptions";
 
 class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
     private readonly _onDidChange: EventEmitter<Uri> = new EventEmitter<Uri>();
@@ -33,8 +35,10 @@ class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
             const options: CatOptions = { peg_revision: RevisionKind.base, revision: RevisionKind.base };
             const result = await client.cat(uri.fsPath, options);
             const content = result.content.toString("utf8");
+            writeOutput(`provideTextDocumentContent("${uri.fsPath}")\n\t"${content.replace(/\r/g, "\\r").replace(/\n/g, "\\n").substring(0, 50)}" (${content.length} characters)`);
             return content;
         } catch (err) {
+            writeOutput(`provideTextDocumentContent("${uri.fsPath}")\n\t"${err}"`);
             return "";
         }
     }
@@ -47,4 +51,4 @@ class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
     }
 }
 
-export const svnTextDocumentContentProvider = new SvnTextDocumentContentProvider();
+export default subscriptions.add(new SvnTextDocumentContentProvider());

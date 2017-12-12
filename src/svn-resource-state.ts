@@ -5,7 +5,6 @@ import {
     DecorationData,
     SourceControlResourceDecorations,
     SourceControlResourceState,
-    SourceControlResourceThemableDecorations,
     ThemeColor,
     Uri,
 } from "vscode";

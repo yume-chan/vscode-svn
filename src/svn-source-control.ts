@@ -1,8 +1,5 @@
-import * as path from "path";
-
 import {
     CancellationToken,
-    Command,
     Disposable,
     ProgressLocation,
     ProviderResult,
@@ -10,17 +7,17 @@ import {
     scm,
     SourceControl,
     SourceControlResourceGroup,
-    SourceControlResourceState,
     Uri,
     window,
     workspace,
 } from "vscode";
 
-import { NodeStatus, StatusKind } from "node-svn";
+import { StatusKind } from "node-svn";
 
 import { client } from "./client";
-import { svnTextDocumentContentProvider } from "./content-provider";
-import { svnDecorationProvider } from "./svn-decoration-provider";
+import svnTextDocumentContentProvider from "./content-provider";
+import { showOutput, writeOutput } from "./output";
+import svnDecorationProvider from "./svn-decoration-provider";
 import { SvnResourceState } from "./svn-resource-state";
 import { Throttler } from "./throttler";
 
@@ -82,53 +79,55 @@ export class SvnSourceControl implements QuickDiffProvider {
         this.refresh();
     }
 
-    private async _refresh() {
-        try {
-            this.stagedFiles.clear();
+    private _refresh() {
+        return window.withProgress({ location: ProgressLocation.SourceControl }, async () => {
+            try {
+                this.stagedFiles.clear();
 
-            const stagedStates: SvnResourceState[] = [];
-            const changedStates: SvnResourceState[] = [];
-            const ignoredStates: SvnResourceState[] = [];
+                const stagedStates: SvnResourceState[] = [];
+                const changedStates: SvnResourceState[] = [];
+                const ignoredStates: SvnResourceState[] = [];
 
-            const files: Uri[] = [];
+                const files: Uri[] = [];
 
-            await client.status(this.root, (info) => {
-                const uri = Uri.file(info.path);
-                files.push(uri);
+                await client.status(this.root, (info) => {
+                    const uri = Uri.file(info.path);
+                    files.push(uri);
 
-                const state = new SvnResourceState(this, info);
-                SvnSourceControl.cache.set(uri.fsPath, state);
+                    const state = new SvnResourceState(this, info);
+                    SvnSourceControl.cache.set(uri.fsPath, state);
 
-                if (state.node_status === StatusKind.external ||
-                    (state.node_status === StatusKind.normal && state.file_external))
-                    return;
+                    if (state.node_status === StatusKind.external ||
+                        (state.node_status === StatusKind.normal && state.file_external))
+                        return;
 
-                if (state.changelist === "ignore-on-commit") {
-                    ignoredStates.push(state);
-                } else {
-                    switch (state.node_status) {
-                        case StatusKind.added:
-                        case StatusKind.modified:
-                        case StatusKind.obstructed:
-                        case StatusKind.deleted:
-                            this.stagedFiles.add(state.path);
-                            stagedStates.push(state);
-                            break;
-                        default:
-                            changedStates.push(state);
-                            break;
+                    if (state.changelist === "ignore-on-commit") {
+                        ignoredStates.push(state);
+                    } else {
+                        switch (state.node_status) {
+                            case StatusKind.added:
+                            case StatusKind.modified:
+                            case StatusKind.obstructed:
+                            case StatusKind.deleted:
+                                this.stagedFiles.add(state.path);
+                                stagedStates.push(state);
+                                break;
+                            default:
+                                changedStates.push(state);
+                                break;
+                        }
                     }
-                }
-            });
+                });
 
-            this.staged.resourceStates = stagedStates;
-            this.changes.resourceStates = changedStates;
-            this.ignored.resourceStates = ignoredStates;
+                this.staged.resourceStates = stagedStates;
+                this.changes.resourceStates = changedStates;
+                this.ignored.resourceStates = ignoredStates;
 
-            svnDecorationProvider.onDidChangeFiles(files);
-        } catch (err) {
-            return;
-        }
+                svnDecorationProvider.onDidChangeFiles(files);
+            } catch (err) {
+                return;
+            }
+        });
     }
 
     public provideOriginalResource?(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
@@ -191,10 +190,17 @@ export class SvnSourceControl implements QuickDiffProvider {
                 await client.commit(Array.from(this.stagedFiles), message!, (info) => { return; });
                 svnTextDocumentContentProvider.onCommit(this.stagedFiles);
             } catch (err) {
+                writeOutput(`commit()\n\t${err}`);
+
                 // X if (err instanceof SvnError)
                 // X     window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
                 // X else
-                window.showErrorMessage(`Commit failed: ${err.message}`);
+                const showDetail = "Show Detail";
+                switch (await window.showErrorMessage("Commit failed, check output for detail", showDetail)) {
+                    case showDetail:
+                        showOutput();
+                        break;
+                }
             } finally {
                 this.sourceControl.inputBox.value = "";
                 this.refresh();

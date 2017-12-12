@@ -5,15 +5,11 @@ import {
     Disposable,
     Event,
     EventEmitter,
-    ProviderResult,
-    ThemeColor,
     Uri,
     window,
 } from "vscode";
 
-import { StatusKind } from "node-svn";
-
-import { client } from "./client";
+import subscriptions from "./subscriptions";
 import { SvnSourceControl } from "./svn-source-control";
 
 const enableProposedApi = false;
@@ -22,8 +18,6 @@ export class SvnDecorationProvider implements DecorationProvider, Disposable {
     private readonly onDidChangeDecorationsEvent: EventEmitter<Uri[]> = new EventEmitter<Uri[]>();
 
     private readonly disposable: Set<Disposable> = new Set();
-
-    private readonly cache: Map<Uri, DecorationData> = new Map<Uri, DecorationData>();
 
     public readonly onDidChangeDecorations: Event<Uri[]> = this.onDidChangeDecorationsEvent.event;
 
@@ -51,4 +45,4 @@ export class SvnDecorationProvider implements DecorationProvider, Disposable {
     }
 }
 
-export const svnDecorationProvider = new SvnDecorationProvider();
+export default subscriptions.add(new SvnDecorationProvider());

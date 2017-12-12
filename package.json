@@ -17,7 +17,7 @@
             {
                 "category": "Svn",
                 "command": "svn.update",
-                "title": "%command.update%"
+                "title": "Update"
             },
             {
                 "category": "Svn",
@@ -26,7 +26,7 @@
                     "dark": "resources/icons/dark/check.svg",
                     "light": "resources/icons/light/check.svg"
                 },
-                "title": "%command.commit%"
+                "title": "Commit"
             },
             {
                 "category": "Svn",
@@ -35,7 +35,7 @@
                     "dark": "resources/icons/dark/stage.svg",
                     "light": "resources/icons/light/stage.svg"
                 },
-                "title": "%command.stage%"
+                "title": "Stage"
             },
             {
                 "category": "Svn",
@@ -44,7 +44,7 @@
                     "dark": "resources/icons/dark/stage.svg",
                     "light": "resources/icons/light/stage.svg"
                 },
-                "title": "%command.stageAll%"
+                "title": "Stage All"
             },
             {
                 "category": "Svn",
@@ -53,7 +53,7 @@
                     "dark": "resources/icons/dark/unstage.svg",
                     "light": "resources/icons/light/unstage.svg"
                 },
-                "title": "%command.unstage%"
+                "title": "Unstage"
             },
             {
                 "category": "Svn",
@@ -62,12 +62,7 @@
                     "dark": "resources/icons/dark/unstage.svg",
                     "light": "resources/icons/light/unstage.svg"
                 },
-                "title": "%command.unstageAll%"
-            },
-            {
-                "category": "Svn",
-                "command": "svn.update",
-                "title": "%command.update%"
+                "title": "Unstage All"
             },
             {
                 "category": "Svn",
@@ -76,7 +71,7 @@
                     "dark": "resources/icons/dark/refresh.svg",
                     "light": "resources/icons/light/refresh.svg"
                 },
-                "title": "%command.refresh%"
+                "title": "Refresh"
             },
             {
                 "category": "Svn",
@@ -85,20 +80,20 @@
                     "dark": "resources/icons/dark/open-file.svg",
                     "light": "resources/icons/light/open-file.svg"
                 },
-                "title": "%command.openFile%"
+                "title": "Open File"
             }
         ],
         "configuration": {
             "properties": {
                 "svn.enabled": {
                     "default": true,
-                    "description": "%config.enabled%",
+                    "description": "Whether svn is enabled",
                     "scope": "resource",
                     "type": "boolean"
                 },
                 "svn.show_changes_from": {
                     "default": "working_copy",
-                    "description": "%config.show_changes_from%",
+                    "description": "When you opened a subfolder, should svn show changes from only the opened folder or the whole working copy.",
                     "enum": [
                         "current_folder",
                         "working_copy"
@@ -133,10 +128,6 @@
                 },
                 {
                     "command": "svn.unstageAll",
-                    "when": "config.svn.enabled"
-                },
-                {
-                    "command": "svn.update",
                     "when": "config.svn.enabled"
                 },
                 {
@@ -217,12 +208,12 @@
     "description": "An experimental extension to provide SVN support for Visual Studio Code.",
     "devDependencies": {
         "@types/mocha": "^2.2.44",
-        "@types/node": "^8.0.53",
+        "@types/node": "^8.0.57",
         "mocha": "^4.0.1",
         "tslint": "^5.8.0",
-        "tslint-language-service": "^0.9.6",
-        "typescript": "^2.6.1",
-        "vscode": "^1.1.8"
+        "tslint-language-service": "^0.9.7",
+        "typescript": "^2.6.2",
+        "vscode": "^1.1.10"
     },
     "displayName": "Svn",
     "engines": {
@@ -244,5 +235,5 @@
         "vscode:prepublish": "npm run compile",
         "watch": "tsc -watch -p ./"
     },
-    "version": "0.0.7"
+    "version": "0.0.8"
 }
