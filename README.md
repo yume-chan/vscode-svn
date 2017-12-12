@@ -40,7 +40,7 @@ like the Git extension?
 git clone https://github.com/yume-chan/vscode-svn.git
 cd vscode-svn
 
-yarn
+npm install
 ````
 
 See [node-svn README](https://github.com/yume-chan/node-svn#readme) for more information.
