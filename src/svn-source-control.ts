@@ -152,7 +152,8 @@ export class SvnSourceControl implements QuickDiffProvider {
                 },
             ];
 
-            await client.update(this.root);
+            const revision = await client.update(this.root);
+            writeOutput(`update("${this.root}")\n\t${revision}`);
 
             this.sourceControl.statusBarCommands = [
                 {
@@ -187,10 +188,18 @@ export class SvnSourceControl implements QuickDiffProvider {
 
         window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
             try {
-                await client.commit(Array.from(this.stagedFiles), message!, (info) => { return; });
+                await client.commit(Array.from(this.stagedFiles), message!, (info) => {
+                    writeOutput(`commit("${info.repos_root}", "${message}")\r\n${info.revision}`);
+                });
                 svnTextDocumentContentProvider.onCommit(this.stagedFiles);
             } catch (err) {
-                writeOutput(`commit()\n\t${err}`);
+                let error = err.message;
+                let child = err.child;
+                while (child !== undefined) {
+                    error += "\n\t\t" + err.child.message;
+                    child = err.child;
+                }
+                writeOutput(`commit("${this.root}", "${message}")\n\t${error}`);
 
                 // X if (err instanceof SvnError)
                 // X     window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
