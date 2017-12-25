@@ -29,7 +29,3 @@ artifacts:
   - path: vsix\*.vsix
     name: Extension Packages
     type: File
-
-deploy:
-  - provider: Environment
-    name: release

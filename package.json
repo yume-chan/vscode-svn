@@ -203,7 +203,7 @@
         }
     },
     "dependencies": {
-        "node-svn": "git+https://github.com/yume-chan/node-svn.git"
+        "node-svn": "file:node-svn"
     },
     "description": "An experimental extension to provide SVN support for Visual Studio Code.",
     "devDependencies": {
