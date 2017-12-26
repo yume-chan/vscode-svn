@@ -1,0 +1,239 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>svn_config</ProjectName>
+    <ProjectGuid>{C66CD423-172D-FD90-0ADF-BA35A2FDB33B}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <CustomBuild Include="$(IntDir)svn_private_config.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="$(SolutionDir)\subversion\svn_private_config.hw">
+      <FileType>Document</FileType>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Creating svn_private_config.h from svn_private_config.hw.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_config_hw.py" $(Platform) "%(FullPath)" "$(IntDir)svn_private_config.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)svn_private_config.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Creating svn_private_config.h from svn_private_config.hw.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_config_hw.py" $(Platform) "%(FullPath)" "$(IntDir)svn_private_config.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)svn_private_config.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Creating svn_private_config.h from svn_private_config.hw.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_config_hw.py" $(Platform) "%(FullPath)" "$(IntDir)svn_private_config.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)svn_private_config.h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Creating svn_private_config.h from svn_private_config.hw.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_config_hw.py" $(Platform) "%(FullPath)" "$(IntDir)svn_private_config.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)svn_private_config.h;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.sql">
+      <FileType>Document</FileType>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion\libsvn_fs_fs\rep-cache-db.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion\libsvn_fs_fs\rep-cache-db.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion\libsvn_fs_fs\rep-cache-db.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion\libsvn_fs_fs\rep-cache-db.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\subversion\libsvn_fs_fs\rep-cache-db.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.sql">
+      <FileType>Document</FileType>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion\libsvn_fs_x\rep-cache-db.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion\libsvn_fs_x\rep-cache-db.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion\libsvn_fs_x\rep-cache-db.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion\libsvn_fs_x\rep-cache-db.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\subversion\libsvn_fs_x\rep-cache-db.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\libsvn_subr\internal_statements.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\libsvn_subr\internal_statements.sql">
+      <FileType>Document</FileType>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion\libsvn_subr\internal_statements.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_subr\internal_statements.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\subversion\libsvn_subr\internal_statements.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion\libsvn_subr\internal_statements.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_subr\internal_statements.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\subversion\libsvn_subr\internal_statements.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion\libsvn_subr\internal_statements.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_subr\internal_statements.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\subversion\libsvn_subr\internal_statements.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion\libsvn_subr\internal_statements.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_subr\internal_statements.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\subversion\libsvn_subr\internal_statements.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\libsvn_wc\wc-queries.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\libsvn_wc\wc-queries.sql">
+      <FileType>Document</FileType>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion\libsvn_wc\wc-queries.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_wc\wc-queries.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\subversion\libsvn_wc\wc-queries.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\subversion\libsvn_wc\wc-metadata.sql;$(SolutionDir)\subversion\libsvn_wc\wc-checks.sql;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion\libsvn_wc\wc-queries.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_wc\wc-queries.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\subversion\libsvn_wc\wc-queries.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\subversion\libsvn_wc\wc-metadata.sql;$(SolutionDir)\subversion\libsvn_wc\wc-checks.sql;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion\libsvn_wc\wc-queries.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_wc\wc-queries.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\subversion\libsvn_wc\wc-queries.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\subversion\libsvn_wc\wc-metadata.sql;$(SolutionDir)\subversion\libsvn_wc\wc-checks.sql;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion\libsvn_wc\wc-queries.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\libsvn_wc\wc-queries.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\subversion\libsvn_wc\wc-queries.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\subversion\libsvn_wc\wc-metadata.sql;$(SolutionDir)\subversion\libsvn_wc\wc-checks.sql;%(AdditionalInputs)</AdditionalInputs>
+
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </CustomBuild>
+    <CustomBuild Include="$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.sql">
+      <FileType>Document</FileType>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion\tests\libsvn_wc\wc-test-queries.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion\tests\libsvn_wc\wc-test-queries.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion\tests\libsvn_wc\wc-test-queries.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion\tests\libsvn_wc\wc-test-queries.h.</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"C:\Python\2.7.14-win-x64\python.exe" "$(SolutionDir)\build\transform_sql.py" "%(FullPath)" "$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.h"</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\subversion\tests\libsvn_wc\wc-test-queries.h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(SolutionDir)\subversion\libsvn_wc\wc-metadata.sql" />
+    <None Include="$(SolutionDir)\subversion\libsvn_wc\wc-checks.sql" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

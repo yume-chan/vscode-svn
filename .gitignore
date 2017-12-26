@@ -5,3 +5,4 @@ node_modules
 vsix
 
 !node-svn/node_modules
+!node-svn/dependencies/subversion/build

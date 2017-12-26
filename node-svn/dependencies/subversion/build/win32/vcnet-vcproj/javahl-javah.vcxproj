@@ -1,0 +1,650 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5F021EB1-9FD1-9A40-1A3F-7A4C46428B34}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)Debug\..\subversion\bindings\javahl\include\</OutDir>
+    <IntDir>$(SolutionDir)Debug\obj\..\subversion\bindings\javahl\include\javahl-javah\</IntDir>
+    <TargetName>javahl-java</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)Release\..\subversion\bindings\javahl\include\</OutDir>
+    <IntDir>$(SolutionDir)Release\obj\..\subversion\bindings\javahl\include\javahl-javah\</IntDir>
+    <TargetName>javahl-java</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Debug\..\subversion\bindings\javahl\include\</OutDir>
+    <IntDir>$(SolutionDir)Debug\obj\..\subversion\bindings\javahl\include\javahl-javah\</IntDir>
+    <TargetName>javahl-java</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Release\..\subversion\bindings\javahl\include\</OutDir>
+    <IntDir>$(SolutionDir)Release\obj\..\subversion\bindings\javahl\include\javahl-javah\</IntDir>
+    <TargetName>javahl-java</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)Debug;..\..\..\subversion\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <StringPooling>true</StringPooling>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;alloca=_alloca;_CRT_SECURE_NO_DEPRECATE=;_CRT_NONSTDC_NO_DEPRECATE=;_CRT_SECURE_NO_WARNINGS=;_DEBUG;SVN_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4100;4127;4206;4512;4701;4706;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <TreatSpecificWarningsAsErrors>4002;4003;4013;4020;4022;4024;4028;4029;4030;4031;4033;4047;4089;4113;4115;4133;4204;4700;4715;4789;%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\subversion\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SVN_FILE_NAME=javahl-javah;SVN_FILE_DESCRIPTION=;WIN32;_WINDOWS;alloca=_alloca;_CRT_SECURE_NO_DEPRECATE=;_CRT_NONSTDC_NO_DEPRECATE=;_CRT_SECURE_NO_WARNINGS=;_DEBUG;SVN_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)Debug;..\..\..\subversion\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <StringPooling>true</StringPooling>
+      <PreprocessorDefinitions>WIN64;WIN32;_WINDOWS;alloca=_alloca;_CRT_SECURE_NO_DEPRECATE=;_CRT_NONSTDC_NO_DEPRECATE=;_CRT_SECURE_NO_WARNINGS=;_DEBUG;SVN_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4100;4127;4206;4512;4701;4706;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <TreatSpecificWarningsAsErrors>4002;4003;4013;4020;4022;4024;4028;4029;4030;4031;4033;4047;4089;4113;4115;4133;4204;4700;4715;4789;%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\subversion\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SVN_FILE_NAME=javahl-javah;SVN_FILE_DESCRIPTION=;WIN64;WIN32;_WINDOWS;alloca=_alloca;_CRT_SECURE_NO_DEPRECATE=;_CRT_NONSTDC_NO_DEPRECATE=;_CRT_SECURE_NO_WARNINGS=;_DEBUG;SVN_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Release;..\..\..\subversion\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <StringPooling>true</StringPooling>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;alloca=_alloca;_CRT_SECURE_NO_DEPRECATE=;_CRT_NONSTDC_NO_DEPRECATE=;_CRT_SECURE_NO_WARNINGS=;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4100;4127;4206;4512;4701;4706;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <TreatSpecificWarningsAsErrors>4002;4003;4013;4020;4022;4024;4028;4029;4030;4031;4033;4047;4089;4113;4115;4133;4204;4700;4715;4789;%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\subversion\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SVN_FILE_NAME=javahl-javah;SVN_FILE_DESCRIPTION=;WIN32;_WINDOWS;alloca=_alloca;_CRT_SECURE_NO_DEPRECATE=;_CRT_NONSTDC_NO_DEPRECATE=;_CRT_SECURE_NO_WARNINGS=;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Release;..\..\..\subversion\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <StringPooling>true</StringPooling>
+      <PreprocessorDefinitions>WIN64;WIN32;_WINDOWS;alloca=_alloca;_CRT_SECURE_NO_DEPRECATE=;_CRT_NONSTDC_NO_DEPRECATE=;_CRT_SECURE_NO_WARNINGS=;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
+      <DisableSpecificWarnings>4100;4127;4206;4512;4701;4706;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <TreatSpecificWarningsAsErrors>4002;4003;4013;4020;4022;4024;4028;4029;4030;4031;4033;4047;4089;4113;4115;4133;4204;4700;4715;4789;%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\subversion\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SVN_FILE_NAME=javahl-javah;SVN_FILE_DESCRIPTION=;WIN64;WIN32;_WINDOWS;alloca=_alloca;_CRT_SECURE_NO_DEPRECATE=;_CRT_NONSTDC_NO_DEPRECATE=;_CRT_SECURE_NO_WARNINGS=;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ClientException.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ClientException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ClientException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ClientException.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ClientException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ClientException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ClientException.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ClientException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ClientException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ClientException.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ClientException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ClientException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ClientException.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ClientNotifyInformation.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ClientNotifyInformation</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ClientNotifyInformation.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ClientNotifyInformation.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ClientNotifyInformation</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ClientNotifyInformation.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ClientNotifyInformation.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ClientNotifyInformation</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ClientNotifyInformation.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ClientNotifyInformation.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ClientNotifyInformation</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ClientNotifyInformation.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ClientNotifyInformation.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\CommitInfo.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitInfo</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitInfo.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitInfo.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitInfo</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitInfo.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitInfo.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitInfo</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitInfo.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitInfo.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitInfo</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitInfo.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitInfo.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\CommitItem.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitItem</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitItem.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitItem.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitItem</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitItem.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitItem.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitItem</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitItem.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitItem.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitItem</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitItem.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitItem.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\CommitItemStateFlags.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitItemStateFlags</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitItemStateFlags.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitItemStateFlags.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitItemStateFlags</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitItemStateFlags.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitItemStateFlags.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitItemStateFlags</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitItemStateFlags.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitItemStateFlags.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.CommitItemStateFlags</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_CommitItemStateFlags.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_CommitItemStateFlags.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ConflictDescriptor.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ConflictDescriptor</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ConflictDescriptor.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ConflictDescriptor.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ConflictDescriptor</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ConflictDescriptor.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ConflictDescriptor.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ConflictDescriptor</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ConflictDescriptor.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ConflictDescriptor.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ConflictDescriptor</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ConflictDescriptor.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ConflictDescriptor.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ConflictResult.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ConflictResult</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ConflictResult.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ConflictResult.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ConflictResult</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ConflictResult.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ConflictResult.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ConflictResult</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ConflictResult.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ConflictResult.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ConflictResult</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ConflictResult.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ConflictResult.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\DiffSummary.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.DiffSummary</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_DiffSummary.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_DiffSummary.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.DiffSummary</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_DiffSummary.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_DiffSummary.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.DiffSummary</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_DiffSummary.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_DiffSummary.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.DiffSummary</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_DiffSummary.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_DiffSummary.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ISVNClient.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNClient</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNClient.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNClient.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNClient</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNClient.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNClient.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNClient</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNClient.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNClient.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNClient</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNClient.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNClient.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ISVNConfig.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNConfig</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNConfig.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNConfig.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNConfig</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNConfig.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNConfig.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNConfig</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNConfig.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNConfig.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNConfig</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNConfig.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNConfig.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ISVNEditor.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNEditor</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNEditor.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNEditor.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNEditor</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNEditor.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNEditor.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNEditor</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNEditor.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNEditor.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNEditor</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNEditor.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNEditor.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ISVNRemote.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNRemote</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNRemote.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNRemote.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNRemote</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNRemote.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNRemote.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNRemote</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNRemote.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNRemote.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNRemote</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNRemote.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNRemote.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ISVNReporter.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNReporter</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNReporter.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNReporter.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNReporter</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNReporter.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNReporter.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNReporter</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNReporter.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNReporter.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNReporter</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNReporter.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNReporter.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ISVNRepos.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNRepos</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNRepos.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNRepos.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNRepos</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNRepos.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNRepos.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNRepos</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNRepos.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNRepos.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ISVNRepos</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ISVNRepos.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ISVNRepos.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\JNIError.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.JNIError</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_JNIError.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_JNIError.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.JNIError</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_JNIError.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_JNIError.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.JNIError</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_JNIError.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_JNIError.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.JNIError</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_JNIError.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_JNIError.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\JNIObject.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.JNIObject</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_JNIObject.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_JNIObject.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.JNIObject</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_JNIObject.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_JNIObject.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.JNIObject</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_JNIObject.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_JNIObject.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.JNIObject</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_JNIObject.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_JNIObject.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\NativeException.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.NativeException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_NativeException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_NativeException.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.NativeException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_NativeException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_NativeException.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.NativeException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_NativeException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_NativeException.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.NativeException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_NativeException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_NativeException.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\NativeResources.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.NativeResources</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_NativeResources.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_NativeResources.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.NativeResources</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_NativeResources.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_NativeResources.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.NativeResources</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_NativeResources.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_NativeResources.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.NativeResources</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_NativeResources.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_NativeResources.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\OperationContext.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.OperationContext</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_OperationContext.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_OperationContext.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.OperationContext</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_OperationContext.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_OperationContext.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.OperationContext</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_OperationContext.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_OperationContext.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.OperationContext</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_OperationContext.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_OperationContext.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ProgressEvent.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ProgressEvent</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ProgressEvent.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ProgressEvent.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ProgressEvent</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ProgressEvent.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ProgressEvent.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ProgressEvent</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ProgressEvent.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ProgressEvent.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ProgressEvent</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ProgressEvent.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ProgressEvent.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\ReposNotifyInformation.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ReposNotifyInformation</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ReposNotifyInformation.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ReposNotifyInformation.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ReposNotifyInformation</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ReposNotifyInformation.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ReposNotifyInformation.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ReposNotifyInformation</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ReposNotifyInformation.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ReposNotifyInformation.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.ReposNotifyInformation</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_ReposNotifyInformation.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_ReposNotifyInformation.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\SVNClient.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNClient</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNClient.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNClient.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNClient</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNClient.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNClient.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNClient</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNClient.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNClient.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNClient</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNClient.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNClient.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\SVNRepos.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNRepos</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNRepos.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNRepos.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNRepos</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNRepos.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNRepos.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNRepos</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNRepos.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNRepos.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNRepos</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNRepos.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNRepos.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\SVNUtil.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNUtil</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNUtil.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNUtil.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNUtil</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNUtil.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNUtil.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNUtil</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNUtil.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNUtil.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SVNUtil</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SVNUtil.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SVNUtil.h</Message>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\subversion\bindings\javahl\classes\org\apache\subversion\javahl\SubversionException.class">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SubversionException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SubversionException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SubversionException.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SubversionException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SubversionException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SubversionException.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SubversionException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SubversionException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SubversionException.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">&quot;C:\Program Files\Java\jdk1.8.0_131\bin\javah&quot; -verbose -force -classpath &quot;..\..\..\subversion\bindings\javahl\classes&quot; -d &quot;..\..\..\subversion\bindings\javahl\include&quot; org.apache.subversion.javahl.SubversionException</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\subversion\bindings\javahl\include\org_apache_subversion_javahl_SubversionException.h;%(Outputs)</Outputs>
+<Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating subversion/bindings/javahl/include/org_apache_subversion_javahl_SubversionException.h</Message>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="svn_config.vcxproj">
+      <Project>{C66CD423-172D-FD90-0ADF-BA35A2FDB33B}</Project>
+    </ProjectReference>
+    <ProjectReference Include="javahl-java.vcxproj">
+      <Project>{311275E1-E0E3-DBE6-B917-04C42F6137B9}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
+
