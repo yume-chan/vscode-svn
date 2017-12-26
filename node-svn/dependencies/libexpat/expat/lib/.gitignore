@@ -1,7 +1,7 @@
 Makefile
 .libs
 *.lo
-expat.h
+#expat.h
 Debug
 Debug-w
 Release
