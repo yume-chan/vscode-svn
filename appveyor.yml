@@ -16,7 +16,7 @@ cache:
 
 install:
   - ps: Install-Product node $env:nodejs_version $env:nodejs_arch
-  - ps: rm -r -force node_modules
+  - ps: rm package-lock.json
   - npm install -g yume-chan/greenkeeper-lockfile
   - npm install
 
