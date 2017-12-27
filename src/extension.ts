@@ -1,7 +1,7 @@
 import { ExtensionContext } from "vscode";
 
 import { initialize } from "./client";
-import { writeOutput } from "./output";
+import { writeTrace } from "./output";
 import subscriptions from "./subscriptions";
 
 export async function activate(context: ExtensionContext) {
@@ -14,8 +14,8 @@ export async function activate(context: ExtensionContext) {
         await import("./svn-decoration-provider");
         await import("./command-center");
 
-        writeOutput(`initialize()\n\t${process.pid}`);
+        writeTrace(`initialize()`, process.pid);
     } catch (err) {
-        writeOutput(`initialize()\n\t${err}`);
+        writeTrace(`initialize()`, err.toString());
     }
 }

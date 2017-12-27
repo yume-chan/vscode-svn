@@ -11,17 +11,20 @@ function padNumber(value: number): string {
 
 function formatTime(): string {
     const now = new Date();
-    return `[${padNumber(now.getHours())}:${padNumber(now.getMinutes())}:${padNumber(now.getSeconds())}]`;
+    return `[${padNumber(now.getHours())}:${padNumber(now.getMinutes())}:${padNumber(now.getSeconds())}] `;
 }
 
-const newLine = "\n" + " ".repeat("[00:00:00] ".length);
+const indent = " ".repeat("[00:00:00] ".length + 4);
 
-function processContent(content: string): string {
-    return content.replace(/\n/g, newLine).replace(/\t/g, "    ");
-}
+export function writeTrace(method: string, result: any) {
+    channel.append(formatTime());
+    channel.appendLine(method);
 
-export function writeOutput(content: string): void {
-    channel.appendLine(`${formatTime()} ${processContent(content)}`);
+    channel.append(indent);
+    if (result === undefined)
+        channel.appendLine("undefined");
+    else
+        channel.appendLine(JSON.stringify(result).replace(/\r\n/g, "\r\n" + indent));
 }
 
 export function showOutput(): void {

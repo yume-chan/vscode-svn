@@ -12,13 +12,14 @@ import {
     workspace,
 } from "vscode";
 
-import { StatusKind } from "node-svn";
+import { RevisionKind, StatusKind } from "node-svn";
 
 import { client } from "./client";
 import svnTextDocumentContentProvider from "./content-provider";
-import { showOutput, writeOutput } from "./output";
+import { showOutput, writeTrace } from "./output";
 import svnDecorationProvider from "./svn-decoration-provider";
 import { SvnResourceState } from "./svn-resource-state";
+import { SvnUri } from "./svn-uri";
 import { Throttler } from "./throttler";
 
 export class SvnSourceControl implements QuickDiffProvider {
@@ -97,19 +98,19 @@ export class SvnSourceControl implements QuickDiffProvider {
                     const state = new SvnResourceState(this, info);
                     SvnSourceControl.cache.set(uri.fsPath, state);
 
-                    if (state.node_status === StatusKind.external ||
-                        (state.node_status === StatusKind.normal && state.file_external))
+                    if (state.status.node_status === StatusKind.external ||
+                        (state.status.node_status === StatusKind.normal && state.status.file_external))
                         return;
 
-                    if (state.changelist === "ignore-on-commit") {
+                    if (state.status.changelist === "ignore-on-commit") {
                         ignoredStates.push(state);
                     } else {
-                        switch (state.node_status) {
+                        switch (state.status.node_status) {
                             case StatusKind.added:
                             case StatusKind.modified:
                             case StatusKind.obstructed:
                             case StatusKind.deleted:
-                                this.stagedFiles.add(state.path);
+                                this.stagedFiles.add(state.status.path);
                                 stagedStates.push(state);
                                 break;
                             default:
@@ -125,13 +126,13 @@ export class SvnSourceControl implements QuickDiffProvider {
 
                 svnDecorationProvider.onDidChangeFiles(files);
             } catch (err) {
-                return;
+                writeTrace(`refresh(${this.root}`, err.toString());
             }
         });
     }
 
-    public provideOriginalResource?(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
-        return uri.with({ scheme: "svn" });
+    public provideOriginalResource(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
+        return new SvnUri(uri, RevisionKind.base).toUri();
     }
 
     public dispose(): void {
@@ -153,7 +154,7 @@ export class SvnSourceControl implements QuickDiffProvider {
             ];
 
             const revision = await client.update(this.root);
-            writeOutput(`update("${this.root}")\n\t${revision}`);
+            writeTrace(`update("${this.root}")`, revision);
 
             this.sourceControl.statusBarCommands = [
                 {
@@ -166,6 +167,7 @@ export class SvnSourceControl implements QuickDiffProvider {
 
             await this.refresh();
         } catch (err) {
+            writeTrace(`update("${this.root}")`, err.toString());
             return;
         }
     }
@@ -189,17 +191,17 @@ export class SvnSourceControl implements QuickDiffProvider {
         window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
             try {
                 await client.commit(Array.from(this.stagedFiles), message!, (info) => {
-                    writeOutput(`commit("${info.repos_root}", "${message}")\r\n${info.revision}`);
+                    writeTrace(`commit("${info.repos_root}", "${message}")`, info.revision);
                 });
                 svnTextDocumentContentProvider.onCommit(this.stagedFiles);
             } catch (err) {
                 let error = err.message;
                 let child = err.child;
                 while (child !== undefined) {
-                    error += "\n\t\t" + err.child.message;
-                    child = err.child;
+                    error += "\r\n" + err.child.message;
+                    child = child.child;
                 }
-                writeOutput(`commit("${this.root}", "${message}")\n\t${error}`);
+                writeTrace(`commit("${this.root}", "${message}")`, error);
 
                 // X if (err instanceof SvnError)
                 // X     window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);

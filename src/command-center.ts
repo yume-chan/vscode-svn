@@ -59,12 +59,12 @@ class CommandCenter {
         const control = resourceStates[0].control;
 
         for (const item of resourceStates) {
-            if (!item.versioned)
-                await client.add(item.path);
-            else if (item.node_status === StatusKind.missing)
-                await client.remove(item.path, (info) => { return; });
+            if (!item.status.versioned)
+                await client.add(item.status.path);
+            else if (item.status.node_status === StatusKind.missing)
+                await client.remove(item.status.path, (info) => { return; });
             else
-                await client.remove_from_changelists(item.path);
+                await client.remove_from_changelists(item.status.path);
         }
 
         await control.refresh();
@@ -77,13 +77,13 @@ class CommandCenter {
         const control = resourceStates[0].control;
 
         for (const item of resourceStates) {
-            switch (item.node_status) {
+            switch (item.status.node_status) {
                 case StatusKind.added:
                 case StatusKind.deleted:
-                    await client.revert(item.path);
+                    await client.revert(item.status.path);
                     break;
                 default:
-                    await client.add_to_changelist(item.path, "ignore-on-commit");
+                    await client.add_to_changelist(item.status.path, "ignore-on-commit");
                     break;
             }
         }

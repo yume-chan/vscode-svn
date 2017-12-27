@@ -3,7 +3,7 @@ import { ConfigurationChangeEvent, Disposable, SourceControl, Uri, window, works
 import { SvnSourceControl } from "./svn-source-control";
 
 import { client } from "./client";
-import { writeOutput } from "./output";
+import { writeTrace } from "./output";
 import isSamePath from "./same-path";
 import subscriptions from "./subscriptions";
 
@@ -25,12 +25,12 @@ class WorkspaceManager {
             // tslint:disable-next-line:prefer-const
             let enabled = configuration.get<boolean | undefined>("enabled", undefined);
             if (enabled === false) {
-                writeOutput(`configuration.get("enabled", "${workspaceRoot}")\n\tfalse`);
+                writeTrace(`configuration.get("enabled", "${workspaceRoot}")`, false);
                 return;
             }
 
             const root = await client.get_working_copy_root(workspaceRoot);
-            writeOutput(`get_working_copy_root("${workspaceRoot}")\n\t"${root}"`);
+            writeTrace(`get_working_copy_root("${workspaceRoot}")`, root);
 
             let show_changes_from = configuration.get<string | undefined>("show_changes_from", undefined);
 
@@ -54,19 +54,19 @@ class WorkspaceManager {
             // tslint:disable-next-line:no-shadowed-variable
             for (const control of this.controls) {
                 if (isSamePath(control.root, controlRoot)) {
-                    writeOutput(`control.root === controlRoot`);
+                    writeTrace(`control.workspaces.add(${workspaceRoot})`, control.root);
                     control.workspaces.add(workspaceRoot);
                     return;
                 }
             }
 
-            writeOutput(`new SvnSourceControl("${controlRoot}")`);
+            writeTrace(`new SvnSourceControl("${controlRoot}")`, undefined);
             const control = new SvnSourceControl(controlRoot);
             control.workspaces.add(workspaceRoot);
             await control.refresh();
             this.controls.add(control);
         } catch (err) {
-            writeOutput(`get_working_copy_root("${workspaceRoot}")\n\t${err}`);
+            writeTrace(`get_working_copy_root("${workspaceRoot}")`, err.toString());
             return;
         }
     }
@@ -81,14 +81,14 @@ class WorkspaceManager {
 
     private onDidChangeConfiguration(e: ConfigurationChangeEvent) {
         if (e.affectsConfiguration("svn")) {
-            writeOutput(`e.affectsConfiguration("svn")\n\ttrue`);
+            writeTrace(`e.affectsConfiguration("svn")`, true);
             this.reload();
             return;
         }
 
         for (const control of this.controls) {
             if (e.affectsConfiguration("svn", Uri.file(control.root))) {
-                writeOutput(`e.affectsConfiguration("svn", "${control.root}")\n\ttrue`);
+                writeTrace(`e.affectsConfiguration("svn", "${control.root}")`, true);
                 this.reload();
                 return;
             }
