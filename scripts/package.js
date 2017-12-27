@@ -14,4 +14,7 @@ try {
 
 vsce.createVSIX({
     packagePath: resolve(__dirname, "..", "vsix", `${package.name}-${package.version}-${process.arch}.vsix`)
+}).catch(function(err) {
+    console.error(err.stack);
+    process.exit(-1);
 });
