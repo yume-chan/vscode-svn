@@ -43,6 +43,18 @@ export const config = {
 
 export let client: AsyncClient;
 
+export function formatError(error: Error): string {
+    let message = error.message;
+
+    let child = (error as any).child;
+    while (child !== undefined) {
+        message += "\r\n" + child.message;
+        child = child.child;
+    }
+
+    return message;
+}
+
 export async function initialize() {
     // tslint:disable-next-line:no-shadowed-variable
     const { AsyncClient } = await import("node-svn");

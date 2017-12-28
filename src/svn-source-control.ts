@@ -14,7 +14,7 @@ import {
 
 import { RevisionKind, StatusKind } from "node-svn";
 
-import { client } from "./client";
+import { client, formatError } from "./client";
 import svnTextDocumentContentProvider from "./content-provider";
 import { showOutput, writeTrace } from "./output";
 import svnDecorationProvider from "./svn-decoration-provider";
@@ -30,6 +30,7 @@ export class SvnSourceControl implements QuickDiffProvider {
     private staged: SourceControlResourceGroup;
     private changes: SourceControlResourceGroup;
     private ignored: SourceControlResourceGroup;
+    private conflicted: SourceControlResourceGroup;
 
     private refreshThrottler: Throttler;
 
@@ -45,14 +46,7 @@ export class SvnSourceControl implements QuickDiffProvider {
         this.sourceControl = scm.createSourceControl("svn", "Svn", Uri.file(root));
         this.sourceControl.acceptInputCommand = { command: "svn.commit", title: "Commit", arguments: [this.sourceControl] };
         this.sourceControl.quickDiffProvider = this;
-        this.sourceControl.statusBarCommands = [
-            {
-                arguments: [this.sourceControl],
-                command: "svn.update",
-                title: "$(sync) Update",
-                tooltip: "Update",
-            },
-        ];
+        this.setUpdating(false);
         this.disposable.add(this.sourceControl);
 
         this.staged = this.sourceControl.createResourceGroup("staged", "Staged Changes");
@@ -62,9 +56,13 @@ export class SvnSourceControl implements QuickDiffProvider {
         this.changes = this.sourceControl.createResourceGroup("changes", "Changes");
         this.disposable.add(this.changes);
 
-        this.ignored = this.sourceControl.createResourceGroup("ignore", "Ignored");
+        this.ignored = this.sourceControl.createResourceGroup("ignored", "Ignored");
         this.ignored.hideWhenEmpty = true;
         this.disposable.add(this.ignored);
+
+        this.conflicted = this.sourceControl.createResourceGroup("conflicted", "Conficted");
+        this.conflicted.hideWhenEmpty = true;
+        this.disposable.add(this.conflicted);
 
         const watcher = workspace.createFileSystemWatcher("**");
         this.disposable.add(watcher);
@@ -78,6 +76,37 @@ export class SvnSourceControl implements QuickDiffProvider {
             return;
 
         this.refresh();
+    }
+
+    private setUpdating(value: boolean): void {
+        if (value) {
+            this.sourceControl.statusBarCommands = [
+                {
+                    arguments: [this.sourceControl],
+                    command: "",
+                    title: "$(sync~spin) Updating",
+                    tooltip: "Updating",
+                },
+            ];
+        } else {
+            this.sourceControl.statusBarCommands = [
+                {
+                    arguments: [this.sourceControl],
+                    command: "svn.update",
+                    title: "$(sync) Update",
+                    tooltip: "Update",
+                },
+            ];
+        }
+    }
+
+    private async showErrorMessage(operation: string): Promise<void> {
+        const showDetail = "Show Detail";
+        switch (await window.showErrorMessage(`${operation} failed, check output for detail`, showDetail)) {
+            case showDetail:
+                showOutput();
+                break;
+        }
     }
 
     private _refresh() {
@@ -126,7 +155,7 @@ export class SvnSourceControl implements QuickDiffProvider {
 
                 svnDecorationProvider.onDidChangeFiles(files);
             } catch (err) {
-                writeTrace(`refresh(${this.root}`, err.toString());
+                writeTrace(`refresh(${this.root}`, formatError(err));
             }
         });
     }
@@ -144,31 +173,17 @@ export class SvnSourceControl implements QuickDiffProvider {
 
     public async update() {
         try {
-            this.sourceControl.statusBarCommands = [
-                {
-                    arguments: [this.sourceControl],
-                    command: "",
-                    title: "$(sync~spin) Updating",
-                    tooltip: "Updating",
-                },
-            ];
+            this.setUpdating(true);
 
             const revision = await client.update(this.root);
             writeTrace(`update("${this.root}")`, revision);
 
-            this.sourceControl.statusBarCommands = [
-                {
-                    arguments: [this.sourceControl],
-                    command: "svn.update",
-                    title: "$(sync) Update",
-                    tooltip: "Update",
-                },
-            ];
-
             await this.refresh();
         } catch (err) {
-            writeTrace(`update("${this.root}")`, err.toString());
-            return;
+            writeTrace(`update("${this.root}")`, formatError(err));
+            this.showErrorMessage("Update");
+        } finally {
+            this.setUpdating(false);
         }
     }
 
@@ -195,23 +210,12 @@ export class SvnSourceControl implements QuickDiffProvider {
                 });
                 svnTextDocumentContentProvider.onCommit(this.stagedFiles);
             } catch (err) {
-                let error = err.message;
-                let child = err.child;
-                while (child !== undefined) {
-                    error += "\r\n" + err.child.message;
-                    child = child.child;
-                }
-                writeTrace(`commit("${this.root}", "${message}")`, error);
+                writeTrace(`commit("${this.root}", "${message}")`, formatError(err));
+                this.showErrorMessage("Commit");
 
                 // X if (err instanceof SvnError)
                 // X     window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
                 // X else
-                const showDetail = "Show Detail";
-                switch (await window.showErrorMessage("Commit failed, check output for detail", showDetail)) {
-                    case showDetail:
-                        showOutput();
-                        break;
-                }
             } finally {
                 this.sourceControl.inputBox.value = "";
                 this.refresh();
