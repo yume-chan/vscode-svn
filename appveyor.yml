@@ -11,12 +11,8 @@ environment:
 
 shallow_clone: true
 
-cache:
-  # - node_modules
-
 install:
   - ps: Install-Product node $env:nodejs_version $env:nodejs_arch
-  - ps: rm package-lock.json
   - npm install -g yume-chan/greenkeeper-lockfile
   - npm install
 
