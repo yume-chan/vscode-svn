@@ -3,7 +3,7 @@ import { ConfigurationChangeEvent, Disposable, SourceControl, Uri, window, works
 import { SvnSourceControl } from "./svn-source-control";
 
 import { client } from "./client";
-import { writeTrace } from "./output";
+import { writeError, writeTrace } from "./output";
 import isSamePath from "./same-path";
 import subscriptions from "./subscriptions";
 
@@ -66,7 +66,7 @@ class WorkspaceManager {
             await control.refresh();
             this.controls.add(control);
         } catch (err) {
-            writeTrace(`get_working_copy_root("${workspaceRoot}")`, err.toString());
+            writeError(`get_working_copy_root("${workspaceRoot}")`, err);
             return;
         }
     }

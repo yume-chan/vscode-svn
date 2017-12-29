@@ -14,9 +14,9 @@ import {
 
 import { RevisionKind, StatusKind } from "node-svn";
 
-import { client, formatError } from "./client";
+import { client } from "./client";
 import svnTextDocumentContentProvider from "./content-provider";
-import { showOutput, writeTrace } from "./output";
+import { showErrorMessage, writeError, writeTrace } from "./output";
 import svnDecorationProvider from "./svn-decoration-provider";
 import { SvnResourceState } from "./svn-resource-state";
 import { SvnUri } from "./svn-uri";
@@ -100,15 +100,6 @@ export class SvnSourceControl implements QuickDiffProvider {
         }
     }
 
-    private async showErrorMessage(operation: string): Promise<void> {
-        const showDetail = "Show Detail";
-        switch (await window.showErrorMessage(`${operation} failed, check output for detail`, showDetail)) {
-            case showDetail:
-                showOutput();
-                break;
-        }
-    }
-
     private _refresh() {
         return window.withProgress({ location: ProgressLocation.SourceControl }, async () => {
             try {
@@ -155,7 +146,7 @@ export class SvnSourceControl implements QuickDiffProvider {
 
                 svnDecorationProvider.onDidChangeFiles(files);
             } catch (err) {
-                writeTrace(`refresh(${this.root}`, formatError(err));
+                writeError(`refresh("${this.root}")`, err);
             }
         });
     }
@@ -176,12 +167,12 @@ export class SvnSourceControl implements QuickDiffProvider {
             this.setUpdating(true);
 
             const revision = await client.update(this.root);
-            writeTrace(`update("${this.root}")`, revision);
+            writeTrace(`update("${this.root}") `, revision);
 
             await this.refresh();
         } catch (err) {
-            writeTrace(`update("${this.root}")`, formatError(err));
-            this.showErrorMessage("Update");
+            writeError(`update("${this.root}") `, err);
+            showErrorMessage("Update");
         } finally {
             this.setUpdating(false);
         }
@@ -199,22 +190,22 @@ export class SvnSourceControl implements QuickDiffProvider {
         }
 
         if (this.stagedFiles.size === 0) {
-            window.showErrorMessage(`There is nothing to commit. (Did you forget to stage changes?)`);
+            window.showErrorMessage(`There is nothing to commit. (Did you forget to stage changes ?) `);
             return;
         }
 
         window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
             try {
                 await client.commit(Array.from(this.stagedFiles), message!, (info) => {
-                    writeTrace(`commit("${info.repos_root}", "${message}")`, info.revision);
+                    writeTrace(`commit("${info.repos_root}", "${message}") `, info.revision);
                 });
                 svnTextDocumentContentProvider.onCommit(this.stagedFiles);
             } catch (err) {
-                writeTrace(`commit("${this.root}", "${message}")`, formatError(err));
-                this.showErrorMessage("Commit");
+                writeError(`commit("${this.root}", "${message}") `, err);
+                showErrorMessage("Commit");
 
                 // X if (err instanceof SvnError)
-                // X     window.showErrorMessage(`Commit failed: E${err.code}: ${err.message}`);
+                // X     window.showErrorMessage(`Commit failed: E${ err.code }: ${ err.message }`);
                 // X else
             } finally {
                 this.sourceControl.inputBox.value = "";

@@ -30,3 +30,33 @@ export function writeTrace(method: string, result: any) {
 export function showOutput(): void {
     channel.show();
 }
+
+export function writeError(method: string, error: Error): void {
+    let message = error.message;
+
+    let child = (error as any).child;
+    while (child !== undefined) {
+        message += "\r\n" + child.message;
+        child = child.child;
+    }
+
+    channel.append(formatTime());
+    channel.appendLine(method);
+
+    channel.append(indent);
+    channel.append(error.name);
+    channel.append(": ");
+    channel.appendLine(message.replace(/\r\n/g, "\r\n" + indent + "    "));
+}
+
+export async function showErrorMessage(operation: string): Promise<void> {
+    const item = "Show Detail";
+    const selected = await window.showErrorMessage(`${operation} failed, check output for detail`, item);
+    switch (selected) {
+        case item:
+            showOutput();
+            break;
+        default:
+            return;
+    }
+}

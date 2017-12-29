@@ -3,7 +3,13 @@
 ## [Unreleased]
 
 ### Added
-- node-svn can now be complied with gcc-7 under Linux.
+- New `svn.checkout` command.
+
+### Changed
+- Use build-svn branch of node-svn, which build all subversion dependencies and components from source code.
+
+### Fixed
+- `svn.commit` randomly fail or append junk characters to commit message.
 
 ## 0.0.8 - 2017-12-12
 

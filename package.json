@@ -81,6 +81,11 @@
                     "light": "resources/icons/light/open-file.svg"
                 },
                 "title": "Open File"
+            },
+            {
+                "category": "Svn",
+                "command": "svn.checkout",
+                "title": "Checkout"
             }
         ],
         "configuration": {
@@ -204,7 +209,7 @@
     },
     "dependencies": {
         "iconv-lite": "^0.4.19",
-        "node-svn": "https://github.com/yume-chan/node-svn/releases/download/v0.0.1-alpha/node-svn-0.0.1.tgz"
+        "node-svn": "file:../node-svn/node-svn-0.0.1.tgz"
     },
     "description": "An experimental extension to provide SVN support for Visual Studio Code.",
     "devDependencies": {

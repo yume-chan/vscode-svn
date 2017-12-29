@@ -11,7 +11,7 @@ import {
 import { CatOptions, Revision, RevisionKind } from "node-svn";
 
 import { client } from "./client";
-import { writeTrace } from "./output";
+import { writeError, writeTrace } from "./output";
 import subscriptions from "./subscriptions";
 import { SvnUri } from "./svn-uri";
 
@@ -38,7 +38,7 @@ class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
         try {
             ({ file, revision } = SvnUri.parse(uri));
         } catch (err) {
-            writeTrace(`provideTextDocumentContent()`, `Can't parse Uri ${uri.toString()}`);
+            writeError(`provideTextDocumentContent()`, new Error(`Can't parse Uri ${uri.toString()}`));
             return "";
         }
 
@@ -54,7 +54,7 @@ class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
             writeTrace(`provideTextDocumentContent("${fsPath}")`, { text: content.replace(/\r/g, "\\r").replace(/\n/g, "\\n").substring(0, 50), length: content.length });
             return content;
         } catch (err) {
-            writeTrace(`provideTextDocumentContent("${fsPath}")`, err.toString());
+            writeError(`provideTextDocumentContent("${fsPath}")`, err);
             return "";
         }
     }
