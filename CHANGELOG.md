@@ -2,14 +2,17 @@
 
 ## [Unreleased]
 
+## 0.0.9 - 2018-1-1
+
 ### Added
 - New `svn.checkout` command.
 
 ### Changed
-- Use build-svn branch of node-svn, which build all subversion dependencies and components from source code.
+- Use build-svn branch of node-svn, which build all dependencies directly from source code.
 
 ### Fixed
-- `svn.commit` randomly fail or append junk characters to commit message.
+- `svn.commit` randomly fail or appends junk characters to commit message.
+- `svn.update` returns an array for single url instead of a number as documented.
 
 ## 0.0.8 - 2017-12-12
 

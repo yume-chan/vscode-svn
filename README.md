@@ -23,7 +23,11 @@ This project uses on my [node-svn](https://github.com/yume-chan/node-svn) projec
 
 ## Platform
 
-Due to the use of node-svn, currently it only supports Windows x64.
+The published package only support Windows x64.
+
+For Windows x86 and nightly builds, see the [AppVeyor CI](https://ci.appveyor.com/project/yume-chan/vscode-svn).
+
+(Select your architecture, switch to ARTIFACTS tab, download the `.vsix` package)
 
 ## Why not the SVN executable
 
