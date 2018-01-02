@@ -1,3 +1,4 @@
+import * as iconv from "iconv-lite";
 import {
     CancellationToken,
     Disposable,
@@ -7,11 +8,12 @@ import {
     workspace,
 } from "vscode";
 
-import { CatOptions, RevisionKind } from "node-svn";
+import { CatOptions, Revision, RevisionKind } from "node-svn";
 
 import { client } from "./client";
-import { writeOutput } from "./output";
+import { writeError, writeTrace } from "./output";
 import subscriptions from "./subscriptions";
+import { SvnUri } from "./svn-uri";
 
 class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
     private readonly _onDidChange: EventEmitter<Uri> = new EventEmitter<Uri>();
@@ -31,14 +33,28 @@ class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
     }
 
     public async provideTextDocumentContent(uri: Uri, token: CancellationToken): Promise<string> {
+        let file: Uri;
+        let revision: Revision;
         try {
-            const options: CatOptions = { peg_revision: RevisionKind.base, revision: RevisionKind.base };
-            const result = await client.cat(uri.fsPath, options);
-            const content = result.content.toString("utf8");
-            writeOutput(`provideTextDocumentContent("${uri.fsPath}")\n\t"${content.replace(/\r/g, "\\r").replace(/\n/g, "\\n").substring(0, 50)}" (${content.length} characters)`);
+            ({ file, revision } = SvnUri.parse(uri));
+        } catch (err) {
+            writeError(`provideTextDocumentContent()`, new Error(`Can't parse Uri ${uri.toString()}`));
+            return "";
+        }
+
+        const fsPath = file.fsPath;
+        try {
+            const options: CatOptions = { peg_revision: RevisionKind.base, revision };
+            const result = await client.cat(fsPath, options);
+
+            const config = workspace.getConfiguration("files", file);
+            const encoding = config.get<string>("encoding", "utf8");
+
+            const content = iconv.decode(result.content, iconv.encodingExists(encoding) ? encoding : "utf8");
+            writeTrace(`provideTextDocumentContent("${fsPath}")`, { text: content.replace(/\r/g, "\\r").replace(/\n/g, "\\n").substring(0, 50), length: content.length });
             return content;
         } catch (err) {
-            writeOutput(`provideTextDocumentContent("${uri.fsPath}")\n\t"${err}"`);
+            writeError(`provideTextDocumentContent("${fsPath}")`, err);
             return "";
         }
     }

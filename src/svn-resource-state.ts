@@ -9,54 +9,36 @@ import {
     Uri,
 } from "vscode";
 
-import { Depth, NodeKind, NodeStatus, StatusKind } from "node-svn";
+import { NodeStatus, RevisionKind, StatusKind } from "node-svn";
 
 import { SvnSourceControl } from "./svn-source-control";
+import { SvnUri } from "./svn-uri";
 
-export class SvnResourceState implements SourceControlResourceState, NodeStatus {
+export class SvnResourceState implements SourceControlResourceState {
     public readonly resourceUri: Uri;
 
-    public path: string;
-    public changed_author: string;
-    public changed_date: number | string;
-    public changed_rev: number;
-    public conflicted: boolean;
-    public copied: boolean;
-    public depth: Depth;
-    public file_external: boolean;
-    public kind: NodeKind;
-    public node_status: StatusKind;
-    public prop_status: StatusKind;
-    public revision: number;
-    public text_status: StatusKind;
-    public versioned: boolean;
-    public changelist?: string;
-
     get command(): Command {
-        if (this.text_status === StatusKind.modified) {
-            const filename = path.basename(this.path);
-            return { command: "vscode.diff", title: "Diff", arguments: [this.resourceUri.with({ scheme: "svn" }), this.resourceUri, filename] };
+        if (this.status.text_status === StatusKind.modified) {
+            const filename = path.basename(this.status.path);
+            return { command: "vscode.diff", title: "Diff", arguments: [new SvnUri(this.resourceUri, RevisionKind.base).toUri(), this.resourceUri, filename] };
         } else {
             return { command: "vscode.open", title: "Open", arguments: [this.resourceUri] };
         }
     }
 
     get decorations(): SourceControlResourceDecorations & DecorationData {
-        const abbreviation = StatusKind[this.node_status][0].toUpperCase();
+        const abbreviation = StatusKind[this.status.node_status][0].toUpperCase();
         const bubble = true;
         const color = new ThemeColor("gitDecoration.modifiedResourceForeground");
         const letter = abbreviation;
         const priority = 1;
-        const strikeThrough = this.node_status === StatusKind.deleted || this.node_status === StatusKind.missing;
-        const tooltip = `\nNode: ${StatusKind[this.node_status]}\nText: ${StatusKind[this.text_status]}\nProps: ${StatusKind[this.prop_status]}`;
+        const strikeThrough = this.status.node_status === StatusKind.deleted || this.status.node_status === StatusKind.missing;
+        const tooltip = `\nNode: ${StatusKind[this.status.node_status]}\nText: ${StatusKind[this.status.text_status]}\nProps: ${StatusKind[this.status.prop_status]}`;
 
         return { abbreviation, bubble, color, letter, priority, strikeThrough, tooltip };
     }
 
-    public constructor(public readonly control: SvnSourceControl, status: Readonly<NodeStatus>) {
+    public constructor(public readonly control: SvnSourceControl, public readonly status: Readonly<NodeStatus>) {
         this.resourceUri = Uri.file(status.path);
-
-        for (const key in status)
-            this[key] = status[key];
     }
 }

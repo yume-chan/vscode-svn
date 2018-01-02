@@ -1,4 +1,9 @@
 out
+build
 node_modules
+package-lock.json
 
 vsix
+
+!node-svn/node_modules
+!node-svn/dependencies/subversion/build

@@ -1,8 +1,11 @@
+import * as path from "path";
+
 import { commands, Disposable, SourceControl, SourceControlResourceGroup, window, workspace } from "vscode";
 
 import { StatusKind } from "node-svn";
 
 import { client } from "./client";
+import { writeError, writeTrace } from "./output";
 import subscriptions from "./subscriptions";
 import { SvnResourceState } from "./svn-resource-state";
 import workspaceManager from "./workspace-manager";
@@ -32,6 +35,57 @@ class CommandCenter {
                 await window.showTextDocument(document);
             }
         }));
+
+        this.disposable.add(commands.registerCommand("svn.checkout", this.checkout));
+    }
+
+    private async checkout() {
+        const url = await window.showInputBox({
+            ignoreFocusOut: true,
+            prompt: "Checkout url",
+        });
+
+        if (url === undefined)
+            return;
+
+        let target = await window.showInputBox({
+            ignoreFocusOut: true,
+            prompt: "Checkout path",
+        });
+
+        if (target === undefined)
+            return;
+
+        while (!path.isAbsolute(target)) {
+            const folders = workspace.workspaceFolders;
+            if (folders === undefined || folders.length !== 1) {
+                const item = "Retry";
+                const selected = await window.showErrorMessage(`Can't determinate absolute path from relative path ${target}`, item);
+                switch (selected) {
+                    case item:
+                        target = await window.showInputBox({
+                            ignoreFocusOut: true,
+                            prompt: "Checkout path",
+                        });
+
+                        if (target === undefined)
+                            return;
+
+                        break;
+                    default:
+                        return;
+                }
+            } else {
+                target = path.resolve(folders[0].uri.fsPath, target);
+            }
+        }
+
+        try {
+            const revision = await client.checkout(url, target);
+            writeTrace(`checkout("${url}", "${target}")`, revision);
+        } catch (err) {
+            writeError(`checkout("${url}", "${target}")`, err);
+        }
     }
 
     private async update(e?: SourceControl) {
@@ -59,12 +113,12 @@ class CommandCenter {
         const control = resourceStates[0].control;
 
         for (const item of resourceStates) {
-            if (!item.versioned)
-                await client.add(item.path);
-            else if (item.node_status === StatusKind.missing)
-                await client.remove(item.path, (info) => { return; });
+            if (!item.status.versioned)
+                await client.add(item.status.path);
+            else if (item.status.node_status === StatusKind.missing)
+                await client.remove(item.status.path, (info) => { return; });
             else
-                await client.remove_from_changelists(item.path);
+                await client.remove_from_changelists(item.status.path);
         }
 
         await control.refresh();
@@ -77,13 +131,13 @@ class CommandCenter {
         const control = resourceStates[0].control;
 
         for (const item of resourceStates) {
-            switch (item.node_status) {
+            switch (item.status.node_status) {
                 case StatusKind.added:
                 case StatusKind.deleted:
-                    await client.revert(item.path);
+                    await client.revert(item.status.path);
                     break;
                 default:
-                    await client.add_to_changelist(item.path, "ignore-on-commit");
+                    await client.add_to_changelist(item.status.path, "ignore-on-commit");
                     break;
             }
         }
