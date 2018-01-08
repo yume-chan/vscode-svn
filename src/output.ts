@@ -24,7 +24,7 @@ export function writeTrace(method: string, result: any) {
     if (result === undefined)
         channel.appendLine("undefined");
     else
-        channel.appendLine(JSON.stringify(result).replace(/\r\n/g, "\r\n" + indent));
+        channel.appendLine(JSON.stringify(result).replace(/\r?\n/g, "\n" + indent));
 }
 
 export function showOutput(): void {
@@ -46,7 +46,7 @@ export function writeError(method: string, error: Error): void {
     channel.append(indent);
     channel.append(error.name);
     channel.append(": ");
-    channel.appendLine(message.replace(/\r\n/g, "\r\n" + indent + "    "));
+    channel.appendLine(message.replace(/\r?\n/g, "\n" + indent + "    "));
 }
 
 export async function showErrorMessage(operation: string): Promise<void> {

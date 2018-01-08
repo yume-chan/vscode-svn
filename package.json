@@ -213,8 +213,8 @@
     },
     "description": "An experimental extension to provide SVN support for Visual Studio Code.",
     "devDependencies": {
-        "@types/mocha": "^2.2.44",
-        "@types/node": "^8.5.2",
+        "@types/mocha": "^2.2.46",
+        "@types/node": "^8.5.7",
         "mocha": "^4.0.1",
         "tslint": "^5.8.0",
         "tslint-language-service": "^0.9.7",
