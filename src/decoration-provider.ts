@@ -10,7 +10,7 @@ import {
 } from "vscode";
 
 import subscriptions from "./subscriptions";
-import { SvnSourceControl } from "./svn-source-control";
+import { SvnSourceControl } from "./source-control";
 
 const enableProposedApi = false;
 

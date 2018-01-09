@@ -17,8 +17,8 @@ import { RevisionKind, StatusKind } from "node-svn";
 import { client } from "./client";
 import svnTextDocumentContentProvider from "./content-provider";
 import { showErrorMessage, writeError, writeTrace } from "./output";
-import svnDecorationProvider from "./svn-decoration-provider";
-import { SvnResourceState } from "./svn-resource-state";
+import svnDecorationProvider from "./decoration-provider";
+import { SvnResourceState } from "./resource-state";
 import { SvnUri } from "./svn-uri";
 import { Throttler } from "./throttler";
 
