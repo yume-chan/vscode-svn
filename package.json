@@ -209,12 +209,14 @@
     },
     "dependencies": {
         "iconv-lite": "^0.4.19",
-        "node-svn": "https://github.com/yume-chan/node-svn/releases/download/v0.0.1-alpha/node-svn-0.0.1.tgz"
+        "node-svn": "https://github.com/yume-chan/node-svn/releases/download/v0.0.1-alpha/node-svn-0.0.1.tgz",
+        "opn": "^5.1.0"
     },
     "description": "An experimental extension to provide SVN support for Visual Studio Code.",
     "devDependencies": {
         "@types/mocha": "^2.2.46",
         "@types/node": "^9.3.0",
+        "@types/opn": "^5.1.0",
         "mocha": "^4.0.1",
         "tslint": "^5.8.0",
         "tslint-language-service": "^0.9.7",

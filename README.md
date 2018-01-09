@@ -7,34 +7,42 @@
 
 **Work In Progress**
 
-An experimental extension to provide SVN support for Visual Studio Code.
+An experimental extension to provide Subversion (SVN) support for Visual Studio Code.
 
 - [vscode-svn](#vscode-svn)
     - [node-svn](#node-svn)
     - [Platform](#platform)
-    - [Why not the SVN executable](#why-not-the-svn-executable)
+    - [Install from `vsix` package](#install-from-vsix-package)
+    - [Why not the Subversion executable](#why-not-the-subversion-executable)
     - [Building](#building)
     - [Issues](#issues)
     - [Contribution](#contribution)
 
 ## node-svn
 
-This project uses on my [node-svn](https://github.com/yume-chan/node-svn) project, which is a Node Native Addon that wraps SVN library.
+This project uses on my [node-svn](https://github.com/yume-chan/node-svn) project, which is a Node Native Addon that wraps the Subversion library.
 
 ## Platform
 
 The published package only support Windows x64.
 
-For Windows x86 and nightly builds, see the [AppVeyor CI](https://ci.appveyor.com/project/yume-chan/vscode-svn).
+For Windows x86 package, you can use [this](https://ci.appveyor.com/api/buildjobs/09qln5lubggj3w9r/artifacts/vsix%2Fvscode-svn-0.0.9-ia32.vsix) package.
 
-(Select your architecture, switch to ARTIFACTS tab, download the `.vsix` package)
+For other platforms, I have no idea how to compile Subversion on them.
 
-## Why not the SVN executable
+## Install from `vsix` package
+
+1. Uninstall your current version. (You may see an error says permission denied, don't worry, just restart your Visual Studio Code)
+1. Switch to Extensions tab.
+1. Click on `...`, select `Install from VSIX...` menu item.
+1. Pick your downloaded `vsix` package.
+
+## Why not the Subversion executable
 
 like the Git extension?
 
-1. SVN.exe doesn't support Unicode on Windows, it cannot take any Unicode arguments or output any Unicode characters to Node.js.
-1. SVN doesn't have a porper "stage" list, so if you want to commit only some of your changes, you need either:
+1. svn.exe doesn't support Unicode on Windows, it cannot take any Unicode arguments or output any Unicode characters to Node.js.
+1. Subversion doesn't have a "stage" list, so if you want to commit only some of your changes, you need either:
     1. Add there files to a changelist. While each file can only be in one changelist, this way doesn't work if you already uses changelists to manage your files.
     1. Pass a file list to the command, this is blocked by problem 1.
 

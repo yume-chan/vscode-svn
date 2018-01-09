@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Add
+- Add notice for non-Windows-x64 environments.
+
 ## 0.0.9 - 2018-1-1
 
 ### Added

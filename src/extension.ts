@@ -1,6 +1,6 @@
-import { exec } from "child_process";
-
 import { ExtensionContext, window } from "vscode";
+
+import opn = require("opn");
 
 import { initialize } from "./client";
 import { writeError, writeTrace } from "./output";
@@ -10,22 +10,11 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(subscriptions);
 
     if (process.platform !== "win32") {
-        const help = "I want to help";
-        const result = await window.showErrorMessage("Svn only supports Windows.", help);
+        const more = "Learn more";
+        const result = await window.showErrorMessage("vscode-svn currently only supports Windows.", more);
         switch (result) {
-            case help:
-                exec("https://github.com/yume-chan/node-svn#platform-table");
-                break;
-        }
-        return;
-    }
-
-    if (process.arch === "ia32") {
-        const download = "Download x86 version";
-        const result = await window.showErrorMessage("This package of Svn only supports x64.", download);
-        switch (result) {
-            case download:
-                exec("https://ci.appveyor.com/api/buildjobs/09qln5lubggj3w9r/artifacts/vsix%2Fvscode-svn-0.0.9-ia32.vsix");
+            case more:
+                opn("https://github.com/yume-chan/vscode-svn##platform");
                 break;
         }
         return;
@@ -42,5 +31,16 @@ export async function activate(context: ExtensionContext) {
         writeTrace(`initialize()`, process.pid);
     } catch (err) {
         writeError(`initialize()`, err);
+
+        if (process.arch === "ia32") {
+            const more = "Learn more";
+            const result = await window.showErrorMessage("This package of vscode-svn only supports x64.", more);
+            switch (result) {
+                case more:
+                    opn("https://github.com/yume-chan/vscode-svn##platform");
+                    break;
+            }
+            return;
+        }
     }
 }
