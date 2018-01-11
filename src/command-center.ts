@@ -6,8 +6,8 @@ import { StatusKind } from "node-svn";
 
 import { client } from "./client";
 import { writeError, writeTrace } from "./output";
+import { SvnResourceState } from "./resource-state";
 import subscriptions from "./subscriptions";
-import { SvnResourceState } from "./svn-resource-state";
 import workspaceManager from "./workspace-manager";
 
 class CommandCenter {

@@ -1,6 +1,6 @@
 import { ConfigurationChangeEvent, Disposable, SourceControl, Uri, window, workspace, WorkspaceFoldersChangeEvent } from "vscode";
 
-import { SvnSourceControl } from "./svn-source-control";
+import { SvnSourceControl } from "./source-control";
 
 import { client } from "./client";
 import { writeError, writeTrace } from "./output";

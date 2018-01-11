@@ -25,7 +25,7 @@ export async function activate(context: ExtensionContext) {
 
         await import("./workspace-manager");
         await import("./content-provider");
-        await import("./svn-decoration-provider");
+        await import("./decoration-provider");
         await import("./command-center");
 
         writeTrace(`initialize()`, process.pid);

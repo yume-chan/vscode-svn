@@ -11,7 +11,7 @@ import {
 
 import { NodeStatus, RevisionKind, StatusKind } from "node-svn";
 
-import { SvnSourceControl } from "./svn-source-control";
+import { SvnSourceControl } from "./source-control";
 import { SvnUri } from "./svn-uri";
 
 export class SvnResourceState implements SourceControlResourceState {
