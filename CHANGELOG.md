@@ -5,6 +5,9 @@
 ### Add
 - Add notice for non-Windows-x64 environments.
 
+### Fixed
+- Click on a newly added item will open it instead of comparing with empty.
+
 ## 0.0.9 - 2018-1-1
 
 ### Added

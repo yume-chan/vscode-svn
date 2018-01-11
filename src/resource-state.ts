@@ -18,7 +18,7 @@ export class SvnResourceState implements SourceControlResourceState {
     public readonly resourceUri: Uri;
 
     get command(): Command {
-        if (this.status.text_status === StatusKind.modified) {
+        if (this.status.node_status === StatusKind.modified) {
             const filename = path.basename(this.status.path);
             return { command: "vscode.diff", title: "Diff", arguments: [new SvnUri(this.resourceUri, RevisionKind.base).toUri(), this.resourceUri, filename] };
         } else {
