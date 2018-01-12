@@ -13,7 +13,9 @@ install:
   - ps: Install-Product node $env:version $env:arch
   - npm install
 
-build_script: node scripts/package.js
+build_script:
+  - npm run vscode:prepublish
+  - node scripts/package.js
 
 test: off
 

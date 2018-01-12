@@ -6,7 +6,6 @@ import {
     ProgressLocation,
     SourceControl,
     SourceControlResourceGroup,
-    Uri,
     window,
     workspace,
 } from "vscode";
