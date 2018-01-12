@@ -8,14 +8,13 @@ import {
     workspace,
 } from "vscode";
 
-import { CatOptions, Revision, RevisionKind } from "node-svn";
+import { Revision } from "node-svn";
 
-import { client } from "./client";
 import { writeError, writeTrace } from "./output";
 import subscriptions from "./subscriptions";
 import { SvnUri } from "./svn-uri";
 
-class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
+class SvnContentProvider implements TextDocumentContentProvider {
     private readonly _onDidChange: EventEmitter<Uri> = new EventEmitter<Uri>();
 
     private readonly disposable: Set<Disposable> = new Set();
@@ -44,8 +43,7 @@ class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
 
         const fsPath = file.fsPath;
         try {
-            const options: CatOptions = { peg_revision: RevisionKind.base, revision };
-            const result = await client.cat(fsPath, options);
+            const result = await SvnUri.provideResource(uri);
 
             const config = workspace.getConfiguration("files", file);
             const encoding = config.get<string>("encoding", "utf8");
@@ -54,7 +52,6 @@ class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
             writeTrace(`provideTextDocumentContent("${fsPath}")`, { text: content.replace(/\r/g, "\\r").replace(/\n/g, "\\n").substring(0, 50), length: content.length });
             return content;
         } catch (err) {
-            writeError(`provideTextDocumentContent("${fsPath}")`, err);
             return "";
         }
     }
@@ -67,4 +64,4 @@ class SvnTextDocumentContentProvider implements TextDocumentContentProvider {
     }
 }
 
-export default subscriptions.add(new SvnTextDocumentContentProvider());
+export default subscriptions.add(new SvnContentProvider());

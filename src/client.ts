@@ -34,9 +34,9 @@ export const config = {
         })) === yes;
 
         return {
-            username,
             password,
             save,
+            username,
         };
     },
 };

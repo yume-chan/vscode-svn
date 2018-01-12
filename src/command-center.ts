@@ -1,14 +1,31 @@
 import * as path from "path";
 
-import { commands, Disposable, SourceControl, SourceControlResourceGroup, window, workspace } from "vscode";
+import {
+    commands,
+    Disposable,
+    ProgressLocation,
+    SourceControl,
+    SourceControlResourceGroup,
+    Uri,
+    window,
+    workspace,
+} from "vscode";
 
-import { StatusKind } from "node-svn";
+import { RevisionKind, StatusKind } from "node-svn";
 
 import { client } from "./client";
 import { writeError, writeTrace } from "./output";
 import { SvnResourceState } from "./resource-state";
 import subscriptions from "./subscriptions";
+import { SvnUri } from "./svn-uri";
 import workspaceManager from "./workspace-manager";
+
+async function openUri(uri: SvnUri) {
+    await window.withProgress({ location: ProgressLocation.Window, title: "Fetching file..." }, async () => {
+        const resource = await uri.toResourceUri();
+        await commands.executeCommand("vscode.open", resource);
+    });
+}
 
 class CommandCenter {
     private readonly disposable: Set<Disposable> = new Set();
@@ -29,11 +46,38 @@ class CommandCenter {
             return this.unstage(...group.resourceStates as SvnResourceState[]);
         }));
 
-        this.disposable.add(commands.registerCommand("svn.openFile", async (...resourceStates: SvnResourceState[]) => {
-            for (const item of resourceStates) {
-                const document = await workspace.openTextDocument(item.resourceUri);
-                await window.showTextDocument(document);
+        this.disposable.add(commands.registerCommand("svn.openDiff", async (uri: SvnUri) => {
+            window.withProgress({ location: ProgressLocation.Window, title: "Fetching file..." }, async () => {
+                try {
+                    const left = await uri.toResourceUri();
+                    const filename = path.basename(uri.file.fsPath);
+
+                    await commands.executeCommand("vscode.diff", left, uri.file, filename);
+                } catch (err) {
+                    writeError(`openDiff(${uri.file.fsPath})`, err);
+                }
+            });
+        }));
+
+        this.disposable.add(commands.registerCommand("svn.openFile", async (uri: SvnUri | SvnResourceState) => {
+            if (uri instanceof SvnResourceState) {
+                switch (uri.status.node_status) {
+                    case StatusKind.missing:
+                    case StatusKind.deleted:
+                        try {
+                            await openUri(new SvnUri(uri.resourceUri, RevisionKind.base));
+                        } catch (err) {
+                            writeError(`openFile(${uri.resourceUri.fsPath})`, err);
+                        }
+                        break;
+                    default:
+                        await commands.executeCommand("vscode.open", uri.resourceUri);
+                        break;
+                }
+                return;
             }
+
+            openUri(uri);
         }));
 
         this.disposable.add(commands.registerCommand("svn.checkout", this.checkout));

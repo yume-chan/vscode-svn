@@ -15,7 +15,7 @@ import {
 import { RevisionKind, StatusKind } from "node-svn";
 
 import { client } from "./client";
-import svnTextDocumentContentProvider from "./content-provider";
+import svnContentProvider from "./content-provider";
 import svnDecorationProvider from "./decoration-provider";
 import { showErrorMessage, writeError, writeTrace } from "./output";
 import { SvnResourceState } from "./resource-state";
@@ -101,7 +101,7 @@ export class SvnSourceControl implements QuickDiffProvider {
     }
 
     private _refresh() {
-        return window.withProgress({ location: ProgressLocation.SourceControl }, async () => {
+        return window.withProgress({ location: ProgressLocation.SourceControl, title: "Updating..." }, async () => {
             try {
                 this.stagedFiles.clear();
 
@@ -152,7 +152,7 @@ export class SvnSourceControl implements QuickDiffProvider {
     }
 
     public provideOriginalResource(uri: Uri, token: CancellationToken): ProviderResult<Uri> {
-        return new SvnUri(uri, RevisionKind.base).toUri();
+        return new SvnUri(uri, RevisionKind.base).toTextUri();
     }
 
     public dispose(): void {
@@ -199,7 +199,7 @@ export class SvnSourceControl implements QuickDiffProvider {
                 await client.commit(Array.from(this.stagedFiles), message!, (info) => {
                     writeTrace(`commit("${info.repos_root}", "${message}") `, info.revision);
                 });
-                svnTextDocumentContentProvider.onCommit(this.stagedFiles);
+                svnContentProvider.onCommit(this.stagedFiles);
             } catch (err) {
                 writeError(`commit("${this.root}", "${message}") `, err);
                 showErrorMessage("Commit");

@@ -2,8 +2,6 @@ image: Visual Studio 2017
 
 environment:
   version: "Current"
-  GH_TOKEN:
-    secure: zHm517HtzQikntPP4AF80e9uBxmq5jzW3/vPfQjDRcVG3V1ZXrLKdIHHeaVD7k28
 
   matrix:
     - arch: x86

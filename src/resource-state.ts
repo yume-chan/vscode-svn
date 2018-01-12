@@ -1,5 +1,3 @@
-import * as path from "path";
-
 import {
     Command,
     DecorationData,
@@ -18,11 +16,15 @@ export class SvnResourceState implements SourceControlResourceState {
     public readonly resourceUri: Uri;
 
     get command(): Command {
-        if (this.status.node_status === StatusKind.modified) {
-            const filename = path.basename(this.status.path);
-            return { command: "vscode.diff", title: "Diff", arguments: [new SvnUri(this.resourceUri, RevisionKind.base).toUri(), this.resourceUri, filename] };
-        } else {
-            return { command: "vscode.open", title: "Open", arguments: [this.resourceUri] };
+        const node_status = this.status.node_status;
+        switch (node_status) {
+            case StatusKind.modified:
+                return { command: "svn.openDiff", title: "Open Changes", arguments: [new SvnUri(this.resourceUri, RevisionKind.base)] };
+            case StatusKind.missing:
+            case StatusKind.deleted:
+                return { command: "svn.openFile", title: "Open File", arguments: [new SvnUri(this.resourceUri, RevisionKind.base)] };
+            default:
+                return { command: "vscode.open", title: "Open File", arguments: [this.resourceUri] };
         }
     }
 

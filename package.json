@@ -75,6 +75,11 @@
             },
             {
                 "category": "Svn",
+                "command": "svn.openDiff",
+                "title": "Open Changes"
+            },
+            {
+                "category": "Svn",
                 "command": "svn.openFile",
                 "icon": {
                     "dark": "resources/icons/dark/open-file.svg",
@@ -168,29 +173,34 @@
             ],
             "scm/resourceState/context": [
                 {
-                    "command": "svn.stage",
-                    "group": "1_modification",
-                    "when": "scmProvider == svn && scmResourceGroup != staged"
-                },
-                {
-                    "command": "svn.stage",
-                    "group": "inline",
-                    "when": "scmProvider == svn && scmResourceGroup != staged"
-                },
-                {
-                    "command": "svn.unstage",
-                    "group": "1_modification",
-                    "when": "scmProvider == svn && scmResourceGroup == staged"
-                },
-                {
-                    "command": "svn.unstage",
-                    "group": "inline",
-                    "when": "scmProvider == svn && scmResourceGroup == staged"
-                },
-                {
                     "command": "svn.openFile",
                     "group": "navigation",
                     "when": "scmProvider == svn"
+                },
+                {
+                    "command": "svn.openFile",
+                    "group": "inline",
+                    "when": "scmProvider == svn"
+                },
+                {
+                    "command": "svn.stage",
+                    "group": "1_modification",
+                    "when": "scmProvider == svn && scmResourceGroup != staged"
+                },
+                {
+                    "command": "svn.stage",
+                    "group": "inline",
+                    "when": "scmProvider == svn && scmResourceGroup != staged"
+                },
+                {
+                    "command": "svn.unstage",
+                    "group": "1_modification",
+                    "when": "scmProvider == svn && scmResourceGroup == staged"
+                },
+                {
+                    "command": "svn.unstage",
+                    "group": "inline",
+                    "when": "scmProvider == svn && scmResourceGroup == staged"
                 }
             ],
             "scm/title": [
@@ -208,12 +218,16 @@
         }
     },
     "dependencies": {
+        "file-type": "^7.4.0",
+        "fs-extra": "^5.0.0",
         "iconv-lite": "^0.4.19",
         "node-svn": "https://ci.appveyor.com/api/buildjobs/4idyk64ck5594pap/artifacts/node-svn-0.0.1.tgz",
         "opn": "^5.1.0"
     },
     "description": "An experimental extension to provide SVN support for Visual Studio Code.",
     "devDependencies": {
+        "@types/file-type": "^5.2.1",
+        "@types/fs-extra": "^5.0.0",
         "@types/mocha": "^2.2.46",
         "@types/node": "^9.3.0",
         "@types/opn": "^5.1.0",
