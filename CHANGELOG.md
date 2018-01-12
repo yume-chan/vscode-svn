@@ -6,6 +6,9 @@
 - Added notice for non-Windows-x64 environments.
 - Added support for comparing image files.
 
+### Changed
+- Changed to only clear Source Control input box only if commit success.
+
 ### Fixed
 - Fixed a issue that clicking on a newly added item would comparing it with empty instead of opening it.
 - Fixed a issue that clicking on a missing or deleted file would throw an error.

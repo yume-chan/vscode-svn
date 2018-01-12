@@ -200,6 +200,7 @@ export class SvnSourceControl implements QuickDiffProvider {
                     writeTrace(`commit("${info.repos_root}", "${message}") `, info.revision);
                 });
                 svnContentProvider.onCommit(this.stagedFiles);
+                this.sourceControl.inputBox.value = "";
             } catch (err) {
                 writeError(`commit("${this.root}", "${message}") `, err);
                 showErrorMessage("Commit");
@@ -208,7 +209,6 @@ export class SvnSourceControl implements QuickDiffProvider {
                 // X     window.showErrorMessage(`Commit failed: E${ err.code }: ${ err.message }`);
                 // X else
             } finally {
-                this.sourceControl.inputBox.value = "";
                 this.refresh();
             }
         });
