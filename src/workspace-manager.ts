@@ -1,4 +1,13 @@
-import { ConfigurationChangeEvent, Disposable, SourceControl, Uri, window, workspace, WorkspaceFoldersChangeEvent } from "vscode";
+import {
+    ConfigurationChangeEvent,
+    Disposable,
+    SourceControl,
+    TextDocumentWillSaveEvent,
+    Uri,
+    window,
+    workspace,
+    WorkspaceFoldersChangeEvent,
+} from "vscode";
 
 import { SvnSourceControl } from "./source-control";
 
@@ -17,6 +26,12 @@ class WorkspaceManager {
 
         this.disposable.add(workspace.onDidChangeWorkspaceFolders(this.onDidChangeWorkspaceFolders, this));
         this.onDidChangeWorkspaceFolders({ added: workspace.workspaceFolders || [], removed: [] });
+
+        this.disposable.add(workspace.onWillSaveTextDocument(this.onWillSaveTextDocument, this));
+    }
+
+    private onWillSaveTextDocument(e: TextDocumentWillSaveEvent) {
+        return;
     }
 
     private async detect(workspaceRoot: string): Promise<void> {

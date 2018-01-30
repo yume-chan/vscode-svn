@@ -105,9 +105,10 @@ export class SvnSourceControl implements QuickDiffProvider {
             try {
                 this.stagedFiles.clear();
 
-                const stagedStates: SvnResourceState[] = [];
-                const changedStates: SvnResourceState[] = [];
-                const ignoredStates: SvnResourceState[] = [];
+                const staged: SvnResourceState[] = [];
+                const changed: SvnResourceState[] = [];
+                const ignored: SvnResourceState[] = [];
+                const conflicted: SvnResourceState[] = [];
 
                 const files: Uri[] = [];
 
@@ -123,7 +124,7 @@ export class SvnSourceControl implements QuickDiffProvider {
                         return;
 
                     if (state.status.changelist === "ignore-on-commit") {
-                        ignoredStates.push(state);
+                        ignored.push(state);
                     } else {
                         switch (state.status.node_status) {
                             case StatusKind.added:
@@ -131,18 +132,22 @@ export class SvnSourceControl implements QuickDiffProvider {
                             case StatusKind.obstructed:
                             case StatusKind.deleted:
                                 this.stagedFiles.add(state.status.path);
-                                stagedStates.push(state);
+                                staged.push(state);
+                                break;
+                            case StatusKind.conflicted:
+                                conflicted.push(state);
                                 break;
                             default:
-                                changedStates.push(state);
+                                changed.push(state);
                                 break;
                         }
                     }
                 });
 
-                this.staged.resourceStates = stagedStates;
-                this.changes.resourceStates = changedStates;
-                this.ignored.resourceStates = ignoredStates;
+                this.staged.resourceStates = staged;
+                this.changes.resourceStates = changed;
+                this.ignored.resourceStates = ignored;
+                this.conflicted.resourceStates = conflicted;
 
                 svnDecorationProvider.onDidChangeFiles(files);
             } catch (err) {
