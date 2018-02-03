@@ -218,24 +218,24 @@
         }
     },
     "dependencies": {
-        "file-type": "^7.4.0",
+        "file-type": "^7.5.0",
         "fs-extra": "^5.0.0",
         "iconv-lite": "^0.4.19",
-        "node-svn": "https://ci.appveyor.com/api/buildjobs/k13flo59o2lygr5i/artifacts/node-svn-0.0.1.tgz",
-        "opn": "^5.1.0"
+        "node-svn": "https://ci.appveyor.com/api/buildjobs/bd6g4i08d617p6se/artifacts/node-svn-0.0.1.tgz",
+        "opn": "^5.2.0"
     },
     "description": "An experimental extension to provide SVN support for Visual Studio Code.",
     "devDependencies": {
         "@types/file-type": "^5.2.1",
         "@types/fs-extra": "^5.0.0",
-        "@types/mocha": "^2.2.46",
+        "@types/mocha": "^2.2.48",
         "@types/node": "^9.3.0",
         "@types/opn": "^5.1.0",
         "mocha": "^5.0.0",
         "tslint": "^5.9.1",
         "tslint-language-service": "^0.9.8",
-        "typescript": "^2.6.2",
-        "vsce": "^1.35.0",
+        "typescript": "^2.7.1",
+        "vsce": "^1.36.1",
         "vscode": "^1.1.10"
     },
     "displayName": "Svn",

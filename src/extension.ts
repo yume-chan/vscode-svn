@@ -3,21 +3,34 @@ import { ExtensionContext, window } from "vscode";
 import opn = require("opn");
 
 import { initialize } from "./client";
-import { writeError, writeTrace } from "./output";
+import { showErrorMessage, writeError, writeTrace } from "./output";
 import subscriptions from "./subscriptions";
+
+const platformName = {
+    linux: "Linux",
+    mac: "macOS",
+    win32: "Windows",
+};
 
 export async function activate(context: ExtensionContext) {
     context.subscriptions.push(subscriptions);
 
-    if (process.platform !== "win32") {
-        const more = "Learn more";
-        const result = await window.showErrorMessage("vscode-svn currently only supports Windows.", more);
-        switch (result) {
-            case more:
-                opn("https://github.com/yume-chan/vscode-svn##platform");
-                break;
+    try {
+        const configuration = require("../configuration.json");
+
+        if (process.platform !== configuration.platform ||
+            process.arch !== configuration.arch) {
+            const more = "Learn more";
+            const result = await window.showErrorMessage(`This package of vscode-svn only supports ${platformName[configuration.platform] || configuration.platform} ${configuration.arch}.`, more);
+            switch (result) {
+                case more:
+                    opn("https://github.com/yume-chan/vscode-svn#platform");
+                    break;
+            }
+            return;
         }
-        return;
+    } catch  {
+        // Nothing
     }
 
     try {
@@ -31,16 +44,6 @@ export async function activate(context: ExtensionContext) {
         writeTrace(`initialize()`, process.pid);
     } catch (err) {
         writeError(`initialize()`, err);
-
-        if (process.arch === "ia32") {
-            const more = "Learn more";
-            const result = await window.showErrorMessage("This package of vscode-svn only supports x64.", more);
-            switch (result) {
-                case more:
-                    opn("https://github.com/yume-chan/vscode-svn##platform");
-                    break;
-            }
-            return;
-        }
+        showErrorMessage("Initialize");
     }
 }

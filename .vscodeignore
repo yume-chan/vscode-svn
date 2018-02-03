@@ -17,4 +17,5 @@ package-lock.json
 tsconfig.json
 tslint.json
 .npmrc
+.travis.yml
 appveyor.yml

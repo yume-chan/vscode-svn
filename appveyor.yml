@@ -1,8 +1,6 @@
 image: Visual Studio 2017
 
 environment:
-  version: "Current"
-
   matrix:
     - arch: x86
     - arch: x64
@@ -10,12 +8,10 @@ environment:
 clone_depth: 2
 
 install:
-  - ps: Install-Product node $env:version $env:arch
+  - ps: Install-Product node Current $env:arch
   - npm install
 
-build_script:
-  - npm run vscode:prepublish
-  - node scripts/package.js
+build_script: node scripts/package.js
 
 test: off
 

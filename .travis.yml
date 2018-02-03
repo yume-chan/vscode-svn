@@ -1,0 +1,29 @@
+matrix:
+  include:
+    # - os: linux
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #       packages:
+    #         - g++-7
+    #   env:
+    #     - MATRIX_EVAL="export CC=gcc-7 && export  CXX=g++-7"
+    - os: osx
+      osx_image: xcode9.2
+      env:
+        - MATRIX_EVAL="brew cask uninstall oclint && brew install gcc && export CC=gcc-7 && export CXX=g++-7"
+
+before_install:
+    - echo "$TRAVIS_COMMIT_MESSAGE" | grep -E '\[(skip travis|travis skip)\]' && exit 0 || true
+    - eval "${MATRIX_EVAL}"
+
+language: node_js
+
+node_js: node
+
+script: node scripts/package.js
+
+cache:
+  directories:
+    - "node_modules"

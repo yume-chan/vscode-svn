@@ -5,5 +5,7 @@ package-lock.json
 
 vsix
 
+configuration.json
+
 !node-svn/node_modules
 !node-svn/dependencies/subversion/build
