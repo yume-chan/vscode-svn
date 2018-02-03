@@ -7,8 +7,8 @@ import { showErrorMessage, writeError, writeTrace } from "./output";
 import subscriptions from "./subscriptions";
 
 const platformName = {
+    darwin: "macOS",
     linux: "Linux",
-    mac: "macOS",
     win32: "Windows",
 };
 
