@@ -1,10 +1,11 @@
 # Change Log
 
-## [Unreleased]
+## 0.0.10 - 2018-2-28
 
 ### Added
 - Added notice for non-Windows-x64 environments.
 - Added support for comparing image files.
+- Added support for simple authentication.
 
 ### Changed
 - Changed to only clear Source Control input box only if commit success.

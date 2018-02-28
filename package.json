@@ -221,7 +221,7 @@
         "file-type": "^7.5.0",
         "fs-extra": "^5.0.0",
         "iconv-lite": "^0.4.19",
-        "node-svn": "https://ci.appveyor.com/api/buildjobs/bd6g4i08d617p6se/artifacts/node-svn-0.0.1.tgz",
+        "node-svn": "https://ci.appveyor.com/api/buildjobs/bn3tn125e798ad82/artifacts/node-svn-0.0.1.tgz",
         "opn": "^5.2.0"
     },
     "description": "An experimental extension to provide SVN support for Visual Studio Code.",
@@ -258,5 +258,5 @@
         "vscode:prepublish": "npm run compile",
         "watch": "tsc -watch -p ./"
     },
-    "version": "0.0.9"
+    "version": "0.0.10"
 }
