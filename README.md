@@ -24,11 +24,11 @@ This project uses on my [node-svn](https://github.com/yume-chan/node-svn) projec
 
 ## Platform
 
-The published package only support Windows x64.
+The published package only supports Windows x64.
 
 For Windows x86 package, you can use [this](https://ci.appveyor.com/api/buildjobs/09qln5lubggj3w9r/artifacts/vsix%2Fvscode-svn-0.0.9-ia32.vsix) package.
 
-For other platforms, I have no idea how to compile Subversion on them.
+I have problem compiling node-svn on Linux, macOS. Please check [node-svn issues](https://github.com/yume-chan/node-svn/issues) if you want to help me.
 
 ## Install from `vsix` package
 

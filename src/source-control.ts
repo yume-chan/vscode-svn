@@ -20,7 +20,6 @@ import svnDecorationProvider from "./decoration-provider";
 import { showErrorMessage, writeError, writeTrace } from "./output";
 import { SvnResourceState } from "./resource-state";
 import { SvnUri } from "./svn-uri";
-import { Throttler } from "./throttler";
 
 export class SvnSourceControl implements QuickDiffProvider {
     public static readonly cache: Map<string, SvnResourceState> = new Map<string, SvnResourceState>();
@@ -32,8 +31,6 @@ export class SvnSourceControl implements QuickDiffProvider {
     private ignored: SourceControlResourceGroup;
     private conflicted: SourceControlResourceGroup;
 
-    private refreshThrottler: Throttler;
-
     private stagedFiles: Set<string> = new Set<string>();
 
     private readonly disposable: Set<Disposable> = new Set();
@@ -41,8 +38,6 @@ export class SvnSourceControl implements QuickDiffProvider {
     public readonly workspaces: Set<string> = new Set<string>();
 
     public constructor(public root: string) {
-        this.refreshThrottler = new Throttler(this._refresh.bind(this), 500);
-
         this.sourceControl = scm.createSourceControl("svn", "Svn", Uri.file(root));
         this.sourceControl.acceptInputCommand = { command: "svn.commit", title: "Commit", arguments: [this.sourceControl] };
         this.sourceControl.quickDiffProvider = this;
@@ -100,8 +95,18 @@ export class SvnSourceControl implements QuickDiffProvider {
         }
     }
 
-    private _refresh() {
-        return window.withProgress({ location: ProgressLocation.SourceControl, title: "Updating..." }, async () => {
+    public async cleanup(): Promise<void> {
+        try {
+            await client.cleanup(this.root);
+            await this.refresh();
+            writeTrace(`cleanup(${this.root})`, "ok");
+        } catch (err) {
+            writeError(`cleanup(${this.root})`, err);
+        }
+    }
+
+    public refresh() {
+        return window.withProgress({ location: ProgressLocation.SourceControl, title: "Refreshing..." }, async () => {
             try {
                 this.stagedFiles.clear();
 
@@ -112,16 +117,16 @@ export class SvnSourceControl implements QuickDiffProvider {
 
                 const files: Uri[] = [];
 
-                await client.status(this.root, (info) => {
-                    const uri = Uri.file(info.path);
+                for await (const status of client.status(this.root)) {
+                    const uri = Uri.file(status.path);
                     files.push(uri);
 
-                    const state = new SvnResourceState(this, info);
+                    const state = new SvnResourceState(this, status);
                     SvnSourceControl.cache.set(uri.fsPath, state);
 
-                    if (state.status.node_status === StatusKind.external ||
-                        (state.status.node_status === StatusKind.normal && state.status.file_external))
-                        return;
+                    // ignore external folders
+                    if (state.status.node_status === StatusKind.external)
+                        continue;
 
                     if (state.status.changelist === "ignore-on-commit") {
                         ignored.push(state);
@@ -137,12 +142,22 @@ export class SvnSourceControl implements QuickDiffProvider {
                             case StatusKind.conflicted:
                                 conflicted.push(state);
                                 break;
+                            case StatusKind.normal:
+                                // maybe it's totally untouched, but
+                                //     a. it's an external file
+                                //     b. it belongs to some changelist
+                                // there files will also get interest of svn.
+                                if (status.prop_status !== StatusKind.normal ||
+                                    status.node_status !== StatusKind.normal) {
+                                    changed.push(state);
+                                }
+                                break;
                             default:
                                 changed.push(state);
                                 break;
                         }
                     }
-                });
+                }
 
                 this.staged.resourceStates = staged;
                 this.changes.resourceStates = changed;
@@ -183,10 +198,6 @@ export class SvnSourceControl implements QuickDiffProvider {
         }
     }
 
-    public refresh(): Promise<void> {
-        return this.refreshThrottler.run();
-    }
-
     public async commit(message?: string) {
         message = message || this.sourceControl.inputBox.value;
         if (message === undefined || message === "") {
@@ -201,18 +212,19 @@ export class SvnSourceControl implements QuickDiffProvider {
 
         window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
             try {
-                await client.commit(Array.from(this.stagedFiles), message!, (info) => {
+                for await (const info of client.commit(Array.from(this.stagedFiles), message!)) {
                     writeTrace(`commit("${info.repos_root}", "${message}") `, info.revision);
-                });
+                }
+
                 svnContentProvider.onCommit(this.stagedFiles);
                 this.sourceControl.inputBox.value = "";
             } catch (err) {
                 writeError(`commit("${this.root}", "${message}") `, err);
                 showErrorMessage("Commit");
 
-                // X if (err instanceof SvnError)
-                // X     window.showErrorMessage(`Commit failed: E${ err.code }: ${ err.message }`);
-                // X else
+                // x if (err instanceof SvnError)
+                // x     window.showErrorMessage(`Commit failed: E${ err.code }: ${ err.message }`);
+                // x else
             } finally {
                 this.refresh();
             }

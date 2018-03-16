@@ -3,13 +3,13 @@
         "tslint:recommended"
     ],
     "rulesDirectory": [
-        "linter/out"
+        // "linter/out"
     ],
     "rules": {
         "comment-format": [
             true,
             "check-space",
-            "check-uppercase"
+            "check-lowercase"
         ],
         "curly": false,
         "max-line-length": false,
@@ -20,7 +20,7 @@
         "no-console": false,
         "array-type": false,
         "forin": false,
-        "eslint-curly": true,
+        // "eslint-curly": true,
         "member-ordering": [
             true,
             {

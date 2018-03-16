@@ -34,10 +34,14 @@ export function showOutput(): void {
 export function writeError(method: string, error: Error): void {
     let message = error.message;
 
-    let child = (error as any).child;
-    while (child !== undefined) {
-        message += "\r\n" + child.message;
-        child = child.child;
+    if (error.name === "SvnError") {
+        message = `E${(error as any).code} ${message}`;
+
+        let child = (error as any).child;
+        while (child !== undefined) {
+            message += `\r\n${"    "}E${(error as any).code} ${error.message}`;
+            child = child.child;
+        }
     }
 
     channel.append(formatTime());

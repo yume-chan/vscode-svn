@@ -34,6 +34,7 @@ class CommandCenter {
 
         this.disposable.add(commands.registerCommand("svn.commit", this.commit));
         this.disposable.add(commands.registerCommand("svn.refresh", this.refresh));
+        this.disposable.add(commands.registerCommand("svn.cleanup", this.cleanup));
 
         this.disposable.add(commands.registerCommand("svn.stage", this.stage));
         this.disposable.add(commands.registerCommand("svn.stageAll", (group: SourceControlResourceGroup) => {
@@ -149,6 +150,12 @@ class CommandCenter {
             await control.refresh();
     }
 
+    private async cleanup(e?: SourceControl) {
+        const control = await workspaceManager.find(e);
+        if (control !== undefined)
+            await control.cleanup();
+    }
+
     private async stage(...resourceStates: SvnResourceState[]) {
         if (resourceStates.length === 0)
             return;
@@ -159,7 +166,9 @@ class CommandCenter {
             if (!item.status.versioned)
                 await client.add(item.status.path);
             else if (item.status.node_status === StatusKind.missing)
-                await client.remove(item.status.path, (info) => { return; });
+                for await (const info of client.remove(item.status.path)) {
+                    console.log(info);
+                }
             else
                 await client.remove_from_changelists(item.status.path);
         }

@@ -7,7 +7,11 @@ import {
     Uri,
 } from "vscode";
 
-import { NodeStatus, RevisionKind, StatusKind } from "node-svn";
+import {
+    RevisionKind,
+    StatusItem,
+    StatusKind,
+} from "node-svn";
 
 import { SvnSourceControl } from "./source-control";
 import { SvnUri } from "./svn-uri";
@@ -40,7 +44,7 @@ export class SvnResourceState implements SourceControlResourceState {
         return { abbreviation, bubble, color, letter, priority, strikeThrough, tooltip };
     }
 
-    public constructor(public readonly control: SvnSourceControl, public readonly status: Readonly<NodeStatus>) {
+    public constructor(public readonly control: SvnSourceControl, public readonly status: Readonly<StatusItem>) {
         this.resourceUri = Uri.file(status.path);
     }
 }

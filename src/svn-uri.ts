@@ -87,7 +87,8 @@ export class SvnUri {
     public constructor(public readonly file: Uri, public readonly revision: Revision) { }
 
     public toTextUri(): Uri {
-        return Uri.parse(`svn://content/?${JSON.stringify(this)}`);
+        // Reserve file name to enable syntax highlighting
+        return Uri.parse(`svn://content/${this.file.path}?${JSON.stringify(this)}`);
     }
 
     public async detectObjectType(): Promise<{ resource: CatResult, mimetype: string, encoding?: string }> {

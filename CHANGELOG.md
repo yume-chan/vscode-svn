@@ -1,5 +1,14 @@
 # Change Log
 
+## [unrealsed]
+
+### Added
+- Added a new `svn.cleanup` command.
+
+### Fixed
+- Fixed a issue that there is no syntax highlight for the old content in diff view.
+- Fixed a issue that files that untouched but belongs to some changelists will be shown in `Changes` group.
+
 ## 0.0.10 - 2018-2-28
 
 ### Added

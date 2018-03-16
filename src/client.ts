@@ -1,6 +1,6 @@
 import { window } from "vscode";
 
-import { AsyncClient } from "node-svn";
+import { Client } from "node-svn";
 
 async function simple_auth_provider(realm: string, username: string | undefined, may_save: boolean) {
     username = await window.showInputBox({
@@ -33,17 +33,17 @@ async function simple_auth_provider(realm: string, username: string | undefined,
     })) === yes;
 
     return {
+        may_save,
         password,
         username,
-        may_save,
     };
 }
 
-export let client: AsyncClient;
+export let client: Client;
 
 export async function initialize() {
     // tslint:disable-next-line:no-shadowed-variable
-    const { AsyncClient } = await import("node-svn");
-    client = new AsyncClient();
+    const { Client } = await import("node-svn");
+    client = new Client();
     client.add_simple_auth_provider(simple_auth_provider);
 }

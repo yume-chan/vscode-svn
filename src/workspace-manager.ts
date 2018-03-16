@@ -139,7 +139,10 @@ class WorkspaceManager {
             for (const control of this.controls)
                 return control;
 
-        const selected = await window.showWorkspaceFolderPick({ ignoreFocusOut: true, placeHolder: "Select a workspace to continue" });
+        const selected = await window.showWorkspaceFolderPick({
+            ignoreFocusOut: true,
+            placeHolder: "Select a workspace to continue",
+        });
         if (selected === undefined)
             return;
 
