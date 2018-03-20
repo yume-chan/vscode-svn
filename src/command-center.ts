@@ -12,8 +12,8 @@ import {
 
 import { RevisionKind, StatusKind } from "node-svn";
 
-import { client } from "./client";
-import { writeError, writeTrace } from "./output";
+import Client from "./client";
+import { showErrorMessage, writeError, writeTrace } from "./output";
 import { SvnResourceState } from "./resource-state";
 import subscriptions from "./subscriptions";
 import { SvnUri } from "./svn-uri";
@@ -124,11 +124,14 @@ class CommandCenter {
             }
         }
 
+        const client = Client.get();
         try {
             const revision = await client.checkout(url, target);
             writeTrace(`checkout("${url}", "${target}")`, revision);
         } catch (err) {
             writeError(`checkout("${url}", "${target}")`, err);
+        } finally {
+            Client.release(client);
         }
     }
 
@@ -162,18 +165,26 @@ class CommandCenter {
 
         const control = resourceStates[0].control;
 
-        for (const item of resourceStates) {
-            if (!item.status.versioned)
-                await client.add(item.status.path);
-            else if (item.status.node_status === StatusKind.missing)
-                for await (const info of client.remove(item.status.path)) {
-                    console.log(info);
-                }
-            else
-                await client.remove_from_changelists(item.status.path);
-        }
+        const client = Client.get();
+        try {
+            for (const item of resourceStates) {
+                if (!item.status.versioned)
+                    await client.add(item.status.path);
+                else if (item.status.node_status === StatusKind.missing)
+                    for await (const info of client.remove(item.status.path)) {
+                        console.log(info);
+                    }
+                else
+                    await client.remove_from_changelists(item.status.path);
+            }
+        } catch (err) {
+            writeError(`stage`, err);
+            showErrorMessage(`Stage`);
+        } finally {
+            Client.release(client);
 
-        await control.refresh();
+            await control.refresh();
+        }
     }
 
     private async unstage(...resourceStates: SvnResourceState[]) {
@@ -182,19 +193,27 @@ class CommandCenter {
 
         const control = resourceStates[0].control;
 
-        for (const item of resourceStates) {
-            switch (item.status.node_status) {
-                case StatusKind.added:
-                case StatusKind.deleted:
-                    await client.revert(item.status.path);
-                    break;
-                default:
-                    await client.add_to_changelist(item.status.path, "ignore-on-commit");
-                    break;
+        const client = Client.get();
+        try {
+            for (const item of resourceStates) {
+                switch (item.status.node_status) {
+                    case StatusKind.added:
+                    case StatusKind.deleted:
+                        await client.revert(item.status.path);
+                        break;
+                    default:
+                        await client.add_to_changelist(item.status.path, "ignore-on-commit");
+                        break;
+                }
             }
-        }
+        } catch (err) {
+            writeError(`unstage`, err);
+            showErrorMessage(`Unstage`);
+        } finally {
+            Client.release(client);
 
-        await control.refresh();
+            await control.refresh();
+        }
     }
 
     public dispose(): void {

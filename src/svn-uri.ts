@@ -6,7 +6,7 @@ import * as filetype from "file-type";
 
 import { CatOptions, CatResult, Revision, RevisionKind } from "node-svn";
 
-import { client } from "./client";
+import Client from "./client";
 import { writeError, writeTrace } from "./output";
 
 const revive: (data: any) => Uri = (Uri as any).revive;
@@ -72,6 +72,7 @@ export class SvnUri {
         }
 
         const fsPath = file.fsPath;
+        const client = Client.get();
         try {
             const options: CatOptions = { peg_revision: RevisionKind.base, revision };
             const result = await client.cat(fsPath, options);
@@ -81,13 +82,15 @@ export class SvnUri {
         } catch (err) {
             writeError(`provideResource("${fsPath}")`, err);
             throw err;
+        } finally {
+            Client.release(client);
         }
     }
 
     public constructor(public readonly file: Uri, public readonly revision: Revision) { }
 
     public toTextUri(): Uri {
-        // Reserve file name to enable syntax highlighting
+        // keep file name to enable syntax highlighting
         return Uri.parse(`svn://content/${this.file.path}?${JSON.stringify(this)}`);
     }
 

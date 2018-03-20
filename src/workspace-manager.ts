@@ -11,7 +11,7 @@ import {
 
 import { SvnSourceControl } from "./source-control";
 
-import { client } from "./client";
+import Client from "./client";
 import { writeError, writeTrace } from "./output";
 import isSamePath from "./same-path";
 import subscriptions from "./subscriptions";
@@ -35,31 +35,19 @@ class WorkspaceManager {
     }
 
     private async detect(workspaceRoot: string): Promise<void> {
-        try {
-            const configuration = workspace.getConfiguration("svn", Uri.file(workspaceRoot));
-            // tslint:disable-next-line:prefer-const
-            let enabled = configuration.get<boolean | undefined>("enabled", undefined);
-            if (enabled === false) {
-                writeTrace(`configuration.get("enabled", "${workspaceRoot}")`, false);
-                return;
-            }
+        const configuration = workspace.getConfiguration("svn", Uri.file(workspaceRoot));
+        const enabled = configuration.get<boolean | undefined>("enabled", undefined);
+        if (enabled === false) {
+            writeTrace(`configuration.get("enabled", "${workspaceRoot}")`, false);
+            return;
+        }
 
+        const client = Client.get();
+        try {
             const root = await client.get_working_copy_root(workspaceRoot);
             writeTrace(`get_working_copy_root("${workspaceRoot}")`, root);
 
             let show_changes_from = configuration.get<string | undefined>("show_changes_from", undefined);
-
-            // tslint:disable:comment-format
-            // if (!samePath(root, workspaceRoot)) {
-            //     const root_configuration = workspace.getConfiguration("svn", Uri.file(root));
-
-            //     enabled = root_configuration.get<boolean | undefined>("enabled", undefined);
-            //     if (enabled === false)
-            //         return;
-
-            //     show_changes_from = root_configuration.get<string | undefined>("show_changes_from", undefined);
-            // }
-            // tslint:enable:comment-format
 
             if (show_changes_from === undefined)
                 show_changes_from = "working_copy";
@@ -82,7 +70,8 @@ class WorkspaceManager {
             this.controls.add(control);
         } catch (err) {
             writeError(`get_working_copy_root("${workspaceRoot}")`, err);
-            return;
+        } finally {
+            Client.release(client);
         }
     }
 

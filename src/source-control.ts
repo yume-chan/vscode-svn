@@ -14,7 +14,7 @@ import {
 
 import { RevisionKind, StatusKind } from "node-svn";
 
-import { client } from "./client";
+import Client from "./client";
 import svnContentProvider from "./content-provider";
 import svnDecorationProvider from "./decoration-provider";
 import { showErrorMessage, writeError, writeTrace } from "./output";
@@ -96,27 +96,31 @@ export class SvnSourceControl implements QuickDiffProvider {
     }
 
     public async cleanup(): Promise<void> {
+        const client = Client.get();
         try {
             await client.cleanup(this.root);
             await this.refresh();
             writeTrace(`cleanup(${this.root})`, "ok");
         } catch (err) {
             writeError(`cleanup(${this.root})`, err);
+        } finally {
+            Client.release(client);
         }
     }
 
     public refresh() {
         return window.withProgress({ location: ProgressLocation.SourceControl, title: "Refreshing..." }, async () => {
+            this.stagedFiles.clear();
+
+            const staged: SvnResourceState[] = [];
+            const changed: SvnResourceState[] = [];
+            const ignored: SvnResourceState[] = [];
+            const conflicted: SvnResourceState[] = [];
+
+            const files: Uri[] = [];
+
+            const client = Client.get();
             try {
-                this.stagedFiles.clear();
-
-                const staged: SvnResourceState[] = [];
-                const changed: SvnResourceState[] = [];
-                const ignored: SvnResourceState[] = [];
-                const conflicted: SvnResourceState[] = [];
-
-                const files: Uri[] = [];
-
                 for await (const status of client.status(this.root)) {
                     const uri = Uri.file(status.path);
                     files.push(uri);
@@ -125,18 +129,18 @@ export class SvnSourceControl implements QuickDiffProvider {
                     SvnSourceControl.cache.set(uri.fsPath, state);
 
                     // ignore external folders
-                    if (state.status.node_status === StatusKind.external)
+                    if (status.node_status === StatusKind.external)
                         continue;
 
-                    if (state.status.changelist === "ignore-on-commit") {
+                    if (status.changelist === "ignore-on-commit") {
                         ignored.push(state);
                     } else {
-                        switch (state.status.node_status) {
+                        switch (status.node_status) {
                             case StatusKind.added:
                             case StatusKind.modified:
                             case StatusKind.obstructed:
                             case StatusKind.deleted:
-                                this.stagedFiles.add(state.status.path);
+                                this.stagedFiles.add(status.path);
                                 staged.push(state);
                                 break;
                             case StatusKind.conflicted:
@@ -167,6 +171,8 @@ export class SvnSourceControl implements QuickDiffProvider {
                 svnDecorationProvider.onDidChangeFiles(files);
             } catch (err) {
                 writeError(`refresh("${this.root}")`, err);
+            } finally {
+                Client.release(client);
             }
         });
     }
@@ -183,6 +189,7 @@ export class SvnSourceControl implements QuickDiffProvider {
     }
 
     public async update() {
+        const client = Client.get();
         try {
             this.setUpdating(true);
 
@@ -194,6 +201,8 @@ export class SvnSourceControl implements QuickDiffProvider {
             writeError(`update("${this.root}") `, err);
             showErrorMessage("Update");
         } finally {
+            Client.release(client);
+
             this.setUpdating(false);
         }
     }
@@ -210,7 +219,8 @@ export class SvnSourceControl implements QuickDiffProvider {
             return;
         }
 
-        window.withProgress({ location: ProgressLocation.SourceControl, title: "SVN Committing..." }, async (progress) => {
+        await window.withProgress({ location: ProgressLocation.SourceControl, title: "Committing..." }, async (progress) => {
+            const client = Client.get();
             try {
                 for await (const info of client.commit(Array.from(this.stagedFiles), message!)) {
                     writeTrace(`commit("${info.repos_root}", "${message}") `, info.revision);
@@ -221,12 +231,10 @@ export class SvnSourceControl implements QuickDiffProvider {
             } catch (err) {
                 writeError(`commit("${this.root}", "${message}") `, err);
                 showErrorMessage("Commit");
-
-                // x if (err instanceof SvnError)
-                // x     window.showErrorMessage(`Commit failed: E${ err.code }: ${ err.message }`);
-                // x else
             } finally {
-                this.refresh();
+                Client.release(client);
+
+                await this.refresh();
             }
         });
     }

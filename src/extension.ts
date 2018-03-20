@@ -2,7 +2,6 @@ import { ExtensionContext, window } from "vscode";
 
 import opn = require("opn");
 
-import { initialize } from "./client";
 import { showErrorMessage, writeError, writeTrace } from "./output";
 import subscriptions from "./subscriptions";
 
@@ -30,12 +29,10 @@ export async function activate(context: ExtensionContext) {
             return;
         }
     } catch  {
-        // Nothing
+        // nothing
     }
 
     try {
-        await initialize();
-
         await import("./workspace-manager");
         await import("./content-provider");
         await import("./decoration-provider");

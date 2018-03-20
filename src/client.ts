@@ -3,6 +3,7 @@ import { window } from "vscode";
 import { Client } from "node-svn";
 
 async function simple_auth_provider(realm: string, username: string | undefined, may_save: boolean) {
+    // ask username
     username = await window.showInputBox({
         ignoreFocusOut: true,
         prompt: `Username for ${realm}:`,
@@ -11,6 +12,7 @@ async function simple_auth_provider(realm: string, username: string | undefined,
     if (username === undefined)
         return undefined;
 
+    // ask password
     const password = await window.showInputBox({
         ignoreFocusOut: true,
         password: true,
@@ -39,11 +41,34 @@ async function simple_auth_provider(realm: string, username: string | undefined,
     };
 }
 
-export let client: Client;
+const pool: Set<Client> = new Set();
+const size = 10;
 
-export async function initialize() {
-    // tslint:disable-next-line:no-shadowed-variable
-    const { Client } = await import("node-svn");
-    client = new Client();
-    client.add_simple_auth_provider(simple_auth_provider);
-}
+export default {
+    get(): Client {
+        // create new
+        if (pool.size === 0) {
+            const client = new Client();
+            client.add_simple_auth_provider(simple_auth_provider);
+            return client;
+        }
+
+        // get from pool
+        for (const client of pool) {
+            pool.delete(client);
+            return client;
+        }
+
+        // make compiler happy
+        throw new Error("unreachable");
+    },
+    release(client: Client) {
+        // throw away
+        if (pool.size >= size) {
+            return;
+        }
+
+        // put into pool
+        pool.add(client);
+    },
+};

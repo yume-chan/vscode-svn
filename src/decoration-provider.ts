@@ -9,8 +9,8 @@ import {
     window,
 } from "vscode";
 
-import subscriptions from "./subscriptions";
 import { SvnSourceControl } from "./source-control";
+import subscriptions from "./subscriptions";
 
 const enableProposedApi = false;
 
