@@ -66,8 +66,8 @@ class WorkspaceManager {
             writeTrace(`new SvnSourceControl("${controlRoot}")`, undefined);
             const control = new SvnSourceControl(controlRoot);
             control.workspaces.add(workspaceRoot);
-            await control.refresh();
             this.controls.add(control);
+            await control.refresh();
         } catch (err) {
             writeError(`get_working_copy_root("${workspaceRoot}")`, err);
         } finally {

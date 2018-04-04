@@ -2,6 +2,8 @@
 
 ## [unrealsed]
 
+## 0.0.11 - 2018-4-4
+
 ### Added
 - Added a new `svn.cleanup` command.
 

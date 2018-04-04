@@ -15,6 +15,7 @@ import { RevisionKind, StatusKind } from "node-svn";
 import Client from "./client";
 import { showErrorMessage, writeError, writeTrace } from "./output";
 import { SvnResourceState } from "./resource-state";
+import isSamePath from "./same-path";
 import subscriptions from "./subscriptions";
 import { SvnUri } from "./svn-uri";
 import workspaceManager from "./workspace-manager";
@@ -35,6 +36,8 @@ class CommandCenter {
         this.disposable.add(commands.registerCommand("svn.commit", this.commit));
         this.disposable.add(commands.registerCommand("svn.refresh", this.refresh));
         this.disposable.add(commands.registerCommand("svn.cleanup", this.cleanup));
+
+        this.disposable.add(commands.registerCommand("svn.resolve", this.resolve));
 
         this.disposable.add(commands.registerCommand("svn.stage", this.stage));
         this.disposable.add(commands.registerCommand("svn.stageAll", (group: SourceControlResourceGroup) => {
@@ -157,6 +160,31 @@ class CommandCenter {
         const control = await workspaceManager.find(e);
         if (control !== undefined)
             await control.cleanup();
+    }
+
+    private async resolve() {
+        const editor = window.activeTextEditor;
+        if (typeof editor === "undefined") {
+            return;
+        }
+
+        const client = Client.get();
+        const target = editor.document.uri.fsPath;
+        try {
+            await client.resolve(target);
+
+            const root = await client.get_working_copy_root(target);
+            for (const control of workspaceManager.controls) {
+                if (isSamePath(control.root, root)) {
+                    await control.refresh();
+                }
+            }
+        } catch (err) {
+            writeError(`resolve(${target})`, err);
+            showErrorMessage(`Stage`);
+        } finally {
+            Client.release(client);
+        }
     }
 
     private async stage(...resourceStates: SvnResourceState[]) {
