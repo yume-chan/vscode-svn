@@ -12,7 +12,12 @@ import {
     workspace,
 } from "vscode";
 
-import { RevisionKind, StatusKind } from "node-svn";
+import {
+    is_commit_finalize_notify,
+    RevisionKind,
+    StatusKind,
+    UpdateNotifyAction,
+} from "./node-svn";
 
 import Client from "./client";
 import svnContentProvider from "./content-provider";
@@ -190,21 +195,27 @@ export class SvnSourceControl implements QuickDiffProvider {
 
     public async update() {
         const client = Client.get();
-        try {
-            this.setUpdating(true);
+        this.setUpdating(true);
+        window.withProgress({ location: ProgressLocation.SourceControl }, async (progress) => {
+            try {
+                for await (const item of client.update(this.root)) {
+                    if (item.action === UpdateNotifyAction.completed) {
+                        writeTrace(`update("${this.root}") `, item.revision);
+                    } else {
+                        progress.report({ message: `${UpdateNotifyAction[item.action]} ${item.path}` });
+                    }
+                }
 
-            const revision = await client.update(this.root);
-            writeTrace(`update("${this.root}") `, revision);
+                await this.refresh();
+            } catch (err) {
+                writeError(`update("${this.root}") `, err);
+                showErrorMessage("Update");
+            } finally {
+                Client.release(client);
 
-            await this.refresh();
-        } catch (err) {
-            writeError(`update("${this.root}") `, err);
-            showErrorMessage("Update");
-        } finally {
-            Client.release(client);
-
-            this.setUpdating(false);
-        }
+                this.setUpdating(false);
+            }
+        });
     }
 
     public async commit(message?: string) {
@@ -223,7 +234,11 @@ export class SvnSourceControl implements QuickDiffProvider {
             const client = Client.get();
             try {
                 for await (const info of client.commit(Array.from(this.stagedFiles), message!)) {
-                    writeTrace(`commit("${info.repos_root}", "${message}") `, info.revision);
+                    if (is_commit_finalize_notify(info)) {
+                        writeTrace(`commit("${info.repos_root}", "${message}") `, info.revision);
+                    } else {
+                        progress.report({ message: `commited ${info.path}` });
+                    }
                 }
 
                 svnContentProvider.onCommit(this.stagedFiles);

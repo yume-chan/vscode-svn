@@ -2,6 +2,13 @@
 
 ## [unrealsed]
 
+### Added
+- Download native dependence at first run.
+- Added support for Code 1.23-insiders (Electron 2.0.0-beta.7).
+
+### Fixed
+- Undo add without removing the file.
+
 ## 0.0.11 - 2018-4-4
 
 ### Added

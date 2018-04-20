@@ -11,7 +11,7 @@ import {
     RevisionKind,
     StatusItem,
     StatusKind,
-} from "node-svn";
+} from "./node-svn";
 
 import { SvnSourceControl } from "./source-control";
 import { SvnUri } from "./svn-uri";

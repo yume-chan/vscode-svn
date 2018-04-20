@@ -1,11 +1,4 @@
 out
-build
+native
 node_modules
-package-lock.json
-
-vsix
-
-configuration.json
-
-!node-svn/node_modules
-!node-svn/dependencies/subversion/build
+*.vsix

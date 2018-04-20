@@ -10,7 +10,7 @@ import {
     workspace,
 } from "vscode";
 
-import { RevisionKind, StatusKind } from "node-svn";
+import { RevisionKind, StatusKind } from "./node-svn";
 
 import Client from "./client";
 import { showErrorMessage, writeError, writeTrace } from "./output";
@@ -25,6 +25,14 @@ async function openUri(uri: SvnUri) {
         const resource = await uri.toResourceUri();
         await commands.executeCommand("vscode.open", resource);
     });
+}
+
+async function iterate<T>(iterable: AsyncIterable<T>): Promise<T | undefined> {
+    let value: T | undefined;
+    for await (const item of iterable) {
+        value = item;
+    }
+    return value;
 }
 
 class CommandCenter {
@@ -226,6 +234,8 @@ class CommandCenter {
             for (const item of resourceStates) {
                 switch (item.status.node_status) {
                     case StatusKind.added:
+                        await iterate(client.remove(item.status.path, { keep_local: true }));
+                        break;
                     case StatusKind.deleted:
                         await client.revert(item.status.path);
                         break;

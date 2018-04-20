@@ -8,7 +8,7 @@ import {
     workspace,
 } from "vscode";
 
-import { Revision } from "node-svn";
+import { Revision } from "./node-svn";
 
 import { writeError, writeTrace } from "./output";
 import subscriptions from "./subscriptions";

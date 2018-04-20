@@ -1,11 +1,15 @@
 {
     "compilerOptions": {
+        "emitDecoratorMetadata": true,
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
         "lib": [
             "esnext",
             "esnext.asynciterable"
         ],
         "module": "commonjs",
         "moduleResolution": "node",
+        "noUnusedLocals": true,
         "outDir": "out",
         "plugins": [
             {
@@ -17,10 +21,7 @@
         "sourceMap": true,
         "strict": true,
         "suppressImplicitAnyIndexErrors": true,
-        "target": "es2017",
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "noUnusedLocals": true
+        "target": "es2017"
     },
     "include": [
         "src"

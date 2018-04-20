@@ -1,6 +1,6 @@
 import { window } from "vscode";
 
-import { Client } from "node-svn";
+import { Client } from "./node-svn";
 
 async function simple_auth_provider(realm: string, username: string | undefined, may_save: boolean) {
     // ask username
@@ -65,6 +65,7 @@ export default {
     release(client: Client) {
         // throw away
         if (pool.size >= size) {
+            client.dispose();
             return;
         }
 

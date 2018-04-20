@@ -1,10 +1,14 @@
-import * as path from "path";
+import filetype from "file-type";
+import path from "path";
 
 import { Uri } from "vscode";
 
-import * as filetype from "file-type";
-
-import { CatOptions, CatResult, Revision, RevisionKind } from "node-svn";
+import {
+    CatOptions,
+    CatResult,
+    Revision,
+    RevisionKind,
+} from "./node-svn";
 
 import Client from "./client";
 import { writeError, writeTrace } from "./output";
