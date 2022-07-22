@@ -236,7 +236,7 @@
         }
     },
     "dependencies": {
-        "file-type": "^7.5.0",
+        "file-type": "^16.5.4",
         "fs-extra": "^5.0.0",
         "iconv-lite": "^0.4.21",
         "request": "^2.85.0"
