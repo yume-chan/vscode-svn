@@ -252,7 +252,7 @@
         "tslint": "^5.9.1",
         "tslint-language-service": "^0.9.9",
         "typescript": "^2.8.1",
-        "vsce": "^1.39.0",
+        "vsce": "^1.103.1",
         "vscode": "^1.1.14"
     },
     "displayName": "Svn",
